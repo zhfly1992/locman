@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.run.locman.api.query.repository.OpenRecordQueryRepository">
+	<select id="getOpenRecord" parameterType="java.util.Map"
+		resultType="com.run.locman.api.dto.OpenRecordQueryDto">
+		SELECT
+		fa.facilitiesCode As facilitiesCode, 
+		fa.address As address ,
+		Rc.deviceId As deviceId,
+		Ft.facilityTypeAlias As facilityTypeAlias ,
+		Rc.controlTime As controlTime,
+		Rc.operateUserName As operateUserName,
+		Rc.reason As reason,
+		Rc.controlDestroyTime
+		FROM
+		RemoteControlRecord Rc
+		LEFT JOIN Facility_Device Fd ON Fd.deviceId = Rc.deviceId
+		LEFT JOIN Device d ON Rc.deviceId = d.id
+		LEFT JOIN Facilities fa ON Fd.facilityId= fa.id
+		LEFT JOIN FacilitiesType Ft ON fa.facilitiesTypeId = Ft.id
+		where
+		fa.accessSecret=#{accessSecret}
+		and
+		(Rc.controlValue = "open" or Rc.controlValue = "on")
+		and
+		d.accessSecret=#{accessSecret}
+		<if test="facilitiesTypeId != null and facilitiesTypeId !=''">
+			and fa.facilitiesTypeId=#{facilitiesTypeId}
+		</if>
+        <if test="searchKey != null and searchKey!=''">
+            and (
+            fa.address like CONCAT('%',#{searchKey},'%')
+            or  fa.facilitiesCode like CONCAT('%',#{searchKey},'%')
+            or  Rc.operateUserName like CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+		<if test="startTime !=null and startTime !=''">
+			and Rc.controlTime &gt;=#{startTime}
+		</if>
+		<if test="endTime !=null and endTime !=''">
+			and Rc.controlTime &lt;=#{endTime}
+		</if>
+		order by Rc.controlTime DESC
+	</select>
+
+</mapper>

@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.query.repository.DistributionPowersQueryRepository">
+
+	<resultMap
+		type="com.run.locman.api.entity.DistributionPowers"
+		id="DistributionPowersResultMap">
+		<result column="id" property="id" javaType="String" />
+		<result column="facilityTypeId" property="facilityTypeId"
+			javaType="String" />
+		<result column="startTime" property="startTime"
+			javaType="String" />
+		<result column="endTime" property="endTime" javaType="String" />
+		<result column="remark" property="remark" javaType="String" />
+		<result column="accessSecret" property="accessSecret"
+			javaType="String" />
+		<result column="manageState" property="manageState"
+			javaType="String" />
+		<result column="hour" property="hour" javaType="String" />
+		<result column="minute" property="minute" javaType="String" />
+		<result column="powerName" property="powerName"
+			javaType="String" />
+		<result column="userInfo" property="userInfo" javaType="String" />
+		<result column="orgName" property="orgName" javaType="String" />
+		<result column="userName" property="userName" javaType="String" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id, facilityTypeId,startTime, endTime, remark,
+		accessSecret,
+		manageState,hour,minute,powerName,userInfo,orgName,userName
+	</sql>
+	<sql id="Base_Condition">
+		<if test="id != null">
+			and id=#{id}
+		</if>
+		<if test="facilityTypeId != null">
+			and facilityTypeId=#{facilityTypeId}
+		</if>
+		<if test="startTime != null">
+			and startTime=#{startTime}
+		</if>
+		<if test="endTime != null">
+			and endTime=#{endTime}
+		</if>
+		<if test="remark != null">
+			and remark=#{remark}
+		</if>
+		<if test="manageState != null">
+			and manageState=#{manageState}
+		</if>
+		<if test="accessSecret != null">
+			and accessSecret=#{accessSecret}
+		</if>
+		<if test="powerName != null">
+			and powerName=#{powerName}
+		</if>
+		<if test="userInfo != null">
+			and userInfo=#{userInfo}
+		</if>
+		<if test="orgName != null">
+			and orgName=#{orgName}
+		</if>
+		<if test="userName != null">
+			and userName=#{userName}
+		</if>
+	</sql>
+
+	<select id="queryDistributionPowersListPage"
+		parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+		id, facilityTypeId,startTime, endTime, remark, accessSecret,
+		manageState,hour,minute,powerName,userInfo,orgName,userName, CASE
+		WHEN
+		DATE(NOW()) &lt; DATE(startTime) THEN
+		'未开始'
+		WHEN DATE(NOW()) &gt;
+		DATE(endTime) THEN
+		'已结束'
+		ELSE
+		'进行中'
+		END AS powerState
+		FROM
+		DistributionPowers
+		WHERE accessSecret=#{accessSecret}
+		<if test="facilityTypeId != null and facilityTypeId != ''">
+			AND facilityTypeId=#{facilityTypeId}
+		</if>
+		<if test="manageState != null and manageState != ''">
+			AND manageState=#{manageState}
+		</if>
+		<if test="organizationId != null and organizationId != ''">
+			AND userInfo LIKE CONCAT ('%',#{organizationId},'%')
+		</if>
+		<if test="userName != null and userName != ''">
+			AND userInfo LIKE CONCAT ('%',#{userName},'%')
+		</if>
+		ORDER by endTime DESC
+	</select>
+
+	<select id="findById" parameterType="java.lang.String"
+		resultMap="DistributionPowersResultMap">
+		SELECT
+		<include refid="Base_Column" />
+		FROM DistributionPowers DP
+		WHERE DP.id=#{id}
+	</select>
+
+	<select id="getDistributionPowersByFacilityTypeId"
+		parameterType="java.lang.String"
+		resultMap="DistributionPowersResultMap">
+		SELECT
+		<include refid="Base_Column" />
+		FROM DistributionPowers DP
+		WHERE DP.facilityTypeId=#{facilityTypeId}
+		AND
+		DATE(DP.endTime) &gt;= DATE(NOW())
+		AND
+		DATE(NOW()) &gt;=
+		DATE(DP.startTime)
+		AND manageState =
+		'enabled'
+	</select>
+	<select id="getByFacilityTypeId"
+		parameterType="java.lang.String"
+		resultMap="DistributionPowersResultMap">
+		SELECT
+		<include refid="Base_Column" />
+		FROM DistributionPowers DP
+		WHERE DP.facilityTypeId=#{facilityTypeId}
+		AND
+		DATE(DP.endTime) &gt;= DATE(NOW())
+		AND manageState = 'enabled'
+	</select>
+
+
+	<!-- 电子地图分权分域判断该人员是否有对该设施类型下设备下发命令的权限 -->
+	<select id="getPowersByParam" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT
+		*
+		FROM
+		Facilities f
+		WHERE
+		f.id = #{facilityId}
+		AND f.accessSecret
+		=#{accessSecret}
+		AND f.manageState = 'enable'
+		AND f.facilitiesTypeId
+		IN (
+		SELECT DISTINCT
+		dp.facilityTypeId
+		FROM
+		DistributionPowers dp
+		WHERE
+		dp.accessSecret = #{accessSecret}
+		AND dp.manageState = 'enabled'
+		AND
+		DATE(NOW()) &gt;= DATE(dp.startTime)
+		AND DATE(NOW()) &lt;=
+		DATE(dp.endTime)
+		AND dp.userInfo LIKE CONCAT ('%',#{orgIdForUser},'%')
+		AND dp.userInfo LIKE CONCAT ('%',#{userId},'%')
+		)
+		AND f.organizationId
+		IN
+		<foreach item="item" collection="organizationId" index="index"
+			open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+	</select>
+
+	<select id="getPowersTime" parameterType="java.lang.String"
+		resultType="java.util.Map">
+		SELECT
+		f.id as facilityId,
+		f.facilitiesTypeId,
+		f.facilitiesCode,
+		ft.facilityTypeAlias,
+		f.completeAddress,
+		fd.deviceId,
+		f.accessSecret,
+		f.organizationId,
+		dp.hour,
+		dp.minute
+		FROM
+		Facilities f
+		LEFT
+		JOIN
+		FacilitiesType ft ON
+		f.facilitiesTypeId =
+		ft.id
+		LEFT JOIN
+		Facility_Device
+		fd ON f.id =
+		fd.facilityId
+		LEFT JOIN
+		DistributionPowers
+		dp ON
+		f.facilitiesTypeId =
+		dp.facilityTypeId
+		WHERE
+		fd.deviceId =
+		#{deviceId}
+		AND
+		dp.accessSecret = #{accessSecret}
+		<if test="organizationId !=null and organizationId !=''">
+			AND dp.userInfo LIKE CONCAT ('%',#{organizationId},'%')
+		</if>
+		AND dp.userInfo LIKE CONCAT ('%',#{userId},'%')
+		AND dp.manageState =
+		'enabled'
+		AND DATE(NOW()) &gt;=
+		dp.startTime
+		AND
+		DATE(NOW()) &lt;=
+		dp.endTime
+		ORDER BY
+		dp. HOUR
+		LIMIT 1
+	</select>
+
+	
+
+</mapper>

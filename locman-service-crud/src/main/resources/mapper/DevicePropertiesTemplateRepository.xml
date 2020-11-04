@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.crud.repository.DevicePropertiesTemplateCrudRepository">
+	<resultMap id="DevicePropertiesTemplateResultMap"
+		type="com.run.locman.api.entity.DevicePropertiesTemplate">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="templateName" jdbcType="VARCHAR" property="templateName" />
+		<result column="creationTime" jdbcType="VARCHAR" property="creationTime" />
+		<result column="editorTime" jdbcType="VARCHAR" property="editorTime" />
+		<result column="manageState" jdbcType="VARCHAR" property="manageState" />
+		<result column="accessSecret" jdbcType="VARCHAR" property="accessSecret" />
+	</resultMap>
+	<sql id="Base_Column">
+		id, templateName, creationTime, editorTime, accessSecret, manageState
+	</sql>
+	<sql id="Base_Condition">
+		<if test="templateName != null">
+			and templateName=#{templateName}
+		</if>
+		<if test="creationTime != null">
+			and creationTime=#{creationTime}
+		</if>
+		<if test="editorTime != null">
+			and editorTime=#{editorTime}
+		</if>
+		<if test="accessSecret != null">
+			and accessSecret=#{accessSecret}
+		</if>
+		<if test="manageState != null">
+			and manageState=#{manageState}
+		</if>
+	</sql>
+	
+	<insert id="insertModel" keyProperty="id"
+		parameterType="com.run.locman.api.entity.DevicePropertiesTemplate">
+		<selectKey keyProperty="id" resultType="String" order="BEFORE">
+			SELECT REPLACE(UUID(),'-','') FROM DUAL
+		</selectKey>
+		insert into DeviceProperties_Template(
+		<include refid="Base_Column" />
+		) values (#{id}, #{templateName}, #{creationTime}, #{editorTime}, #{accessSecret}, #{manageState})
+	</insert>
+	
+	<update id="updatePart" parameterType="com.run.locman.api.entity.DevicePropertiesTemplate">
+		update DeviceProperties_Template set
+		<if test="id != null and id != ''">
+			id=#{id}
+		</if>
+		<if test="templateName != null and templateName != ''">
+			,templateName=#{templateName}
+		</if>
+		<if test="creationTime != null and creationTime != ''">
+			,creationTime=#{creationTime}
+		</if>
+		<if test="editorTime != null and editorTime != ''">
+			,editorTime=#{editorTime}
+		</if>
+		<if test="manageState != null and manageState != ''">
+			,manageState=#{manageState}
+		</if>
+		<if test="accessSecret != null and accessSecret != ''">
+			,accessSecret=#{accessSecret}
+		</if>
+		where id=#{id}
+	</update>
+</mapper>

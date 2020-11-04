@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.query.repository.FactoryQueryRepository">
+	<resultMap id="BaseResultMap"
+		type="com.run.locman.api.entity.Factory">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="factoryName" jdbcType="VARCHAR"
+			property="factoryName" />
+		<result column="contacts" jdbcType="VARCHAR"
+			property="contacts" />
+		<result column="contactsPhone" jdbcType="VARCHAR"
+			property="contactsPhone" />
+		<result column="address" jdbcType="VARCHAR" property="address" />
+		<result column="remark" jdbcType="VARCHAR" property="remark" />
+		<result column="accessSecret" jdbcType="VARCHAR"
+			property="accessSecret" />
+	</resultMap>
+
+	<select id="findMapById" parameterType="String"
+		resultType="java.util.Map">
+		SELECT fa.id, fa.factoryName, fa.contacts,
+		fa.contactsPhone,
+		fa.manageState, fa.address, fa.remark,
+		GROUP_CONCAT(fat.appTag)
+		appTag,fa.accessSecret
+		FROM Factory fa
+		LEFT JOIN
+		Factory_AppTag fat ON
+		fa.id = fat.factoryId
+		WHERE fa.id = #{id}
+		GROUP BY
+		fa.id, fa.factoryName,
+		fa.contacts,
+		fa.contactsPhone, fa.manageState,
+		fa.address, fa.remark
+	</select>
+
+	<select id="queryAppTagForAccessSecret" parameterType="String"
+		resultType="String">
+		SELECT DISTINCT
+		fa.appTag
+		FROM
+		Factory_AppTag fa
+		LEFT JOIN
+		Factory ff ON ff.id = fa.factoryId
+		WHERE
+		ff.accessSecret =
+		#{accessSecret}
+		AND ff.manageState = 'enabled'
+	</select>
+
+	<select id="findAppTagForAccessSecret" parameterType="String"
+		resultType="String">
+		SELECT DISTINCT
+		fa.appTag
+		FROM
+		Factory_AppTag fa
+		LEFT JOIN
+		Factory ff ON ff.id = fa.factoryId
+		WHERE
+		ff.accessSecret =
+		#{accessSecret}
+	</select>
+	<select id="queryFactoryByAppTag" parameterType="String"
+		resultType="String">
+		SELECT
+		ff.factoryName
+		FROM
+		Factory ff
+		LEFT JOIN
+		Factory_AppTag fa ON ff.id
+		= fa.factoryId
+		<where>
+			fa.appTag = #{appTag}
+		</where>
+	</select>
+	<select id="queryFactoryInfoByAppTag" parameterType="String"
+		resultType="java.util.Map">
+		SELECT
+		*
+		FROM
+		Factory ff
+		LEFT JOIN
+		Factory_AppTag fa ON ff.id =
+		fa.factoryId
+		<where>
+			fa.appTag = #{appTag}
+		</where>
+	</select>
+	<select id="queryAllappTag" parameterType="String"
+		resultType="java.util.Map">
+		select appTag,factoryId from Factory_AppTag fa left join
+		Factory f on
+		fa.factoryId = f.id where f.manageState = 'enabled'
+	</select>
+	<select id="queryAccessSecretByDeviceId" parameterType="String"
+		resultType="String">
+		SELECT
+		f.accessSecret
+		FROM
+		Factory f
+		LEFT JOIN Factory_AppTag
+		fa ON f.id = fa.factoryId
+		LEFT JOIN Device d ON d.appTag = fa.appTag
+		WHERE
+		f.manageState = 'enabled'
+		AND d.manageState = 'enabled'
+		AND d.id =
+		#{deviceId}
+	</select>
+	<select id="findFactoryByDeviceId" parameterType="java.util.Map"
+		resultMap="BaseResultMap">
+		SELECT f.id, f.factoryName, f.contacts, f.contactsPhone,
+		f.manageState, f.address, f.remark, f.accessSecret FROM Factory f
+		LEFT
+		JOIN Factory_AppTag fa ON f.id
+		= fa.factoryId
+		LEFT JOIN Device d ON
+		d.appTag = fa.appTag
+		WHERE
+		d.accessSecret = #{accessSecret}
+		AND d.id =
+		#{deviceId}
+	</select>
+
+	<select id="getFactoryNameList" parameterType="String"
+		resultType="java.util.Map">
+		SELECT f.id,f.factoryName from Factory f where
+		f.accessSecret =
+		#{accessSecret}
+	</select>
+
+	<select id="checkAppTagExist"
+		parameterType="com.run.locman.api.dto.AppTagDto" resultType="int">
+		SELECT
+		COUNT(1)
+		FROM
+		Factory_AppTag
+		WHERE
+		appTag =#{appTag}
+		<if test="id != null and id != ''">
+			AND factoryId != #{id}
+		</if>
+
+	</select>
+	
+	<select id="checkGatewayIdExist" resultType="String">
+		SELECT DISTINCT
+			d.gatewayId
+		FROM
+			Device d
+		WHERE
+			d.accessSecret = #{accessSecret}
+			AND
+			d.gatewayId IN
+		<foreach collection="gatewayId" item="id" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+		<if test="appTag != null and appTag != ''">
+			AND
+			d.appTag != #{appTag}
+		</if>
+
+	</select>
+
+	<select id="getAppTagByFactoryId" parameterType="String"
+		resultType="com.run.locman.api.dto.AppTagDto">
+		SELECT 
+		fa.id,
+		fa.appId,
+		fa.appKey,
+		fa.appTag
+		FROM
+		Factory_AppTag
+		fa
+		WHERE
+		fa.factoryId = #{factoryId}
+	</select>
+
+	<select id="findByAccessSecretNew" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT fa.id, fa.factoryName, fa.contacts, fa.contactsPhone,
+		fa.manageState, fa.address, fa.remark,
+		GROUP_CONCAT(fat.appTag) appTag
+		FROM Factory fa
+		LEFT JOIN Factory_AppTag fat ON fa.id = fat.factoryId
+		WHERE fa.accessSecret = #{accessSecret}
+		AND fat.appKey is NOT NULL
+		<if test="searchKey != null and searchKey != ''">
+			AND fa.factoryName LIKE CONCAT
+			('%',#{searchKey},'%')
+		</if>
+		<if test="manageState != null and manageState != ''">
+			AND fa.manageState = #{manageState}
+		</if>
+		GROUP BY
+		fa.id, fa.factoryName, fa.contacts, fa.contactsPhone,
+		fa.manageState,
+		fa.address, fa.remark
+	</select>
+
+	<select id="findAppKeyAppId" parameterType="String"
+		resultType="java.util.Map">
+		SELECT
+		fat.appId,
+		fat.appKey
+		FROM
+		Factory_AppTag fat
+		WHERE
+		fat.factoryId = #{factoryId}
+	</select>
+
+	<select id="downBoxFactory" parameterType="String"
+		resultType="java.util.Map">
+		select id,factoryName from Factory where accessSecret =
+		#{accessSecret} and manageState = 'enabled'
+	</select>
+</mapper>

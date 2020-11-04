@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.crud.repository.DeviceTimeUtilCrudRepository">
+
+	<sql id="Base_Column">
+		id,
+		deviceId,device_bv,device_sig,device_rsrp,device_sinr,device_ls,lastReportTime
+	</sql>
+
+	<insert id="addDeviceLastReportTime" parameterType="java.util.List">
+		insert into Device_RealRported(
+		<include refid="Base_Column" />
+		) values
+		<foreach collection="list" index="index" item="item"
+			separator=",">
+			(#{item.id},#{item.deviceId},#{item.state.reported.bv},#{item.state.reported.sig},#{item.state.reported.rsrp},#{item.state.reported.sinr},#{item.state.reported.ls},#{item.lastReportTime}
+			)
+		</foreach>
+
+	</insert>
+	<update id="addDeviceOnLineState" parameterType="java.util.List">
+
+		update Device_RealRported
+		set onLineState =
+		<foreach collection="list " item="item" index="index"
+			separator=" " open="case deviceId" close="end">
+			when #{item.deviceId} then
+			#{item.thingStatus}
+		</foreach>
+		where deviceId in
+		<foreach collection="list" index="index" item="item"
+			separator="," open="(" close=")">
+			#{item.deviceId}
+		</foreach>
+	</update>
+
+	<select id="getDeviceIdList" resultType="String">
+		select id from Device
+	</select>
+
+
+</mapper>

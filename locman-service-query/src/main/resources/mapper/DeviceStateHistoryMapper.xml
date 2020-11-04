@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.query.repository.DeviceStateHistoryQueryRepository">
+	<resultMap id="BaseResultMap" type="com.run.locman.api.entity.DeviceStateHistory">
+		<id column="id" property="id" javaType="String"/>
+	    <result column="deviceId" property="deviceId" javaType="String"/>
+	    <result column="datas" property="datas" javaType="String"/>
+	    <result column="reportTime" property="reportTime" javaType="String"/>
+	</resultMap>
+	
+</mapper>

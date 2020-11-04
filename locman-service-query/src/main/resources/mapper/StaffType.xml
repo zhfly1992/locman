@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.run.locman.api.query.repository.StaffTypeQueryRepository">
+
+	<resultMap type="com.run.locman.api.entity.StaffType" id="StaffTypeResultMap">
+		<result column="id" property="id" javaType="String" />
+		<result column="staffTypeName" property="staffTypeName" javaType="String" />
+		<result column="manageState" property="manageState" javaType="String" />
+		<result column="createTime" property="createTime" javaType="String" />
+		<result column="editTime" property="editTime" javaType="String" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id, staffTypeName, manageState, createTime, editTime
+	</sql>
+	<sql id="Base_Condition">
+		<if test="id != null">
+			and id=#{id}
+		</if>
+		<if test="staffTypeName != null">
+			and staffTypeName=#{staffTypeName}
+		</if>
+		<if test="manageState != null">
+			and manageState=#{manageState}
+		</if>
+		<if test="createTime != null">
+			and createTime=#{createTime}
+		</if>
+		<if test="editTime != null">
+			and editTime=#{editTime}
+		</if>
+	</sql>
+
+	<!-- 不分页查找指定接入方下的所有人员类型 -->
+	<select id="findAllAllStaffType" parameterType="java.lang.String" resultMap="StaffTypeResultMap">
+		SELECT
+		<include refid="Base_Column" />
+		FROM StaffType ST
+	</select>
+	
+	<select id="findById" parameterType="java.lang.String" resultMap="StaffTypeResultMap">
+		SELECT
+		<include refid="Base_Column" />
+		FROM StaffType ST
+		WHERE ST.id=#{id}
+	</select>
+
+</mapper>
+

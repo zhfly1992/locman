@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.crud.repository.SwitchLockRecordCrudRepository">
+
+	<sql id="Base_Column_List">
+		id,lockState,reportTime,deviceId,arrangeUserId,remoteControlRecordId,accessSecret
+	</sql>
+
+
+	<select id="findDeviceType" resultType="String" parameterType="String">
+		SELECT
+		dt.id
+		FROM
+		Device d
+		LEFT JOIN DeviceType dt ON
+		d.deviceType = dt.id
+		WHERE
+		d.id = #{deviceId}
+	</select>
+
+
+	<select id="findRemoteControlRecord" parameterType="String"
+		resultType="java.util.Map">
+		SELECT
+		*,d.accessSecret
+		FROM
+		RemoteControlRecord rc
+		LEFT JOIN
+		Device d
+		on rc.deviceId = d.id
+		WHERE
+		rc.deviceId =
+		#{deviceId}
+		AND (
+		rc.controlValue = 'open'
+		OR rc.controlValue = 'on'
+		)
+		ORDER BY
+		rc.controlTime
+		DESC
+		LIMIT 0,
+		1
+	</select>
+
+	<insert id="insertSwitchLockRecord" parameterType="com.run.locman.api.entity.SwitchLockRecord">
+		insert into SwitchLockRecord (
+		<include refid="Base_Column_List" />
+		)
+		values (#{id},
+		#{lockState},
+		#{reportTime},
+		#{deviceId},
+		#{arrangeUserId},
+		#{remoteControlRecordId},
+		#{accessSecret})
+	</insert>
+
+	<select id="findSwitchLockRecord" parameterType="String"
+		resultType="java.util.Map">
+		SELECT
+		*
+		FROM
+		SwitchLockRecord
+		WHERE
+		deviceId =
+		#{deviceId}
+		ORDER
+		BY
+		reportTime DESC
+		LIMIT 0,1
+	</select>
+	
+	<select id="findManholeSwitchByDeviceID" parameterType="String" resultType="java.util.Map">
+	SELECT 
+		*
+		FROM
+		ManholeCoverSwitch mcs
+		WHERE 
+		mcs.deviceId=#{deviceId}
+		ORDER BY mcs.openTime DESC
+		LIMIT 1
+	
+	</select>
+	
+	<insert id="insertManholeSwitch" parameterType="com.run.locman.api.entity.ManholeCoverSwitch">
+		insert into ManholeCoverSwitch (
+		id,deviceId,openTime
+		)
+		values (
+		#{id},
+		#{deviceId},
+		#{openTime}
+		)
+		
+	</insert>
+	
+	<update id="updateManholeSwitch" parameterType="java.util.Map" >
+		UPDATE
+			ManholeCoverSwitch 
+			SET
+			closeTime=#{closeTime},
+			differenceTime=#{differenceTime}
+			WHERE 
+			id=#{id}
+	</update>
+
+</mapper>

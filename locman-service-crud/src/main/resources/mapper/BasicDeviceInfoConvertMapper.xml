@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.crud.repository.BasicDeviceInfoConvertCrudRepository">
+	<sql id="Base_Column">
+		id, dicKey,
+		dicValue,createTime,updateTime,accessSecret
+	</sql>
+	<insert id="basicDeviceInfoConvertadd" parameterType="String">
+		INSERT INTO DeviceInfoConvert(     <!-- 需要改表名 同步设施类型 -->
+		id,
+		dicKey,
+		dicValue,
+		createTime,
+		updateTime,
+		accessSecret
+		)
+		SELECT
+		REPLACE(UUID(),'-','') AS id,
+		dicKey,
+		dicValue,
+		NOW(),
+		NOW(),
+		#{accessSecret}
+		FROM
+		Base_DeviceInfoConvert;    <!-- 需要改表名 -->
+	</insert>
+</mapper>

@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.query.repository.FacilitiesTypeQueryRepository">
+
+	<resultMap type="com.run.locman.api.entity.FacilitiesType"
+		id="FacilitiesTypeResultMap">
+		<result column="id1" property="id" javaType="String" />
+		<result column="facilityTypeAlias" property="facilityTypeAlias"
+			javaType="String" />
+		<result column="accessSecret" property="accessSecret" javaType="String" />
+		<result column="manageState1" property="manageState" javaType="String" />
+		<result column="creationUserId" property="creationUserId"
+			javaType="String" />
+		<result column="creationTime" property="creationTime" javaType="String" />
+		<result column="editorUserId" property="editorUserId" javaType="String" />
+		<result column="editorTime" property="editorTime" javaType="String" />
+		<result column="remark" property="remark" javaType="String" />
+		<association property="facilitiesTypeBase" column="facilityTypeBaseId"
+			javaType="com.run.locman.api.entity.FacilitiesTypeBase">
+			<result column="id2" property="id" javaType="String" />
+			<result column="facilityTypeName" property="facilityTypeName"
+				javaType="String" />
+			<result column="facilityTypeIco" property="facilityTypeIco"
+				javaType="String" />
+			<result column="manageState2" property="manageState" javaType="String" />
+			<result column="createTime" property="createTime" javaType="String" />
+			<result column="createUser" property="createUser" javaType="String" />
+		</association>
+	</resultMap>
+
+	<sql id="Base_Column">
+		FT.id id1, FTB.id id2, FTB.facilityTypeName,
+		FTB.facilityTypeIco, FTB.manageState manageState2, FTB.createTime,
+		FTB.createUser, facilityTypeAlias, accessSecret, FT.manageState
+		manageState1, creationUserId, creationTime, editorUserId,
+		editorTime,remark
+	</sql>
+	<sql id="Base_Condition">
+		<if test="id != null">
+			and id=#{id}
+		</if>
+		<if test="facilityTypeBaseId != null">
+			and facilityTypeBaseId=#{facilityTypeBaseId}
+		</if>
+		<if test="facilityTypeAlias != null">
+			and facilityTypeAlias=#{facilityTypeAlias}
+		</if>
+		<if test="accessSecret != null">
+			and accessSecret=#{accessSecret}
+		</if>
+		<if test="manageState != null">
+			and manageState=#{manageState}
+		</if>
+		<if test="creationUserId != null">
+			and creationUserId=#{creationUserId}
+		</if>
+		<if test="creationTime != null">
+			and creationTime=#{creationTime}
+		</if>
+		<if test="editorUserId != null">
+			and editorUserId=#{editorUserId}
+		</if>
+		<if test="editorTime != null">
+			and editorTime=#{editorTime}
+		</if>
+	</sql>
+
+	<select id="findById" resultMap="FacilitiesTypeResultMap"
+		parameterType="String">
+		select
+		<include refid="Base_Column" />
+		FROM FacilitiesType FT
+		LEFT JOIN FacilitiesTypeBase FTB
+		ON
+		FT.facilityTypeBaseId = FTB.id
+		where FT.id=#{id}
+	</select>
+	
+	<select id="findAllType" resultMap="FacilitiesTypeResultMap">
+		select
+		<include refid="Base_Column" />
+		FROM FacilitiesType FT
+		LEFT JOIN FacilitiesTypeBase FTB
+		ON
+		FT.facilityTypeBaseId = FTB.id
+		where accessSecret = #{accessSecret} and
+		FTB.manageState = 'enabled' and
+		FT.manageState = 'enabled'
+	</select>
+	
+	<select id="findByParams" resultMap="FacilitiesTypeResultMap"
+		parameterType="String">
+		select
+		<include refid="Base_Column" />
+		FROM FacilitiesType FT
+		LEFT JOIN FacilitiesTypeBase FTB
+		ON
+		FT.facilityTypeBaseId = FTB.id
+		where 1=1
+		<include refid="Base_Condition" />
+	</select>
+
+	<select id="queryFacilitiesTypeListPage" parameterType="java.util.Map"
+		resultMap="FacilitiesTypeResultMap">
+		SELECT
+		<include refid="Base_Column" />
+		FROM FacilitiesType FT
+		LEFT JOIN FacilitiesTypeBase FTB
+		ON
+		FT.facilityTypeBaseId = FTB.id
+		WHERE accessSecret = #{accessSecret}
+		<if test="searchKey != null">
+			AND (
+			FTB.facilityTypeName like CONCAT
+			('%',#{searchKey},'%')
+			OR facilityTypeAlias like CONCAT
+			('%',#{searchKey},'%')
+			)
+		</if>
+		<if test="manageState != null and manageState != ''">
+			AND FT.manageState = #{manageState}
+		</if>
+		order by facilityTypeBaseId, FT.creationTime desc
+	</select>
+
+	<select id="queryFacilitiesTypeListPageCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT
+		COUNT(1)
+		FROM FacilitiesType FT
+		LEFT JOIN FacilitiesTypeBase FTB
+		ON FT.facilityTypeBaseId = FTB.id
+		<if test="facilityTypeBaseId != null">
+			and facilityTypeBaseId like #{facilityTypeBaseId}
+		</if>
+		<if test="facilityTypeAlias != null">
+			and facilityTypeAlias like #{facilityTypeAlias}
+		</if>
+		<if test="manageState != null">
+			and manageState=#{manageState}
+		</if>
+	</select>
+
+	<select id="checkFacilitiesTypeName" resultType="int"
+		parameterType="String">
+		SELECT
+		count(*) AS count
+		FROM
+		FacilitiesType ft
+		WHERE
+		ft.facilityTypeAlias
+		= #{facilitiesTypeName}
+		AND ft.accessSecret =
+		#{accessSecret}
+		<if test="facilityTypeId != null and facilityTypeId != ''">
+			and ft.id != #{facilityTypeId}
+		</if>
+	</select>
+	
+	<select id="findAllFacilitiesTypeAndNum" parameterType="String"
+		resultType="java.util.Map">
+		SELECT
+			ft.facilityTypeAlias,
+			COUNT(f.id) as num
+		FROM
+			FacilitiesType ft
+		LEFT JOIN Facilities f ON ft.id = f.facilitiesTypeId
+		WHERE
+			ft.accessSecret = #{accessSecret}
+		GROUP BY
+			ft.id
+	</select>
+	
+	<select id="findAllFacTypeAndDeviceTypeNum" parameterType="String"
+		resultType="java.util.Map">
+		SELECT
+			b.num totalNum,
+			b.facilityTypeAlias facilityType
+		FROM
+			(
+				SELECT
+					COUNT(DISTINCT a.id) num,
+					a.facilityTypeAlias
+				FROM
+					(
+						SELECT
+							f.id,
+							CASE
+						WHEN JSON_CONTAINS (
+							f.extend,
+							'{"checkWellFuncType":"进水篦"}'
+						) THEN
+							'雨水篦子'
+						ELSE
+							ft.facilityTypeAlias
+						END facilityTypeAlias
+						FROM
+							FacilitiesType ft
+						LEFT JOIN Facilities f ON f.facilitiesTypeId = ft.id
+						WHERE
+							ft.accessSecret = #{accessSecret}
+					) a
+				LEFT JOIN Facility_Device fd ON fd.facilityId = a.id
+				WHERE
+					1 = 1
+					
+					<if test="boundState != null and boundState != '' and boundState == 'bound'">
+						AND fd.deviceId IS NOT NULL
+					</if>
+					<if test="boundState != null and boundState != '' and boundState == 'unBound'">
+						AND fd.deviceId IS NULL
+					</if>
+					
+				GROUP BY
+					a.facilityTypeAlias
+			) b
+		WHERE
+			b.num > 0
+	</select>
+	
+	
+
+</mapper>

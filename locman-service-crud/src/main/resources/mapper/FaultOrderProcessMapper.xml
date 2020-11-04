@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.crud.repository.FaultOrderProcessCudRepository">
+	<sql id="Base_Column">
+		id, serialNumber,
+		createTime,createBy,faultType,mark,accessSecret,phone,deviceCount,manager,processState,processId,
+		userId,updateTime,orderImg,factoryId,orderName,faultProcessType
+	</sql>
+
+	<insert id="addFaultOrder"
+		parameterType="com.run.locman.api.entity.FaultOrderProcess">
+		insert into FaultOrderProcess(
+		<include refid="Base_Column" />
+		) values
+		(#{id},(SELECT IFNULL(MAX(t.serialNumber)+1, 1000) FROM
+		FaultOrderProcess t WHERE
+		t.accessSecret =
+		#{accessSecret}),#{createTime},#{createBy},#{faultType},#{mark},#{accessSecret},
+		#{phone},#{deviceCount},#{manager},#{processState},#{processId},#{userId},#{updateTime},#{orderImg},#{factoryId},#{orderName},#{faultProcessType})
+	</insert>
+
+	<update id="updateFaultOrder"
+		parameterType="com.run.locman.api.entity.FaultOrderProcess">
+		update FaultOrderProcess set
+		<if test="id != null and id != ''">
+			id=#{id}
+		</if>
+		<if test="orderName != null and orderName != ''">
+			,orderName=#{orderName}
+		</if>
+		<if test="serialNumber != null and serialNumber != ''">
+			,serialNumber=#{serialNumber}
+		</if>
+		<if test="factoryId != null and factoryId != ''">
+			,factoryId=#{factoryId}
+		</if>
+		<if test="createTime != null and createTime != ''">
+			,createTime=#{createTime}
+		</if>
+		<if test="createBy != null and createBy != ''">
+			,createBy=#{createBy}
+		</if>
+		<if test="faultType != null">
+			,faultType=#{faultType}
+		</if>
+		<if test="mark != null and mark != ''">
+			,mark=#{mark}
+		</if>
+		<if test="accessSecret != null and accessSecret != ''">
+			,accessSecret=#{accessSecret}
+		</if>
+		<if test="phone != null and phone != ''">
+			,phone=#{phone}
+		</if>
+		<if test="deviceCount != null and deviceCount != ''">
+			,deviceCount=#{deviceCount}
+		</if>
+		<if test="manager != null and manager != ''">
+			,manager=#{manager}
+		</if>
+		<if test="processState != null and processState != ''">
+			,processState=#{processState}
+		</if>
+		<if test="processId != null and processId != ''">
+			,processId=#{processId}
+		</if>
+		<if test="userId != null and userId != ''">
+			,userId=#{userId}
+		</if>
+		<if test="updateTime != null and updateTime != ''">
+			,updateTime=#{updateTime}
+		</if>
+		<if test="orderImg != null and orderImg != ''">
+			,orderImg=#{orderImg}
+		</if>
+		where id=#{id}
+	</update>
+
+	<select id="findAlarmDescByFaultOrderId" parameterType="String"
+		resultType="java.lang.String">
+		SELECT
+		max(ai.alarmDesc) alarmDesc
+		FROM
+		AlarmOrder a
+		LEFT JOIN
+		Alarm_Order ao ON a.id = ao.alarmOrderId
+		LEFT JOIN AlarmInfo
+		ai ON
+		ao.alarmId = ai.id
+		WHERE
+		a.faultOrderId =
+		#{faultOrderId}
+		AND ai.isDel NOT
+		IN (2, 3)
+		GROUP BY
+		ai.rule
+		ORDER BY
+		max(alarmTime) DESC
+	</select>
+
+	<select id="findDeviceIdByFaultOrderId" parameterType="String"
+		resultType="String">
+		SELECT
+		fod.deviceId
+		FROM
+		FaultOrderProcess fop
+		LEFT JOIN
+		FaultOrder_Device fod ON fop.id = fod.faultOrderId
+		WHERE
+		fop.id =
+		#{faultOrderId}
+	</select>
+</mapper>
+

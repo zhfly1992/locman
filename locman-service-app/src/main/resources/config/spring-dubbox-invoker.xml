@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+    http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+
+	<dubbo:consumer timeout="5000" check="false" />
+	<!-- api接口query -->
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.FacilitiesDataTypeQueryRpcService"
+		id="facilitiesDataTypeQueryRpcService" check="false" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.FacilitiesQueryService"
+		id="facilitiesQueryService" check="false" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.FacilitiesTypeQueryService"
+		id="facilitiesTypeQueryService" check="false" />
+	<dubbo:reference interface="com.run.locman.api.base.query.FacilitesService"
+		id="facilitesService" check="false" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.FacilitiesTypeBaseQueryService"
+		id="facilitiesTypeBaseQueryService" check="false"></dubbo:reference>
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.FacilityDeviceQueryService"
+		id="facilityDeviceQueryService" check="false" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.PropertiesQueryService"
+		id="propertiesQueryService" check="false" />	<!-- 被调用的基础beans -->
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.DeviceTypeTemplateService"
+		id="deviceTypeTemplateService.java" check="false" />
+	<dubbo:reference id="deviceQueryService"
+		interface="com.run.locman.api.query.service.DeviceQueryService" check="false" />
+
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.SimpleOrderCrudService" id="simpleOrderCrudService"
+		check="false" timeout="10000" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.SimpleOrderQueryService"
+		id="simpleOrderQueryService" check="false" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.SimpleOrderTypeQueryService"
+		id="simpleOrderTypeQueryService" check="false" />
+	<dubbo:reference interface="com.run.locman.api.crud.service.AlarmInfoCrudService"
+		id="alarmInfoCrudService" check="false" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.AlarmInfoQueryService" id="alarmInfoQueryService"
+		check="false" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.AlarmOrderQueryService"
+		id="alarmOrderQueryService" check="false" />
+	<dubbo:reference interface="com.run.activity.api.query.ActivityProgressQuery"
+		id="activityProgressQuery" check="false" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.AlarmRuleQueryService" id="alarmRuleQueryService"
+		check="false" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.DeviceInfoConvertQueryService"
+		id="deviceInfoConvertQueryService" check="false" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.DistributionPowersQueryService"
+		id="distributionPowersQueryService" check="false" />
+
+
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.RemoteControlRecordCrudService"
+		id="remoteControlRecordCrudService" check="false" />
+
+	<!-- api接口Crud -->
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.FacilitiesCrudService" id="facilitiesCrudService"
+		check="false" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.FacilitiesTypeCudService"
+		id="FacilitiesTypeCudService" check="false" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.FacilitiesDataTypeCudService"
+		id="facilitiesDataTypeCudService" check="false" />
+
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.FacilitiesTypeBaseCudService"
+		id="FacilitiesTypeBaseCudService" check="false" />
+
+	<!-- 调用dubbo提供的用户中心写入RPC服务 -->
+	<dubbo:reference interface="com.run.usc.base.query.UserBaseQueryService"
+		id="userQueryRpcService" check="false" timeout="13000" />
+	<!-- 调用dubbo提供的用户中心写入RPC服务 -->
+	<dubbo:reference interface="com.run.usc.api.base.crud.UserBaseCurdService"
+		id="userCrudRpcService" check="false" timeout="13000" />
+	<!-- 用户角色rpc -->
+	<dubbo:reference interface="com.run.authz.api.base.crud.UserRoleBaseCrudService"
+		id="userRoleBaseCrudService" check="false" />
+	<!-- 用户角色rpc -->
+	<dubbo:reference interface="com.run.authz.base.query.UserRoleBaseQueryService"
+		id="userRoleBaseQueryService" check="false" />
+	<!-- 调用dubbo提供的用户中心接入方查询RPC服务 -->
+	<dubbo:reference interface="com.run.usc.base.query.TenAccBaseQueryService"
+		id="tenaccQuery" check="false" />
+	<dubbo:reference interface="com.run.usc.base.query.AccUserBaseQueryService"
+		id="accUserBaseQueryService" check="false" />
+
+	<dubbo:reference interface="com.run.locman.api.query.service.FactoryQueryService"
+		id="factoryQueryService" check="false" />
+
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.FaultOrderProcessStateQueryService"
+		id="faultOrderProcessStateQueryService" check="false" />
+
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.BalanceSwitchPowersQueryService"
+		id="balanceSwitchPowersQueryService" check="false" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.BalanceSwitchStateRecordCurdService"
+		id="balanceSwitchStateRecordCurdService" check="false" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.BalanceSwitchStateRecordQueryService"
+		id="balanceSwitchStateRecordQueryService" check="false" />
+
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.DeviceSchedulerService" id="deviceSchedulerService"
+		check="false" />
+</beans>

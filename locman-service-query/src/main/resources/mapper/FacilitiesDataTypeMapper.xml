@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.query.repository.FacilitiesDataTypeQueryRpcRepository">
+
+	<resultMap type="com.run.locman.api.entity.FacilitiesDataType"
+		id="FacilitiesDataTypeResultMap">
+		<result column="id" property="id" javaType="String" />
+		<result column="facilitiesTypeId" property="facilitiesTypeId"
+			javaType="String" />
+		<result column="dataType" property="dataType" javaType="String" />
+		<result column="name" property="name" javaType="String" />
+		<result column="sign" property="sign" javaType="String" />
+		<result column="initialValue" property="initialValue" javaType="String" />
+		<result column="isNotMandatory" property="isNotMandatory"
+			javaType="String" />
+		<result column="state" property="state" javaType="String" />
+		<result column="remarks" property="remarks" javaType="String" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id, facilitiesTypeId, dataType, name, sign,
+		initialValue,isNotMandatory,state,remarks
+	</sql>
+	<sql id="Base_Condition">
+		<if test="id != null">
+			and id=#{id}
+		</if>
+		<if test="facilitiesTypeId != null">
+			and facilitiesTypeId=#{facilitiesTypeId}
+		</if>
+		<if test="dataType != null">
+			and dataType=#{dataType}
+		</if>
+		<if test="name != null">
+			and name=#{name}
+		</if>
+		<if test="sign != null">
+			and sign=#{sign}
+		</if>
+		<if test="initialValue != null">
+			and initialValue=#{initialValue}
+		</if>
+	</sql>
+
+	<select id="findById" resultMap="FacilitiesDataTypeResultMap"
+		parameterType="String">
+		select
+		<include refid="Base_Column" />
+		from FacilitiesDataType where id=#{id}
+	</select>
+
+	<select id="findAllFacilitiesDataType" parameterType="java.util.Map"
+		resultMap="FacilitiesDataTypeResultMap">
+		select fdt.* FROM FacilitiesDataType fdt,FacilitiesType ft
+		where fdt.facilitiesTypeId = ft.id and fdt.state = 'enabled'
+		AND
+		fdt.facilitiesTypeId = #{facilitiesTypeId}
+		AND ft.accessSecret =
+		#{accessSecret}
+	</select>
+
+	<select id="findFacilitiesDataTypeList" parameterType="java.util.Map"
+		resultMap="FacilitiesDataTypeResultMap">
+		select
+		<include refid="Base_Column" />
+		from FacilitiesDataType where 1=1
+		<if test="name != null and name != ''">
+			AND name LIKE CONCAT ('%',#{name},'%')
+		</if>
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			AND facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		<if test="state != null and state != ''">
+			AND state = #{state}
+		</if>
+	</select>
+
+	<select id="validFacilitiesDataTypeName" parameterType="java.util.Map"
+		resultType="java.lang.Integer">
+
+		SELECT
+		count(1)
+		FROM
+		FacilitiesDataType fdt
+		WHERE
+		fdt.facilitiesTypeId =
+		#{facilitiesTypeId}
+		<if test="sign != null and sign != ''">
+			and fdt.sign = #{sign}
+		</if>
+		<if test="name != null and name != ''">
+			and fdt.name = #{name}
+		</if>
+		<if test="id != null and id != ''">
+			and fdt.id != #{id}
+		</if>
+	</select>
+
+</mapper>

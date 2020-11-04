@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.timer.crud.repository.SendTextMessageTaskRepository">
+
+	<select id="getAlarmTextMessageForSend" resultType="java.util.Map">
+		SELECT
+		sr.id,
+		sr.phoneNumber,
+		sr.smsContent,
+		si.gatewayUrl
+		FROM
+		SmsRecord sr
+		LEFT JOIN SmsInfo si ON si.accessSecret = sr.accessSecret
+		WHERE
+		sr.createTime &lt; date_sub(now(), INTERVAL 5 MINUTE)
+		AND sr.state = 0
+	</select>
+
+
+	<update id="updateTextMessageRecordState">
+		update SmsRecord set
+		state = #{state},
+		sendTime = #{sendTime}
+		<if test="failReason!= null">
+			,failReason=#{failReason}
+		</if>
+		where id=#{id}
+	</update>
+</mapper>

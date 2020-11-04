@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.timer.query.repository.DeviceQueryRepository">
+
+	<select id="getAllAccessSecret" resultType="java.lang.String">
+		SELECT DISTINCT
+		d.accessSecret FROM Device d;
+	</select>
+	<select id="getInfoForFaultOrderById" parameterType="java.util.List"
+		resultType="java.util.Map">
+		SELECT
+		a.*, f.contactsPhone as phone
+		FROM
+		(
+		SELECT
+		d.id,
+		d.accessSecret,
+		fa.factoryId,
+		dt.deviceTypeName,
+		f.facilitiesCode
+		FROM
+		Device d
+		LEFT JOIN Factory_AppTag fa ON
+		d.appTag = fa.appTag
+		LEFT JOIN Facility_Device fd ON d.id = fd.deviceId
+		LEFT JOIN DeviceType dt ON d.deviceType = dt.id
+		LEFT JOIN Facilities f ON fd.facilityId = f.id
+		WHERE
+		d.id in
+		<foreach item="item" open="(" separator="," close=")"
+			collection="list">
+			#{item}
+		</foreach>
+		) a
+		LEFT JOIN Factory f ON a.factoryId = f.id
+	</select>
+
+	<select id="checkOrderExist" parameterType="String" resultType="String">
+		SELECT fo.id FROM
+		FaultOrderProcess fo
+		LEFT JOIN FaultOrder_Device fd ON
+		fo.id = fd.faultOrderId
+		WHERE fd.deviceId = #{deviceId}
+		and fo.processState in ('1','3','4','5')
+		
+	</select>
+
+	<select id="checkFaultOrderDevice" resultType="com.run.locman.api.dto.DeviceAndTimeDto">
+		SELECT
+		trc.timeoutReportTime AS configTime, fd.deviceId AS device from Facility_TimeoutReportConfig
+		ft
+		LEFT JOIN TimeoutReportConfig trc ON ft.timeoutReportConfigId = trc.id
+		LEFT JOIN Facilities f ON ft.facilityId = f.id
+		LEFT JOIN Facility_Device fd ON f.id = fd.facilityId
+		WHERE fd.deviceId in (
+		SELECT DISTINCT fd1.deviceId FROM FaultOrderProcess fop
+		LEFT JOIN FaultOrder_Device fd1 ON fop.id = fd1.faultOrderId
+		WHERE fop.faultType = '9'
+		AND fop.manager = '系统检测超时未上报'
+		AND fop.processState = '1'
+		ORDER BY fop.faultType
+		)
+	</select>
+	<select id="getCountDeviceTimingTrigger" resultType="java.util.Map">
+	SELECT
+	d.id deviceId,
+	d.deviceName
+	from 
+	Device d
+	left JOIN
+	Facility_Device fd on fd.deviceId =d.id
+	LEFT JOIN 
+	Facilities f on fd.facilityId =f.id
+	where f.id is not null
+	
+	</select>
+	<insert id="insertToTrigger" parameterType="java.util.Map" >
+	INSERT 
+	INTO CountTimeTrigger
+	(id,deviceId,dateNum,countTiming,countTrigger,countAll,ractv,ractvTime)
+	values
+	<foreach collection="list" item="endList" index="index"
+			separator=",">
+			(#{endList.id},#{endList.deviceId},#{endList.dateNum},#{endList.countTiming},#{endList.countTrigger},#{endList.countAll}
+			,#{endList.ractv},#{endList.ractvTime})
+	</foreach>
+	
+	</insert>
+	
+	<select id="getDeviceInfo" resultType="java.util.Map" parameterType="java.util.Map">
+		SELECT
+			b.deviceId,
+			b.count,
+			f.id AS facilityId,
+			f.accessSecret
+			
+		FROM
+			(
+				SELECT
+					COUNT(a.deviceId) count,
+					a.deviceId
+				FROM
+					(
+						SELECT
+							ct.deviceId,
+							ct.dateNum
+						FROM
+							CountTimeTrigger ct
+						WHERE
+							ct.dateNum &gt;= #{dateNum}
+						AND ct.countTrigger &gt;=#{triggerCount}
+						
+						AND ct.id NOT IN (
+							SELECT
+								d.id
+							FROM
+								(
+									SELECT
+										MIN(c.id) id
+									FROM
+										CountTimeTrigger c
+									GROUP BY
+										deviceId,
+										dateNum
+									HAVING
+										COUNT(*) > 1
+								) d
+						)
+						ORDER BY
+							ct.deviceId,
+							ct.dateNum DESC
+							
+					) a
+				GROUP BY
+					a.deviceId
+				ORDER BY
+					count DESC
+			) b
+		LEFT JOIN Facility_Device fd ON fd.deviceId = b.deviceId
+		LEFT JOIN Facilities f ON f.id = fd.facilityId
+		WHERE
+			count &gt;= #{continuousDays}
+			and f.defenseState =#{defenseState}
+	</select>
+	
+	<select id="getTimingDeviceInfo" resultType="java.util.Map" parameterType="java.util.Map">
+		SELECT
+			b.deviceId,
+			b.count,
+			f.id AS facilityId,
+			f.accessSecret
+			
+		FROM
+			(
+				SELECT
+					COUNT(a.deviceId) count,
+					a.deviceId
+				FROM
+					(
+						SELECT
+							ct.deviceId,
+							ct.dateNum
+						FROM
+							CountTimeTrigger ct
+						WHERE
+							ct.dateNum &gt;= #{dateNum}
+						AND ct.countTiming &gt;=#{timingCount}
+						
+						AND ct.id NOT IN (
+							SELECT
+								d.id
+							FROM
+								(
+									SELECT
+										MIN(c.id) id
+									FROM
+										CountTimeTrigger c
+									GROUP BY
+										deviceId,
+										dateNum
+									HAVING
+										COUNT(*) > 1
+								) d
+						)
+						ORDER BY
+							ct.deviceId,
+							ct.dateNum DESC
+						
+					) a
+				GROUP BY
+					a.deviceId
+				ORDER BY
+					count DESC
+			) b
+		LEFT JOIN Facility_Device fd ON fd.deviceId = b.deviceId
+		LEFT JOIN Facilities f ON f.id = fd.facilityId
+		WHERE
+			count &gt;= #{continuousTimingDays}
+			and f.defenseState = #{defenseState}
+	
+	</select>
+	<select id="getAutomaticTimingDeviceInfo" resultType="java.util.Map" parameterType="java.util.Map">
+	SELECT
+			b.deviceId,
+			b.count,
+			f.id AS facilityId,
+			f.accessSecret
+			
+		FROM
+			(
+				SELECT
+					COUNT(a.deviceId) count,
+					a.deviceId
+				FROM
+					(
+						SELECT
+							ct.deviceId,
+							ct.dateNum
+						FROM
+							CountTimeTrigger ct
+						WHERE
+							ct.dateNum &gt;= #{dateNum}
+						AND ct.countTiming in (1,2,3)
+						
+						AND ct.id NOT IN (
+							SELECT
+								d.id
+							FROM
+								(
+									SELECT
+										MIN(c.id) id
+									FROM
+										CountTimeTrigger c
+									GROUP BY
+										deviceId,
+										dateNum
+									HAVING
+										COUNT(*) > 1
+								) d
+						)
+						ORDER BY
+							ct.deviceId,
+							ct.dateNum DESC
+						
+					) a
+				GROUP BY
+					a.deviceId
+				ORDER BY
+					count DESC
+			) b
+		LEFT JOIN Facility_Device fd ON fd.deviceId = b.deviceId
+		LEFT JOIN Facilities f ON f.id = fd.facilityId
+		WHERE
+			count &gt;= #{continuousTimingDays}
+			and f.defenseState = #{defenseState}
+	</select>	
+	<select id="getNormalDeviceIds" resultType="String">
+		SELECT
+		d.id deviceId
+		from 
+		Device d
+		left JOIN
+		Facility_Device fd on fd.deviceId =d.id
+		LEFT JOIN 
+		Facilities f on fd.facilityId =f.id
+		where f.id is not null
+		AND f.defenseState = '1'
+	</select>
+	
+	<insert id="addDeviceRportedEffective" parameterType="com.alibaba.fastjson.JSONObject" >
+	INSERT 
+	INTO DeviceRportedEffective
+	(id,deviceId,dateNum,xavtv,yavtv,zavtv,xgcm,ygcm,xgtv,ygtv,reportTime,manageState)
+	values
+		<foreach collection="list" item="ite" index="index"
+				separator=",">
+				(#{ite.id},#{ite.deviceId},#{ite.dateNum},#{ite.xavtv},#{ite.yavtv},#{ite.zavtv},
+				#{ite.xgcm},#{ite.ygcm},#{ite.xgtv},#{ite.ygtv},#{ite.reportTime},#{ite.manageState})
+		</foreach>
+	
+	</insert>
+	
+	<select id="queryXYZAvg" resultType="com.alibaba.fastjson.JSONObject">
+		SELECT
+			dre.deviceId,
+			SUM(dre.xavtv) xavtv,
+			SUM(dre.yavtv) yavtv,
+			SUM(dre.zavtv) zavtv,
+			SUM(dre.xgcm) xgcm,
+			SUM(dre.ygcm) ygcm,
+			COUNT(dre.deviceId) num
+		FROM
+			DeviceRportedEffective dre
+		WHERE
+			dre.manageState = 'enable'
+		AND dre.xavtv != 0
+		AND dre.xavtv != 0
+		AND dre.xavtv != 0
+		AND dre.id NOT IN (
+									SELECT
+										d.id
+									FROM
+										(
+											SELECT
+												MIN(c.id) id
+											FROM
+												DeviceRportedEffective c
+											GROUP BY
+												deviceId,
+												dateNum
+											HAVING
+												COUNT(*) > 1
+										) d
+								)
+		GROUP BY
+			dre.deviceId
+	</select>
+	
+	<insert id="addRportedAvg" parameterType="com.alibaba.fastjson.JSONObject" >
+	INSERT 
+	INTO RportedAvg
+	(id,deviceId,dateNum,xavtvAvg,yavtvAvg,zavtvAvg,xgcmAvg,ygcmAvg,ractvAvg,manageState)
+	values
+		<foreach collection="list" item="ite" index="index"
+				separator=",">
+				(#{ite.id},#{ite.deviceId},#{ite.dateNum},#{ite.xavtvAvg},#{ite.yavtvAvg},#{ite.zavtvAvg},
+				#{ite.xgcmAvg},#{ite.ygcmAvg},#{ite.ractvAvg},#{ite.manageState})
+		</foreach>
+	
+	</insert>
+	
+</mapper>

@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.query.repository.SimpleOrderQueryRepository">
+
+	<resultMap
+		type="com.run.locman.api.entity.SimpleOrderProcess"
+		id="simpleOrderResultMap">
+		<result column="id" property="id" javaType="String" />
+		<result column="orderName" property="orderName"
+			javaType="String" />
+		<result column="serialNumber" property="serialNumber"
+			javaType="String" />
+		<result column="orderType" property="orderType"
+			javaType="Integer" />
+		<result column="createBy" property="createBy" javaType="String" />
+		<result column="createTime" property="createTime"
+			javaType="String" />
+		<result column="processStartTime" property="processStartTime"
+			javaType="String" />
+		<result column="constructBy" property="constructBy"
+			javaType="String" />
+		<result column="accessSecret" property="accessSecret"
+			javaType="String" />
+		<result column="manager" property="manager" javaType="String" />
+		<result column="phone" property="phone" javaType="String" />
+		<result column="processEndTime" property="processEndTime"
+			javaType="String" />
+		<result column="mark" property="mark" javaType="String" />
+		<result column="orderImg" property="orderImg" javaType="String" />
+		<result column="deviceCount" property="deviceCount"
+			javaType="Integer" />
+		<result column="processState" property="processState"
+			javaType="String" />
+		<result column="processId" property="processId"
+			javaType="String" />
+		<result column="userId" property="userId" javaType="String" />
+		<result column="updateTime" property="updateTime"
+			javaType="String" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id,orderName,serialNumber,orderType,createBy,createTime,processStartTime,constructBy,accessSecret,manager,phone,
+		processEndTime,mark,orderImg,deviceCount,processState,processId,userId,updateTime
+	</sql>
+	<select id="getFacilityDeviceList" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT
+		*
+		FROM
+		(
+		SELECT
+		fd.facilityId,
+		ftt.facilityTypeName,
+		f.facilitiesCode,
+		fd.deviceId,
+		ft.facilityTypeAlias,
+		f.completeAddress,
+		f.address,
+		f.facilitiesTypeId,
+		f.accessSecret,
+		d.deviceName
+		FROM Device d
+		left join
+		Facility_Device fd on d.id = fd.deviceId
+		LEFT
+		JOIN Facilities f
+		ON
+		fd.facilityId = f.id
+		LEFT JOIN
+		FacilitiesType ft ON
+		f.facilitiesTypeId
+		=
+		ft.id
+		LEFT JOIN FacilitiesTypeBase ftt on ftt.id =
+		ft.facilityTypeBaseId
+		WHERE 1=1 and ft.manageState ='enabled' and
+		f.manageState
+		='enable' and ftt.manageState = 'enabled' and
+		d.manageState = 'enabled'
+		<if test="selectKey !=null and selectKey !=''">
+			and (
+			f.facilitiesCode like CONCAT('%',#{selectKey},'%')
+			OR
+			fd.deviceId like CONCAT('%',#{selectKey},'%')
+			OR f.address like
+			CONCAT('%',#{selectKey},'%')
+			OR f.completeAddress like
+			CONCAT('%',#{selectKey},'%')
+			)
+		</if>
+		<if test="facilitiesTypeId !=null and facilitiesTypeId !=''">
+			AND
+			f.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		AND
+		f.accessSecret = #{accessSecret}
+		) a
+		<if test="selectAll !=null and selectAll =='false'">
+			WHERE
+			a.deviceId
+		</if>
+		<if test="binding !=null and binding =='unBound'">
+			not
+		</if>
+		<if test="select !=null and select =='false'">
+			IN (
+			SELECT
+			deviceId
+			FROM
+			SimpleOrder_Device sd
+			WHERE
+			sd.simpleOrderId = #{simpleOrderId}
+			)
+		</if>
+	</select>
+	<select id="findById" parameterType="String"
+		resultType="java.util.Map">
+		SELECT
+		sp.id,
+		sp.orderName,
+		sp.serialNumber,
+		sp.orderType,
+		sp.createBy,
+		sp.createTime,
+		sp.processStartTime,
+		sp.constructBy,
+		sp.accessSecret,
+		sp.manager,
+		sp.phone,
+		sp.processEndTime,
+		sp.mark,
+		sp.orderImg,
+		sp.deviceCount,
+		sp.processState,
+		IF (
+		now() &gt;
+		sp.processEndTime
+		AND
+		sp.processState != 0
+		AND sp.processState != 2
+		AND
+		sp.processState != 5
+		AND sp.processState != 8
+		,
+		7,
+		processState
+		) AS processStateApp,
+		sp.processId,
+		sp.userId,
+		sp.updateTime,
+		sp.remindTime,
+		sp.remindRule,
+		spt.id AS
+		orderTypeId,
+		spt. NAME
+		AS orderTypeName,
+		COUNT(sf.id)
+		facilitiesCount,
+		GROUP_CONCAT(sf.facilitiesId)
+		facilitiesIds
+		FROM
+		SimpleOrderProcessType
+		spt
+		LEFT JOIN
+		SimpleOrderProcess
+		sp ON spt.id =
+		sp.orderType
+		LEFT JOIN
+		SimpleOrder_Facilities sf on sp.id
+		=
+		sf.simpleOrderId
+		WHERE
+		sp.id =
+		#{id}
+	</select>
+	<select id="getSimpleOrderList" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT
+		sp.id,sp.orderName,sp.serialNumber,sp.orderType,sp.createBy,sp.createTime,sp.processStartTime,sp.constructBy,sp.accessSecret,sp.manager,sp.phone,
+		sp.processEndTime,sp.mark,sp.orderImg,sp.deviceCount,sp.processId,sp.userId,sp.updateTime,spt.id
+		as orderTypeId,spt.name as orderTypeName ,
+		IF (
+		now() &gt;
+		sp.processEndTime and sp.processState != 0 AND sp.processState != 2
+		AND sp.processState != 5 AND sp.processState != 8,
+		7,
+		processState
+		) AS
+		processState,
+		sp.processState AS processRealState
+		FROM
+		SimpleOrderProcessType
+		spt
+		left
+		join
+		SimpleOrderProcess sp on spt.id =
+		sp.orderType
+		WHERE
+		1=1
+		<if test="selectKey !=null and selectKey !=''">
+			AND (
+			sp.serialNumber like CONCAT('%',#{selectKey},'%')
+			OR
+			sp.orderName like CONCAT('%',#{selectKey},'%')
+			)
+		</if>
+		<if test="processStartTime !=null and processStartTime !=''">
+			AND TO_DAYS(sp.processStartTime) &gt;=
+			TO_DAYS(#{processStartTime})
+		</if>
+		<if test="processEndTime !=null and processEndTime !=''">
+			AND TO_DAYS(sp.processEndTime) &lt;=
+			TO_DAYS(#{processEndTime})
+		</if>
+		<if test="orderType !=null and orderType !=''">
+			and sp.orderType = #{orderType}
+		</if>
+		<!-- processState与基础流程状态数据对应,后期变动,更改初始值 -->
+		<if
+			test="processState !=null and processState !='' and processState != 7 and processState != 4 and processState != 1 and processState != 9">
+			and sp.processState = #{processState}
+		</if>
+		<!-- 结束时间小于当前时间，并且不是流程已经结束 -->
+		<if test="processState == 7">
+			and sp.processEndTime &lt; NOW() and sp.processState != 2
+			and sp.processState != 0 and sp.processState != 5
+			and sp.processState
+			!= 8
+		</if>
+		<if
+			test="processState == 4 or processState == 1 or processState == 9">
+			and sp.processState = #{processState} and
+			sp.processEndTime &gt;
+			NOW()
+		</if>
+		and sp.userId=#{userId} and sp.accessSecret=#{accessSecret} order by
+		sp.serialNumber desc
+	</select>
+	<select id="whetherExistOrder" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT
+		<include refid="Base_Column" />
+		FROM
+		SimpleOrderProcess
+		WHERE
+		id IN (
+		SELECT
+		simpleOrderId
+		FROM
+		SimpleOrder_Device
+		WHERE
+		deviceId = #{deviceId}
+		) and processState = "4"
+		AND
+		TO_DAYS(#{pointOfTime}) BETWEEN TO_DAYS(processStartTime)
+		AND
+		TO_DAYS(processEndTime)
+	</select>
+	<select id="getSimpleOrderAgencyList"
+		parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+		sp.id,sp.orderName,sp.serialNumber,sp.orderType,sp.createBy,sp.createTime,sp.processStartTime,sp.constructBy,sp.accessSecret,sp.manager,sp.phone,
+		sp.processEndTime,sp.mark,sp.orderImg,sp.deviceCount,sp.processId,sp.userId,sp.updateTime,spt.id
+		as orderTypeId,spt.name as orderTypeName,
+		IF (
+		now() > sp.processEndTime
+		AND sp.processState != 0
+		AND sp.processState != 2
+		AND sp.processState !=
+		5,
+		7,
+		processState
+		) AS processState
+		FROM SimpleOrderProcessType
+		spt
+		left
+		join
+		SimpleOrderProcess sp on spt.id = sp.orderType
+		WHERE
+		1=1
+		<if test="selectKey !=null and selectKey !=''">
+			AND (
+			sp.serialNumber like CONCAT('%',#{selectKey},'%')
+			OR
+			sp.orderName like CONCAT('%',#{selectKey},'%')
+			)
+		</if>
+		<if test="processStartTime !=null and processStartTime !=''">
+			AND TO_DAYS(sp.processStartTime) &gt;=
+			TO_DAYS(#{processStartTime})
+		</if>
+		<if test="processEndTime !=null and processEndTime !=''">
+			AND TO_DAYS(sp.processEndTime) &lt;=
+			TO_DAYS(#{processEndTime})
+		</if>
+		<if test="orderType !=null and orderType !=''">
+			and sp.orderType = #{orderType}
+		</if>
+		<!-- processState与基础流程状态数据对应,后期变动,更改初始值 -->
+		<if
+			test="processState !=null and processState !='' and processState != 7 and processState != 4 and processState != 1 and processState != 9">
+			and sp.processState = #{processState}
+		</if>
+		<!-- 结束时间小于当前时间，并且不是流程已经结束 -->
+		<if test="processState == 7">
+			and sp.processEndTime &lt; NOW() and sp.processState != 2
+			and sp.processState != 0 and sp.processState != 5
+			and sp.processState
+			!= 8
+		</if>
+		<if
+			test="processState == 4 or processState == 1 or processState == 9">
+			and sp.processState = #{processState} and
+			sp.processEndTime &gt;
+			NOW()
+		</if>
+		<if test="appProcessStates != null and appProcessStates.size > 0 ">
+			and sp.processState in
+			<foreach collection="appProcessStates" index="index"
+				item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+			and sp.processEndTime &gt;
+			NOW()
+		</if>
+		<choose>
+			<when test="set !=null and set.size>0">
+				and sp.id in
+				<foreach collection="set" index="index" item="item" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+			</when>
+			<otherwise>
+				and 1 != 1
+			</otherwise>
+		</choose>
+		order by sp.serialNumber desc
+	</select>
+
+	<select id="getSimpleCount" resultType="Integer">
+		SELECT
+		count(1)
+		FROM
+		SimpleOrderProcess t
+		WHERE
+		t.id
+		in
+		<foreach collection="
+		list " index="index" item="item"
+			open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+	<select id="getOrderByDeviceId" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT
+		*
+		FROM
+		SimpleOrderProcess sop
+		LEFT JOIN
+		SimpleOrder_Device sd ON sd.simpleOrderId = sop.id
+		WHERE
+		sop.processState = 4
+		AND sop.accessSecret = #{accessSecret}
+		AND
+		sop.processStartTime &lt;= NOW()
+		AND NOW() &lt;= sop.processEndTime
+		AND
+		sd.deviceId = #{deviceId}
+	</select>
+
+	<select id="getSimpleOrderAgencyListForApp"
+		parameterType="java.util.Map" resultType="java.util.Map">
+		<!-- SELECT sop.* FROM SimpleOrderProcess sop LEFT JOIN SimpleOrder_Facilities 
+			sf ON sop.id = sf.simpleOrderId WHERE sop.accessSecret =#{accessSecret} AND 
+			sf.facilitiesId =#{facilityId} AND sop.id IN <foreach collection="set" index="index" 
+			item="item" open="(" separator="," close=")"> #{item} </foreach> -->
+
+		SELECT
+		sop.*,
+		IF (
+		now() > sop.processEndTime
+		AND sop.processState != 0
+		AND sop.processState != 2
+		AND sop.processState != 5,
+		7,
+		processState
+		) AS
+		processStateApp
+		FROM
+		SimpleOrderProcess sop
+		WHERE
+		sop.accessSecret =
+		#{accessSecret}
+		AND sop.userId = #{userId}
+		AND sop.id IN (
+		SELECT
+		sf.simpleOrderId
+		FROM
+		SimpleOrder_Facilities sf
+		WHERE
+		sf.facilitiesId =
+		#{facilityId}
+		)
+		ORDER BY
+		sop.serialNumber DESC
+	</select>
+
+	<select id="findOrderNumber" resultType="String"
+		parameterType="String">
+		SELECT
+		IFNULL(MAX(t.serialNumber) + 1, 1000)
+		FROM
+		SimpleOrderProcess t
+		WHERE
+		t.accessSecret = #{accessSecret}
+	</select>
+
+	<select id="querySimpleOrderStartTime" resultType="String"
+		parameterType="String">
+		SELECT
+		sop.processStartTime
+		FROM
+		SimpleOrder_Facilities sf
+		LEFT JOIN Facility_Device fd ON sf.facilitiesId = fd.facilityId
+		LEFT
+		JOIN SimpleOrderProcess sop ON sf.simpleOrderId = sop.id
+		WHERE
+		sop.accessSecret = #{accessSecret}
+		AND fd.deviceId = #{deviceId}
+		AND
+		sop.processState = '4'
+		ORDER BY
+		sop.processStartTime DESC
+		LIMIT 1
+	</select>
+
+</mapper>
+

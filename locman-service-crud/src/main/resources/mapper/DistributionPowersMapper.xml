@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.crud.repository.DistributionPowersCudRepository">
+
+	<resultMap type="com.run.locman.api.entity.DistributionPowers"
+		id="DistributionPowersResultMap">
+		<result column="id" property="id" javaType="String" />
+		<result column="facilityTypeId" property="facilityTypeId"
+			javaType="String" />
+		<result column="startTime" property="startTime" javaType="String" />
+		<result column="endTime" property="endTime" javaType="String" />
+		<result column="remark" property="remark" javaType="String" />
+		<result column="accessSecret" property="accessSecret" javaType="String" />
+		<result column="manageState" property="manageState" javaType="String" />
+		<result column="hour" property="hour" javaType="String" />
+		<result column="minute" property="minute" javaType="String" />
+		<result column="powerName" property="powerName" javaType="String" />
+		<result column="userInfo" property="userInfo" javaType="String" />
+		<result column="orgName" property="orgName" javaType="String" />
+		<result column="userName" property="userName" javaType="String" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id, facilityTypeId, startTime, endTime, remark,
+		accessSecret,
+		manageState,hour,minute,powerName,userInfo,orgName,userName
+	</sql>
+	<sql id="Base_Condition">
+		<if test="id != null">
+			and id=#{id}
+		</if>
+		<if test="facilityTypeId != null">
+			and facilityTypeId=#{facilityTypeId}
+		</if>
+		<if test="startTime != null">
+			and startTime=#{startTime}
+		</if>
+		<if test="endTime != null">
+			and endTime=#{endTime}
+		</if>
+		<if test="remark != null">
+			and remark=#{remark}
+		</if>
+		<if test="manageState != null">
+			and manageState=#{manageState}
+		</if>
+		<if test="accessSecret != null">
+			and accessSecret=#{accessSecret}
+		</if>
+		<if test="hour != null">
+			and hour=#{hour}
+		</if>
+		<if test="minute != null">
+			and minute=#{minute}
+		</if>
+		<if test="powerName != null">
+			and powerName=#{powerName}
+		</if>
+		<if test="userInfo != null">
+			and userInfo=#{userInfo}
+		</if>
+		<if test="orgName != null">
+			and orgName=#{orgName}
+		</if>
+		<if test="userName != null">
+			and userName=#{userName}
+		</if>
+	</sql>
+
+	<insert id="insertModel" parameterType="com.run.locman.api.entity.DistributionPowers">
+		INSERT INTO DistributionPowers(
+		<include refid="Base_Column" />
+		)
+		VALUES(
+		#{id}, #{facilityTypeId},
+		#{startTime}, #{endTime}, #{remark},
+		#{accessSecret},
+		#{manageState},#{hour},#{minute},#{powerName},#{userInfo},#{orgName},#{userName}
+		)
+	</insert>
+
+	<update id="updatePart" parameterType="java.util.Map">
+		UPDATE DistributionPowers DP
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="startTime != null">
+				startTime=#{startTime},
+			</if>
+			<if test="endTime != null">
+				endTime=#{endTime},
+			</if>
+			<if test="remark != null">
+				remark=#{remark},
+			</if>
+			<if test="manageState != null">
+				manageState=#{manageState},
+			</if>
+			<if test="hour != null">
+				hour=#{hour},
+			</if>
+			<if test="minute != null">
+				minute=#{minute},
+			</if>
+			<if test="powerName != null">
+				powerName=#{powerName},
+			</if>
+			<if test="userInfo != null">
+				userInfo=#{userInfo},
+			</if>
+			<if test="orgName != null">
+				orgName=#{orgName},
+			</if>
+			<if test="userName != null">
+				userName=#{userName}
+			</if>
+		</trim>
+		WHERE DP.id=#{id}
+	</update>
+
+	<delete id="deleteById" parameterType="String">
+		DELETE FROM
+		DistributionPowers WHERE id=#{id}
+	</delete>
+</mapper>
+

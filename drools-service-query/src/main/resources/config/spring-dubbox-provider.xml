@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+    http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+
+	<dubbo:protocol name="dubbo" port="${service.port:80}"
+		accesslog="true" />
+
+<!-- 规则引擎查询rpc -->
+	<dubbo:service interface="com.run.locman.api.query.service.DroolsQueryService" ref="droolsQueryService" protocol="dubbo"/>
+	<bean id="droolsQueryService" class="com.run.locman.query.service.DroolsQueryServiceImpl" />
+	
+	<dubbo:service interface="com.run.locman.api.drools.service.TestInterface" ref="testInterface" protocol="dubbo" />	
+	<bean id="testInterface" class="com.run.locman.query.service.TestInterfaceImpl" />
+	
+	<dubbo:service interface="com.run.locman.api.drools.service.AlarmRuleInvokInterface" ref="alarmRuleInvokInterface" protocol="dubbo" />	
+	<bean id="alarmRuleInvokInterface" class="com.run.locman.query.service.AlarmInvok" />
+</beans>

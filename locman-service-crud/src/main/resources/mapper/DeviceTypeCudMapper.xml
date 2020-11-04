@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.crud.repository.DeviceTypeCudRepository">
+	<resultMap id="BaseResultMap"
+		type="com.run.locman.api.entity.DeviceType">
+		<id column="id" property="id" javaType="String" />
+		<result column="deviceTypeName" property="deviceTypeName"
+			javaType="String" />
+		<result column="parentId" property="parentId" javaType="String" />
+		<result column="createTime" property="createTime"
+			javaType="String" />
+		<result column="updateTime" property="updateTime"
+			javaType="String" />
+		<result column="createBy" property="createBy" javaType="String" />
+		<result column="updateBy" property="updateBy" javaType="String" />
+		<result column="accessSecret" property="accessSecret"
+			javaType="String" />
+	</resultMap>
+	<insert id="addDeviceType" parameterType="java.util.List">
+		INSERT INTO DeviceType (id, deviceTypeName, parentId, createTime,
+		updateTime, createBy, updateBy, accessSecret)
+		VALUES
+		<foreach collection="list" item="deviceType" index="index"
+			separator=",">
+			(#{deviceType.id}, #{deviceType.deviceTypeName},
+			#{deviceType.parentId}, #{deviceType.createTime},
+			#{deviceType.updateTime},
+			#{deviceType.createBy},
+			#{deviceType.updateBy}, #{deviceType.accessSecret})
+		</foreach>
+	</insert>
+
+	<delete id="deleteDeviceTypeById" parameterType="java.util.List">
+		DELETE FROM DeviceType WHERE id IN (
+		<foreach collection="list" item="deviceType" index="index"
+			separator=",">
+			#{deviceType.id}
+		</foreach>
+		)
+	</delete>
+	<select id="queryDeviceTypeByAS" parameterType="String"
+		resultMap="BaseResultMap">
+		SELECT
+		d.id,
+		d.accessSecret,
+		d.deviceTypeName
+		FROM
+		DeviceType d
+		WHERE
+		d.accessSecret = #{accessSecret}
+	</select>
+	<delete id="deleteUnusedDeviceTypeByAS" parameterType="String">
+		DELETE
+		FROM
+		DeviceType
+		WHERE
+		id IN (
+		SELECT
+		b.id
+		FROM
+		(
+		(
+		SELECT
+		dt.id
+		FROM
+		DeviceType dt
+		WHERE
+		dt.accessSecret = #{accessSecret}
+		AND dt.id NOT IN (
+		SELECT
+		DISTINCT
+		d.deviceType
+		FROM
+		Device d
+		WHERE
+		d.accessSecret = #{accessSecret}
+		)
+		)
+		) b
+		)
+	</delete>
+
+	<delete id="deleteCascadeAlarmRuleById" parameterType="String">
+		DELETE
+		FROM
+		AlarmRule
+		WHERE
+		id IN (
+		SELECT
+		*
+		FROM
+		(
+		SELECT
+		ar.id
+		FROM
+		AlarmRule ar
+		WHERE
+		ar.accessSecret = #{accessSecret}
+		AND ar.deviceTypeId NOT IN (
+		SELECT DISTINCT
+		d.deviceType
+		FROM
+		Device d
+		WHERE
+		d.accessSecret = #{accessSecret}
+		)
+		) AS deleteAlarmRule
+		);
+	</delete>
+
+	<delete id="deleteAlarmRuleIdByAccess" parameterType="String">
+		DELETE
+		FROM
+		DefinedAlarmRule_Device
+		WHERE
+		id IN (
+		SELECT
+		*
+		FROM
+		(
+		SELECT
+		dd.id
+		FROM
+		DefinedAlarmRule_Device dd
+		LEFT JOIN (
+		SELECT
+		*
+		FROM
+		Device
+		WHERE
+		accessSecret = #{accessSecret}
+		) b ON dd.deviceId = b.id
+		WHERE
+		b.id
+		IS
+		NULL
+		)
+		lsDRule
+		)
+	</delete>
+
+	<delete id="deleteAlarmRuleByNotDeviceId" parameterType="String">
+		DELETE
+		FROM
+		AlarmRule
+		WHERE
+		id IN (
+		SELECT
+		id
+		FROM
+		(
+		SELECT
+		ar.id
+		FROM
+		AlarmRule ar
+		LEFT
+		JOIN DefinedAlarmRule_Device dd ON ar.id =
+		dd.alarmRuleId
+		LEFT JOIN
+		Device d ON dd.deviceId = d.id
+		WHERE
+		ar.ruleType = 1
+		AND ar.accessSecret
+		= #{accessSecret}
+		GROUP BY
+		ar.id
+		HAVING
+		count(d.id) = 0
+		) lsDAlarm
+		)
+	</delete>
+
+	<update id="editDeviceType"
+		parameterType="com.run.locman.api.entity.DeviceType">
+		update DeviceType set
+		deviceTypeName
+		=#{deviceTypeName},updateTime =
+		#{updateTime},updateBy =
+		#{updateBy},typeSign = #{typeSign}
+		where id = #{id} and accessSecret =
+		#{accessSecret}
+	</update>
+
+	<select id="selectAlarmRuleDeviceCount" parameterType="String"
+		resultType="java.util.Map">
+		SELECT
+		ar.id,
+		count(d.id) as deviceCount
+		FROM
+		AlarmRule
+		ar
+		LEFT
+		JOIN
+		DefinedAlarmRule_Device dd ON ar.id = dd.alarmRuleId
+		LEFT
+		JOIN
+		Device d
+		ON dd.deviceId = d.id
+		WHERE
+		ar.ruleType = 1
+		AND
+		ar.accessSecret =
+		#{accessSecret}
+		GROUP BY
+		ar.id;
+	</select>
+
+	<update id="updateAlarmRuleDeivceCount"
+		parameterType="java.util.List">
+		UPDATE AlarmRule
+		SET deviceCount =
+		CASE
+		id
+		<foreach collection="alarmRules" item="item" index="index">
+			WHEN
+			#{item.id}
+			THEN #{item.deviceCount}
+		</foreach>
+		ELSE deviceCount END
+		WHERE id in
+		<foreach collection="alarmRules" item="item" index="index"
+			open="(" close=")" separator=",">
+			#{item.id}
+		</foreach>
+	</update>
+
+</mapper>

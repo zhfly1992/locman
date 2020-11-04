@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.crud.repository.UpdateZbyCrudRepository">
+	<select id="findOldORNewId" resultType="java.util.Map">
+		SELECT ID ,
+		DEVICE_ID , NEW_DEVICE_ID 
+		FROM switch_device where NEW_DEVICE_ID is not null AND NEW_DEVICE_ID != ''
+		and APPTAG IS NOT NULL
+		AND APPTAG != ''
+		and NEW_DEVICE_TYPE IS NOT NULL
+		AND NEW_DEVICE_TYPE !=
+		''
+		and GATEWAY_ID IS NOT NULL
+		AND GATEWAY_ID != ''
+		ORDER BY ID
+ 	</select>
+	
+	<update id="updateAlarmInfoDeviceId" parameterType="java.util.List">
+		UPDATE AlarmInfo
+		SET deviceId =
+		CASE
+		deviceId 
+		<foreach collection="deviceIds" item="item" index="index">
+			WHEN #{item.DEVICE_ID}
+			THEN #{item.NEW_DEVICE_ID}
+		</foreach>
+		ELSE deviceId END
+		WHERE deviceId in
+		<foreach collection="deviceIds" item="item" index="index" open="(" close=")" separator=",">
+			#{item.DEVICE_ID}
+		</foreach>
+		
+	
+	</update>
+	
+	<update id="updateRealRportedDeviceId" parameterType="java.util.List">
+		UPDATE Device_RealRported
+		SET deviceId =
+		CASE
+		deviceId 
+		<foreach collection="deviceIds" item="item" index="index">
+			WHEN #{item.DEVICE_ID}
+			THEN #{item.NEW_DEVICE_ID}
+		</foreach>
+		ELSE deviceId END
+		WHERE deviceId in
+		<foreach collection="deviceIds" item="item" index="index" open="(" close=")" separator=",">
+			#{item.DEVICE_ID}
+		</foreach>
+	</update>
+	
+</mapper>

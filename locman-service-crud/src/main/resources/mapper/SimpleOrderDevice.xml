@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.crud.repository.SimpleOrderDeviceCrudRepository">
+	<sql id="Base_Column">
+		id,simpleOrderId,deviceId
+	</sql>
+	<insert id="insertModel" parameterType="com.run.locman.api.entity.SimpleOrderDevice">
+		insert into SimpleOrder_Device(
+		<include refid="Base_Column" />
+		) values
+		(#{id},#{simpleOrderId},#{deviceId})
+	</insert>
+	<update id="updateModel" parameterType="com.run.locman.api.entity.SimpleOrderDevice">
+	</update>
+	<delete id="deleteByids" parameterType="Map">
+		delete from
+		SimpleOrder_Device
+		where deviceId=#{deviceId} and simpleOrderId = #{id}
+	</delete>
+
+	<delete id="deleteByOrderid" parameterType="String">
+		delete from
+		SimpleOrder_Device
+		where simpleOrderId = #{orderId}
+	</delete>
+
+</mapper>
+

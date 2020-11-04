@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.crud.repository.DeviceInfoConvertCrudRepository">
+
+	<sql id="Base_Column">
+		id,dicKey,dicValue,createTime,updateTime,accessSecret
+	</sql>
+
+	<insert id="insertModel" parameterType="com.run.locman.api.model.DeviceInfoConvertModel">
+		insert into DeviceInfoConvert(
+		<include refid="Base_Column" />
+		) values
+		(#{id},#{dicKey},#{dicValue},#{createTime},#{updateTime},#{accessSecret})
+	</insert>
+
+
+	<update id="updatePart" parameterType="com.run.locman.api.model.DeviceInfoConvertModel">
+		update DeviceInfoConvert d
+		<trim prefix="set" suffixOverrides=",">
+			d.dicKey=#{dicKey},
+			d.dicValue=#{dicValue},
+			d.updateTime=#{updateTime},
+			d.accessSecret=#{accessSecret}
+		</trim>
+		where d.id=#{id}
+	</update>
+
+	<delete id="deleteConvertInfo" parameterType="com.run.locman.api.model.DeviceInfoConvertModel">
+		delete from
+		DeviceInfoConvert where id IN
+		<foreach collection="list" item="id" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	<select id="deviceTypeIdListBYAccessSecret" parameterType="String" resultType="String">
+	SELECT
+		dt.id
+		from 
+		DeviceType dt 
+		where  
+		dt.accessSecret=#{accessSecret}
+	</select>
+	
+	<select id="deviceIdListByAccAndType" parameterType="java.util.Map" resultType="String">
+	SELECT
+		d.id
+	FROM
+		Device d
+	LEFT JOIN Facility_Device fd ON fd.deviceId = d.id
+	LEFT JOIN Facilities f ON f.id = fd.facilityId
+	WHERE
+		d.accessSecret = #{accessSecret}
+	AND d.deviceType =  #{productId}
+	AND f.id IS NOT NULL
+	</select>
+	
+	<delete id="deleteDeviceByAccAndType" parameterType="java.util.Map">
+	DELETE
+	FROM
+	 Device 
+	WHERE 
+	deviceType=#{productId}
+	and accessSecret=#{accessSecret}
+	</delete>
+	<update id="updateDeviceTypeNameByProductId" parameterType="java.util.Map">
+	update 
+	DeviceType dt 
+	SET 
+	dt.deviceTypeName=#{productName}
+	where dt.id=#{productId}
+	</update>
+	
+	<delete id="deleteFacDevice" parameterType="String">
+	delete  from Facility_Device 
+	where 
+	deviceId in 
+	<foreach collection="list" item="deviceId" open="(" separator=","
+			close=")">
+			#{deviceId}
+		</foreach>
+	</delete>
+	
+</mapper>

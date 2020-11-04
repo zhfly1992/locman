@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.crud.repository.DataCacheCrudRepository">
+
+
+
+	<insert id="saveCacheData" parameterType="String">
+		insert into DataCache (id,dataCache,createTime)
+		values (#{id}, #{dataCache}, NOW())
+	</insert>
+
+	<update id="updateDataCacheRetryCount" parameterType="String">
+		update DataCache
+		set retryCount = retryCount + '1', updateTime = NOW()
+		where id=#{id} AND '3' > retryCount 
+	</update>
+
+	<delete id="deleteCacheDataById" parameterType="String">
+		DELETE FROM DataCache WHERE id = #{id}
+	</delete>
+	
+	<select id="findRetryCacheData" resultType="java.util.Map" >
+		SELECT
+			dc.id,
+			dc.dataCache
+		FROM
+			DataCache dc
+		WHERE
+			3 > dc.retryCount 
+		and dc.retryCount > 0
+		ORDER BY
+		dc.createTime
+		LIMIT 2
+	</select>
+	
+
+</mapper>

@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+    http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+	<!-- 本地调试 -->
+	<!-- <dubbo:reference id="wUserInfoByMongodbCommonRest" interface="com.run.shared.service.ucs.api.writer.user.UserBaseRestWriterService" 
+		url="dubbo:http://172.168.0.100:8888/user/register"/> -->
+	<dubbo:consumer timeout="5000" check="false" />
+	<!-- api接口query -->
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.FacilitiesDataTypeQueryRpcService"
+		id="facilitiesDataTypeQueryRpcService" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.FacilitiesQueryService"
+		id="facilitiesQueryService" timeout="60000" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.FacilitiesTypeQueryService"
+		id="facilitiesTypeQueryService" timeout="20000" />
+	<dubbo:reference interface="com.run.locman.api.base.query.FacilitesService"
+		id="facilitesService" timeout="50000" />
+	<dubbo:reference interface="com.run.usc.base.query.UserBaseQueryService"
+		id="userQueryRpcService" />
+	<!--<dubbo:reference interface="com.run.usc.base.query.UserBaseQueryService" 
+		id="userQueryRpcService" /> -->
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.FacilitiesTypeBaseQueryService"
+		id="facilitiesTypeBaseQueryService"></dubbo:reference>
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.StaffTypeQueryService" id="staffTypeQueryService" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.DistributionPowersQueryService"
+		id="distributionPowersQueryService" />
+	<dubbo:reference interface="com.run.usc.base.query.AccSourceBaseQueryService"
+		id="accSourceQuery" />
+	<dubbo:reference interface="com.run.authz.base.query.UserRoleBaseQueryService"
+		id="userRoleBaseQueryService" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.FacilityDeviceQueryService"
+		id="facilityDeviceQueryService" timeout="200000" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.DeviceTypeTemplateService"
+		id="deviceTypeTemplateService" />
+	<dubbo:reference interface="com.run.locman.api.query.service.FactoryQueryService"
+		id="factoryQueryService" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.PropertiesQueryService"
+		id="propertiesQueryService" />    <!-- 被调用的基础beans -->
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.PropertiesTemplateQueryService"
+		id="propertiesTemplateQueryService" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.AlarmRuleQueryService" id="alarmRuleQueryService" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.AlarmInfoQueryService" id="alarmInfoQueryService"
+		timeout="2000000" retries="0" />
+	<dubbo:reference
+		interface="com.run.locman.api.drools.service.AlarmRuleInvokInterface"
+		id="alarmRuleInvokInterface" retries="0" timeout="100000" />
+	<dubbo:reference interface="com.run.activity.api.crud.ActivityProgressCrud"
+		id="activityProgressCrud" timeout="10000" retries="0" />
+	<dubbo:reference interface="com.run.activity.api.query.ActivityProgressQuery"
+		id="activityProgressQuery" timeout="10000" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.FaultOrderProcessTypeQueryService"
+		id="faultOrderProcessTypeQueryService" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.FaultOrderProcessQueryService"
+		id="faultOrderProcessQueryService" timeout="1000000" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.FaultOrderProcessStateQueryService"
+		id="faultOrderProcessStateQueryService" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.SimpleOrderTypeQueryService"
+		id="simpleOrderTypeQueryService" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.SimpleOrderQueryService"
+		id="simpleOrderQueryService" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.AlarmOrderQueryService"
+		id="alarmOrderQueryService" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.StatisticsQueryService"
+		id="statisticsQueryService" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.RemoteControlRecordQueryService"
+		id="remoteControlRecordQueryService" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.AlarmRuleFacilityQueryService"
+		id="alarmRuleFacilityQueryService" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.OrderProcessQueryService"
+		id="orderProcessQueryService" timeout="10000" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.DeviceTypeQueryService"
+		id="deviceTypeQueryService" timeout="10000" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.DeviceInfoConvertQueryService"
+		id="deviceInfoConvertQueryService" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.TimeoutReportConfigQueryService"
+		id="timeoutReportConfigQueryService" />
+
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.DeviceDataStorageQueryService"
+		id="deviceDataStorageQueryService" timeout="500000" />
+
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.MysqlDataQueryService" id="mysqlDataQueryService"
+		timeout="10000" />
+
+	<dubbo:reference interface="com.run.locman.api.query.service.Query4ExcelService"
+		id="query4ExcelService" timeout="3000000" />
+
+	<dubbo:reference interface="com.run.locman.api.timer.query.service.DeviceQuery"
+		id="deviceQuery" timeout="30000" />
+
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.NewFaultOrderQueryService"
+		id="newFaultOrderQueryService" timeout="300000" />
+
+	<!-- api接口Crud -->
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.FacilitiesCrudService" id="facilitiesCrudService" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.FacilitiesTypeCudService"
+		id="FacilitiesTypeCudService" retries="0" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.FacilitiesDataTypeCudService"
+		id="facilitiesDataTypeCudService" />
+
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.FacilitiesTypeBaseCudService"
+		id="FacilitiesTypeBaseCudService" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.FacilityDeviceCudService"
+		id="facilityDeviceCudService" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.DeviceTypeTemplateCudService"
+		id="deviceTypeTemplateCudService" />
+
+	<dubbo:reference interface="com.run.locman.api.crud.service.FactoryCrudService"
+		id="factoryCrudService" timeout="50000" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.PropertiesCrudService" id="propertiesCrudService" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.PropertiesTemplateCrudService"
+		id="propertiesTemplateCrudService" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.DistributionPowersCudService"
+		id="distributionPowersCudService" />
+	<dubbo:reference interface="com.run.locman.api.crud.service.AlarmRuleService"
+		id="alarmRuleService" timeout="6000" />
+	<dubbo:reference interface="com.run.locman.api.crud.service.AlarmInfoCrudService"
+		id="alarmInfoCrudService" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.FaultOrderProcessCudService"
+		id="faultOrderProcessCudService" timeout="10000" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.FaultOrderDeviceCudService"
+		id="faultOrderDeviceCudService" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.SimpleOrderCrudService" id="simpleOrderCrudService"
+		timeout="10000" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.AlarmOrderCrudService" id="alarmOrderCrudService" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.DeviceStateHistoryCrudService"
+		id="deviceStateHistoryCrudService" />
+	<dubbo:reference interface="com.run.locman.api.crud.service.DeviceInfoCudService"
+		id="deviceInfoCudService" retries="0" timeout="35000" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.DeviceDataStorageCudService"
+		id="deviceDataStorageCudService" retries="0" timeout="10000" />
+	<dubbo:reference
+		interface="com.run.locman.api.timer.crud.service.ExecuteMethodTimerService"
+		id="executeMethodTimerService" retries="0" timeout="8000" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.DeviceReportedCrudService"
+		id="deviceReportedCrudService" retries="0" timeout="8000" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.FacilitiesRenovationCrudService"
+		id="facilitiesRenovationCrudService" retries="0" timeout="8000" />
+
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.RemoteControlRecordCrudService"
+		id="remoteControlRecordCrudService" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.OrderProcessCudService" id="orderProcessCudService"
+		timeout="30000" />
+	<dubbo:reference
+		interface="com.run.activity.api.crud.service.ProcessFileCurdService"
+		id="processFileCurdService" />
+	<dubbo:reference
+		interface="com.run.activity.api.query.service.ProcessFileQueryService"
+		id="processFileQueryService" />
+	<dubbo:reference interface="com.run.rabbit.activity.server.RabbitMqCrudService"
+		id="rabbitMqSendClient" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.DeviceInfoConvertCrudService"
+		id="deviceInfoConvertCrudService" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.BasicDeviceAttributeTemplateCurdService"
+		id="basicDeviceAttributeTemplateCurdService" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.BaseFacilitiesTypeCrudService"
+		id="baseFacilitiesTypeCrudService" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.BasicDeviceInfoConvertCrudService"
+		id="basicDeviceInfoConvertCrudService" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.InfoSummaryQueryService"
+		id="infoSummaryQueryService" timeout="15000" />
+	<dubbo:reference interface="com.run.locman.api.crud.service.SmsRegistService"
+		id="smsRegistService" />
+	<dubbo:reference interface="com.run.locman.api.query.service.SmsQueryService"
+		id="SmsQueryService" />
+
+
+
+	<dubbo:reference interface="com.run.locman.api.crud.service.DeviceTypeCudService"
+		id="deviceTypeCudService" />
+
+
+	<!-- 规则引擎 -->
+	<dubbo:reference interface="com.run.locman.api.drools.service.TestInterface"
+		id="testInterface" />
+	<dubbo:reference interface="com.run.locman.api.drools.service.ExportDate"
+		id="exportDate" />
+
+	<dubbo:reference interface="com.run.locman.api.query.service.DroolsQueryService"
+		id="droolsQueryService" />
+
+	<dubbo:reference interface="com.run.locman.api.crud.service.DroolsCrudSerivce"
+		id="droolsCrudService" />
+
+	<dubbo:reference id="processTypeBaseQueryService"
+		interface="com.run.locman.api.query.service.ProcessTypeBaseQueryService" />
+	<dubbo:reference id="deviceQueryService"
+		interface="com.run.locman.api.query.service.DeviceQueryService"
+		timeout="12000" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.BalanceSwitchPowersCrudService"
+		id="balanceSwitchPowersCrudService" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.BalanceSwitchPowersQueryService"
+		id="balanceSwitchPowersQueryService" />
+
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.BalanceSwitchStateRecordCurdService"
+		id="balanceSwitchStateRecordCurdService" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.BalanceSwitchStateRecordQueryService"
+		id="balanceSwitchStateRecordQueryService" />
+	<dubbo:reference interface="com.run.locman.api.query.service.AreaQueryService"
+		id="areaQueryService" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.TimeoutReportConfigCrudService"
+		id="timeoutReportConfigCrudService" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.DeviceSchedulerService" id="deviceSchedulerService"
+		timeout="20000" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.OpenRecordQueryService"
+		id="openRecordQueryService" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.SwitchLockRecordQueryService"
+		id="switchLockRecordQueryService" />
+	<dubbo:reference
+		interface="com.run.locman.api.activemq.service.ActiveMqReceiveService"
+		id="activeMqReceiveService" retries="0" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.FacilitiesRenovationQueryService"
+		id="facilitiesRenovationQueryService" />
+
+	<!-- test -->
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.DeviceStateQueryService"
+		id="deviceStateQueryService" />
+	<dubbo:reference
+		interface="com.run.locman.api.timer.crud.service.AlramOrderRemindTimerService"
+		id="alramOrderRemindTimerService" timeout="70000" />
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.FocusSecurityCrudService"
+		id="focusSecurityCrudService" timeout="15000" />
+	<dubbo:reference
+		interface="com.run.locman.api.query.service.FocusSecurityQueryService"
+		id="focusSecurityQueryService" />
+	<dubbo:reference
+		interface="com.run.locman.api.timer.crud.service.FocusSecuritysTimerCrudService"
+		id="focusSecuritysTimerCrudService" />
+
+
+	<dubbo:reference
+		interface="com.run.locman.api.timer.query.service.WingsIotConstansQuery"
+		id="wingsIotConstansQuery" check="false" />
+
+	<dubbo:reference
+		interface="com.run.locman.api.crud.service.UpdateRedisCrudService" id="updateRedisCrudService" />
+
+</beans>

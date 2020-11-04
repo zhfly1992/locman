@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+    http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+	<dubbo:protocol name="dubbo" port="${service.port:80}"
+		accesslog="true" />
+	<!-- 被调用的服务接口 -->
+	<dubbo:service interface="com.run.locman.api.crud.service.SchedulerCrudService"
+		ref="schedulerCrudService" protocol="dubbo" />
+
+	<dubbo:service interface="com.run.locman.api.timer.query.service.DeviceQuery"
+		ref="deviceQuery" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.timer.query.service.OrderProcessQueryService"
+		ref="orderProcessQueryService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.timer.query.service.TimeoutReportConfigQueryService"
+		ref="timeoutReportConfigQueryService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.timer.crud.service.FaultOrderProcessCudService"
+		ref="faultOrderProcessCudServiceTimer" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.timer.query.service.FaultOrderDeviceQueryService"
+		ref="faultOrderDeviceQueryService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.timer.crud.service.ExecuteMethodTimerService"
+		ref="executeMethodTimerService" protocol="dubbo" retries="0" timeout="10000" />
+	<dubbo:service
+		interface="com.run.locman.api.timer.crud.service.AlramOrderRemindTimerService"
+		ref="alramOrderRemindTimerService" protocol="dubbo" retries="0"
+		timeout="1000000" />
+	<dubbo:service
+		interface="com.run.locman.api.timer.crud.service.SendTextMessageTaskService"
+		ref="sendTextMessageTaskService" protocol="dubbo" retries="0"/>
+	<dubbo:service
+		interface="com.run.locman.api.timer.crud.service.FocusSecuritysTimerCrudService"
+		ref="focusSecuritysTimerCrudService" protocol="dubbo" retries="0"/>
+	<dubbo:service
+		interface=" com.run.locman.api.timer.query.service.WingsIotConstansQuery"
+		ref="wingsIotConstansQuery" protocol="dubbo" retries="0"/>
+
+
+	<bean id="schedulerCrudService" class="com.run.locman.scheduler.crud.SchedulerCrudServiceImpl" />
+	<bean id="deviceQuery" class="com.run.locman.timer.query.DeviceQueryImpl" />
+	<bean id="orderProcessQueryService"
+		class="com.run.locman.timer.query.OrderProcesQueryServiceTimerImpl" />
+	<bean id="timeoutReportConfigQueryService"
+		class="com.run.locman.timer.query.TimeoutReportConfigQueryServiceImpl" />
+	<bean id="faultOrderProcessCudServiceTimer"
+		class="com.run.locman.timer.cud.FaultOrderProcessCudServiceTimerImpl" />
+	<bean id="faultOrderDeviceQueryService"
+		class="com.run.locman.timer.query.FaultOrderDeviceQueryServiceImpl" />
+	<bean id="executeMethodTimerService" class="com.run.locman.timer.cud.ExecuteMethodTimerServiceImpl" />
+	<bean id="alramOrderRemindTimerService"
+		class="com.run.locman.timer.cud.AlarmOrderRemindTimerServiceImpl" />
+	<bean id="sendTextMessageTaskService"
+		class="com.run.locman.timer.cud.SendTextMessageTaskServiceImpl" />
+	<bean id="focusSecuritysTimerCrudService"
+		class="com.run.locman.timer.cud.FocusSecurityTimerCrudServiceImpl" />
+	<bean id="wingsIotConstansQuery"
+		class="com.run.locman.timer.query.WingsIotConstansQueryImpl" />	
+	
+</beans>

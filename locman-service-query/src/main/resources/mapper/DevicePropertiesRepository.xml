@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.query.repository.DevicePropertiesQueryRepository">
+	<resultMap id="DevicePropertiesResultMap" type="com.run.locman.api.entity.DeviceProperties">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="devicePropertiesName" jdbcType="VARCHAR"
+			property="devicePropertiesName" />
+		<result column="devicePropertiesSign" jdbcType="VARCHAR"
+			property="devicePropertiesSign" />
+		<result column="dataType" jdbcType="VARCHAR" property="dataType" />
+		<result column="dataValue" jdbcType="VARCHAR" property="dataValue" />
+		<result column="readWrite" jdbcType="INTEGER" property="readWrite" />
+		<result column="icon" jdbcType="VARCHAR" property="icon" />
+		<result column="appIcon" jdbcType="VARCHAR" property="appIcon" />
+		<result column="remark" jdbcType="VARCHAR" property="remark" />
+		<result column="creationTime" jdbcType="VARCHAR" property="creationTime" />
+		<result column="templateId" jdbcType="VARCHAR" property="templateId" />
+		<result column="orderNo" jdbcType="INTEGER" property="order" />
+	</resultMap>
+	<sql id="Base_Column">
+		id, devicePropertiesName, devicePropertiesSign, dataType,
+		dataValue,
+		readWrite, icon, remark, creationTime, templateId, orderNo,
+		appIcon
+	</sql>
+	<sql id="Base_Condition">
+		<if test="id != null">
+			and id=#{id}
+		</if>
+		<if test="devicePropertiesName != null">
+			and devicePropertiesName=#{devicePropertiesName}
+		</if>
+		<if test="devicePropertiesSign != null">
+			and devicePropertiesSign=#{devicePropertiesSign}
+		</if>
+		<if test="dataType != null">
+			and dataType=#{dataType}
+		</if>
+		<if test="dataValue != null">
+			and dataValue=#{dataValue}
+		</if>
+		<if test="readWrite != null">
+			and readWrite=#{readWrite}
+		</if>
+		<if test="icon != null">
+			and icon=#{icon}
+		</if>
+		<if test="appIcon != null">
+			and appIcon=#{appIcon}
+		</if>
+		<if test="remark != null">
+			and remark=#{remark}
+		</if>
+		<if test="creationTime != null">
+			and creationTime=#{creationTime}
+		</if>
+		<if test="templateId != null">
+			and templateId=#{templateId}
+		</if>
+		<if test="order != null">
+			and orderNo=#{order}
+		</if>
+	</sql>
+	
+	<select id="findById" parameterType="java.lang.String" resultMap="DevicePropertiesResultMap">
+		SELECT <include refid="Base_Column" /> FROM DeviceProperties dp
+		WHERE dp.id = #{id}
+	</select>
+	
+	<select id="findByTemplateId" parameterType="java.lang.String"
+		resultMap="DevicePropertiesResultMap">
+		select
+		<include refid="Base_Column" />
+		from DeviceProperties
+		where templateId=#{templateId}
+		ORDER BY orderNo
+	</select>
+	<select id="findByDeviceTypeId" parameterType="java.lang.String"
+		resultMap="DevicePropertiesResultMap">
+		SELECT dp.* FROM DeviceProperties dp
+	    LEFT JOIN DeviceType_Template dt ON dt.devicePropertyTemplateId =
+	    dp.templateId
+	    left join DeviceProperties_Template devT on dp.templateId=devT.id
+	    WHERE
+	    dt.deviceTypePropertyConfigId = #{deviceTypeId}
+	    and
+	    devT.accessSecret=#{accessSecret}
+	    and dt.accessSecret=#{accessSecret}
+	    ORDER BY dp.orderNo
+	</select>
+	<select id="existOrder" parameterType="java.util.Map"
+		resultType="int">
+		select count(1)
+		from DeviceProperties
+		where templateId=#{templateId} and
+		orderNo = #{order}
+		and id<![CDATA[ <> ]]>#{id}
+	</select>
+	
+	<select id="checkNameOrSigExist" parameterType="com.run.locman.api.entity.DeviceProperties" resultType="com.alibaba.fastjson.JSONObject">
+		SELECT
+			dp.devicePropertiesName,
+			dp.devicePropertiesSign
+		FROM
+			DeviceProperties dp
+		WHERE
+			dp.templateId = #{templateId}
+		<if test="devicePropertiesSign != null and devicePropertiesSign != ''">
+		AND dp.devicePropertiesSign = #{devicePropertiesSign}
+		</if>
+		<if test="devicePropertiesName != null and devicePropertiesName != ''">
+		AND dp.devicePropertiesName = #{devicePropertiesName}
+		</if>
+		<if test="id != null and id != ''">
+		AND dp.id != #{id}
+		</if>
+	</select>
+	
+</mapper>

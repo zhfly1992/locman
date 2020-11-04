@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.crud.repository.FacilitiesDataTypCudRepository">
+
+	<resultMap type="com.run.locman.api.entity.FacilitiesDataType"
+		id="FacilitiesDataTypeResultMap">
+		<result column="id" property="id" javaType="String" />
+		<result column="facilitiesTypeId" property="facilitiesTypeId"
+			javaType="String" />
+		<result column="dataType" property="dataType" javaType="String" />
+		<result column="name" property="name" javaType="String" />
+		<result column="sign" property="sign" javaType="String" />
+		<result column="initialValue" property="initialValue" javaType="String" />
+		<result column="isNotMandatory" property="isNotMandatory"
+			javaType="String" />
+		<result column="state" property="state" javaType="String" />
+		<result column="remarks" property="remarks" javaType="String" />
+	</resultMap>
+
+
+
+	<insert id="insertModel" keyProperty="id"
+		parameterType="com.run.locman.api.entity.FacilitiesDataType">
+		insert into FacilitiesDataType
+		(id, facilitiesTypeId,
+		dataType, name, sign, initialValue, isNotMandatory, state,
+		remarks)
+		values (
+		#{id}, #{facilitiesTypeId}, #{dataType},
+		#{name}, #{sign}, #{initialValue}, #{isNotMandatory}, #{state},
+		#{remarks}
+		)
+	</insert>
+
+	<update id="updatePart" parameterType="com.run.locman.api.entity.FacilitiesDataType">
+		update FacilitiesDataType
+		<trim prefix="set" suffixOverrides=",">
+			<if test="id!=null">
+				id=#{id},
+			</if>
+			<if test="facilitiesTypeId!=null">
+				facilitiesTypeId=#{facilitiesTypeId},
+			</if>
+			<if test="dataType!=null">
+				dataType=#{dataType},
+			</if>
+			<if test="name!=null">
+				name=#{name},
+			</if>
+			<if test="sign!=null">
+				sign=#{sign},
+			</if>
+			<if test="initialValue!=null">
+				initialValue=#{initialValue},
+			</if>
+			<if test="isNotMandatory!=null">
+				isNotMandatory=#{isNotMandatory},
+			</if>
+			<if test="state!=null">
+				state=#{state},
+			</if>
+			<if test="remarks!=null">
+				remarks=#{remarks},
+			</if>
+
+		</trim>
+		where id=#{id} and facilitiesTypeId=#{facilitiesTypeId}
+	</update>
+
+</mapper>

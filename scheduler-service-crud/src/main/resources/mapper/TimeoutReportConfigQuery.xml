@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.run.locman.api.timer.query.repository.TimeoutReportConfigQueryRepository">
+
+	<select id="getDeviceAndTime" resultType="com.run.locman.api.dto.DeviceAndTimeDto">
+		SELECT
+		DISTINCT
+		fd.deviceId AS device,
+		frc.timeoutReportTime AS configTime
+		FROM TimeoutReportConfig frc
+		LEFT JOIN
+		Facility_TimeoutReportConfig ft on frc.id =
+		ft.timeoutReportConfigId
+		LEFT JOIN Facility_Device fd ON ft.facilityId = fd.facilityId
+		RIGHT
+		JOIN Device d ON d.id = fd.deviceId WHERE d.manageState = 'enabled'
+		AND
+		ft.facilityId in
+		(
+		SELECT
+		DISTINCT
+		f.id
+		FROM
+		Facility_Device fd
+		LEFT JOIN
+		Facilities f ON f.id =
+		fd.facilityId
+		WHERE f.manageState = 'enable'
+		)
+	</select>
+</mapper>

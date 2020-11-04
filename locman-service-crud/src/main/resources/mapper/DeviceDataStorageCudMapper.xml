@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.run.locman.api.crud.repository.DeviceDataStorageCudRepository">
+	<sql id="Base_Column">
+		id,deviceId,deviceNumber,bluetooth,deviceAddress,longitude,latitude,ipPort,serialNumber,status,
+		properties,deviceTypeId,synchronizationState,areaId,errorInfo,showExtend,extend,createTime
+	</sql>
+
+
+	<insert id="addDeviceData" parameterType="java.util.List">
+		INSERT INTO DeviceDataStorage (
+		<include refid="Base_Column" />
+		)
+		VALUES
+		<foreach collection="list" item="deviceData" index="index"
+			separator=",">
+			(#{deviceData.id}, #{deviceData.deviceId}, #{deviceData.deviceNumber},
+			#{deviceData.bluetooth}, #{deviceData.deviceAddress}, #{deviceData.longitude},
+			#{deviceData.latitude}, #{deviceData.ipPort}, #{deviceData.serialNumber},
+			#{deviceData.status}, #{deviceData.properties}, #{deviceData.deviceTypeId},
+			#{deviceData.synchronizationState}, #{deviceData.areaId}, #{deviceData.errorInfo}, #{deviceData.showExtend},
+			#{deviceData.extend}, NOW())
+		</foreach>
+	</insert>
+
+	<update id="deleteById">
+		update DeviceDataStorage set
+		isDelete = #{userId},
+		updateTime = NOW()
+		WHERE id = #{deviceDataId}
+	</update>
+
+	<update id="updateDeviceData" parameterType="com.run.locman.api.entity.DeviceDataStorage">
+		update DeviceDataStorage set
+		id=#{id}
+		<if test="deviceId != null and deviceId != ''">
+			,deviceId=#{deviceId}
+		</if>
+		<if test="deviceNumber != null">
+			,deviceNumber=#{deviceNumber}
+		</if>
+		<if test="bluetooth != null and bluetooth != ''">
+			,bluetooth=#{bluetooth}
+		</if>
+		<if test="deviceAddress != null and deviceAddress != ''">
+			,deviceAddress=#{deviceAddress}
+		</if>
+		<if test="longitude != null and longitude != ''">
+			,longitude=#{longitude}
+		</if>
+		<if test="latitude != null and latitude != ''">
+			,latitude=#{latitude}
+		</if>
+		<if test="ipPort != null and ipPort != ''">
+			,ipPort=#{ipPort}
+		</if>
+		<if test="serialNumber != null and serialNumber != ''">
+			,serialNumber=#{serialNumber}
+		</if>
+		<if test="status != null and status != ''">
+			,status=#{status}
+		</if>
+		<if test="properties != null and properties != ''">
+			,properties=#{properties}
+		</if>
+		<if test="deviceTypeId != null and deviceTypeId != ''">
+			,deviceTypeId=#{deviceTypeId}
+		</if>
+		<if test="synchronizationState != null and synchronizationState != '' and synchBy != null and synchBy != ''">
+			,synchronizationState=#{synchronizationState}
+			,synchBy=#{synchBy}
+			,synchTime=NOW()
+		</if>
+		<if test="updateBy != null and updateBy != ''">
+			,updateBy=#{updateBy}
+			,updateTime=NOW()
+		</if>
+		<if test="areaId != null and areaId != ''">
+			,areaId=#{areaId} 
+		</if>
+		<if test="errorInfo != null and errorInfo != ''">
+			,errorInfo=#{errorInfo} 
+		</if>
+		<if test="showExtend != null and showExtend != ''">
+			,showExtend=#{showExtend} 
+		</if>
+		<if test="extend != null and extend != ''">
+			,extend=#{extend} 
+		</if>
+		where
+		id=#{id}
+	</update>
+<!-- 	<select id="getUnusedFile" resultType="String">
+		SELECT DISTINCT f.url FROM fileUrl f WHERE f.isDelete = 'yes' and f.deleteState != 'yes' LIMIT #{size}
+	</select>
+	
+	<select id="getUnusedFileCount" resultType="int">
+		SELECT COUNT(DISTINCT f.url) FROM fileUrl f WHERE f.isDelete = 'yes'
+	
+	</select>
+	
+	<update id="updateDeleteState" parameterType="java.util.List" >
+		update fileUrl SET deleteState = 'yes' WHERE url in
+		<foreach item="item" collection="url" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+		</foreach>
+		
+	</update> -->
+	
+	
+
+</mapper>

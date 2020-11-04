@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.run.locman.api.crud.repository.FocusSecurityCrudRepository">
+	<insert id="addFocusSecurity" parameterType="com.run.locman.api.entity.FocusSecurity">
+		INSERT INTO
+		FocusSecurity (id,
+		securityName, startTime,
+		endTime, createTime, userId,accessSecret,
+		organization, status,previewTime,personName,personTel) VALUES (#{id},
+		#{securityName},
+		#{startTime}, #{endTime}, #{createTime}, #{userId},#{accessSecret},
+		#{organization},
+		#{status},#{previewTime},#{personName},#{personTel});
+
+
+
+	</insert>
+
+	<insert id="addFocusSecurityAndFac" parameterType="java.util.List">
+		INSERT INTO Facilities_FocusSecurity (id, securityId,
+		facilityId)
+		VALUES
+		<foreach collection="list" item="focusSecurityAndFac"
+			separator=",">
+			(#{focusSecurityAndFac.id},#{focusSecurityAndFac.securityId},#{focusSecurityAndFac.facilityId})
+		</foreach>
+
+
+	</insert>
+
+	<select id="findFacIdByOrgIds" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select
+		d.id as deviceId,
+		f.id as facilityId
+		from
+		Device d
+		LEFT JOIN
+		Facility_Device fd on fd.deviceId=d.id
+		LEFT JOIN Facilities f on
+		f.id=fd.facilityId
+		where f.accessSecret =#{accessSecret}
+		and f.id is not
+		null
+		<if test="organizationIdList != null and organizationIdList.size() > 0">
+			and f.organizationId in
+			<foreach item="item" collection="organizationIdList" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+
+	<update id="enabledFocusSecurity" parameterType="java.util.Map">
+		UPDATE
+		FocusSecurity f
+		set f.`status`=#{status}
+		where f.id=#{securityId}
+		and  f.accessSecret=#{accessSecret}
+	</update>
+
+	<select id="findAllOrgId" resultType="java.util.Map">
+		SELECT
+		f.organization
+		from
+		FocusSecurity f
+		WHERE f.`status`='enable'
+	</select>
+
+
+	<select id="getDeviceInfoByFacId" resultType="java.util.Map">
+		SELECT * from
+		Facility_Device where facilityId = #{facId}
+
+	</select>
+
+	<update id="updateIotReceivingStatus" parameterType="String">
+		UPDATE
+		Facilities_FocusSecurity ff
+		set ff.IotReceivingStatus=#{commandStatus}
+		where ff.facilityId=#{facId}
+		and ff.securityId=#{securityId}
+	</update>
+	
+	<update id="querySecurityFacilitiesOrders">
+	UPDATE FocusSecurity
+		SET `status` = 'disable'
+		WHERE
+			id IN (
+				SELECT
+					a.id
+				FROM
+					(
+						SELECT
+							id
+						FROM
+							FocusSecurity f
+						WHERE
+							f.endTime &lt;= NOW()
+						AND f.`status` = 'enable'
+					) a
+			)
+	</update>
+	
+	<select id="querySecurityFacIdList" resultType="java.util.Map">
+	SELECT
+		ff.facilityId,
+		ff.securityId
+		from FocusSecurity f
+		LEFT JOIN Facilities_FocusSecurity ff on ff.securityId=f.id
+		where f.endTime &lt;= NOW()
+		and f.`status`='enable'
+	</select>
+	
+	<update id="updateEndStatus" parameterType="String">
+	UPDATE
+		Facilities_FocusSecurity ff
+		set ff.endStatus=#{status}
+		where ff.facilityId=#{facId}
+		and ff.securityId=#{securityId}
+	</update>
+	
+	<select id="findFacIdListBySecurityId" parameterType="String" resultType="String">
+		SELECT 
+			ff.facilityId
+			from 
+			Facilities_FocusSecurity ff
+			where ff.securityId=#{securityId}
+	</select>
+	
+
+</mapper>

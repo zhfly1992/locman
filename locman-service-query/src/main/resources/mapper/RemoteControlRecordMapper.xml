@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.query.repository.RemoteControlRecordQueryRepository">
+	<resultMap type="com.run.locman.api.entity.RemoteControlRecord"
+		id="remoteControlRecordMap">
+		<result column="id" property="id" javaType="String" />
+		<result column="deviceId" property="deviceId" javaType="String" />
+		<result column="controlItem" property="controlItem" javaType="String" />
+		<result column="controlValue" property="controlValue" javaType="String" />
+		<result column="controlTime" property="controlTime" javaType="String" />
+		<result column="controlUserId" property="controlUserId"
+			javaType="String" />
+		<result column="operateUserName" property="operateUserName"
+			javaType="String" />
+		<result column="operateUserPhone" property="operateUserPhone"
+			javaType="String" />
+		<result column="reason" property="reason" javaType="String" />
+		<result column="controlType" property="controlType" javaType="Integer" />
+		<result column="controlState" property="controlState" javaType="String" />
+		<result column="controlDestroyTime" property="controlDestroyTime"
+			javaType="String" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id, deviceId, controlItem, controlValue, controlTime,
+		controlUserId, operateUserName, operateUserPhone, reason,
+		controlType,controlState,controlDestroyTime
+	</sql>
+
+	<sql id="Base_condition">
+		<if test="id != null and id != ''">
+			AND id = #{id}
+		</if>
+		<if test="deviceId != null and deviceId != ''">
+			AND deviceId = #{deviceId}
+		</if>
+		<if test="controlItem != null and controlItem != ''">
+			AND controlItem = #{controlItem}
+		</if>
+		<if test="controlValue != null and controlValue != ''">
+			AND controlValue = #{controlValue}
+		</if>
+		<if test="controlTime != null and controlTime != ''">
+			AND controlTime = #{controlTime}
+		</if>
+		<if test="controlUserId != null and controlUserId != ''">
+			AND controlUserId = #{controlUserId}
+		</if>
+		<if test="operateUserName != null and operateUserName != ''">
+			AND operateUserName = #{operateUserName}
+		</if>
+		<if test="operateUserPhone != null and operateUserPhone != ''">
+			AND operateUserPhone = #{operateUserPhone}
+		</if>
+		<if test="reason != null and reason != ''">
+			AND reason = #{reason}
+		</if>
+		<if test="controlType != null and controlType != ''">
+			AND controlType = #{controlType}
+		</if>
+		<if test="controlState != null and controlState != ''">
+			AND controlState = #{controlState}
+		</if>
+		<if test="controlDestroyTime != null and controlDestroyTime != ''">
+			AND controlDestroyTime = #{controlDestroyTime}
+		</if>
+	</sql>
+
+	<select id="findByParams" parameterType="java.util.Map"
+		resultMap="remoteControlRecordMap">
+		SELECT
+		<include refid="Base_Column" />
+		FROM RemoteControlRecord RMC
+		WHERE 1=1
+		<include refid="Base_condition" />
+		ORDER BY
+		RMC.controlTime DESC
+	</select>
+
+	<select id="getControlList" resultType="java.util.Map">
+		SELECT
+		fd.deviceId,
+		f.id facilitiesTypeId,
+		fd.facilityId,
+		f.facilitiesCode,
+		f.areaId,
+		f.organizationId,
+		f.address,
+		f.completeAddress,
+		f.latitude,
+		f.longitude,
+		ft.facilityTypeAlias,
+		ftb.facilityTypeName,
+		fd.deviceTypeId,
+		<!-- 校验设备是否配置了数据点 -->
+		IF((SELECT
+		COUNT(*)
+		FROM
+		DeviceType_Template dt
+		LEFT JOIN
+		DeviceProperties_Template dpt ON
+		dt.devicePropertyTemplateId =
+		dpt.id
+		LEFT JOIN DeviceProperties dp ON
+		dpt.id = dp.templateId
+		WHERE
+		dt.deviceTypePropertyConfigId =
+		fd.deviceTypeId
+		AND dpt.accessSecret =
+		#{accessSecret}) &gt;
+		0,TRUE,FALSE) as deviceState,
+		<!-- ****** -->
+
+		<!-- 分页返回总条数，与外部sql条件一样，只是返回count字段 -->
+
+		(SELECT
+		COUNT(*)
+		FROM
+		Facilities f
+		LEFT JOIN
+		Facility_Device
+		fd ON f.id =
+		fd.facilityId
+		LEFT JOIN FacilitiesType ft
+		ON
+		f.facilitiesTypeId = ft.id
+		LEFT JOIN
+		FacilitiesTypeBase ftb ON
+		ftb.id =
+		ft.facilityTypeBaseId
+		WHERE
+		f.accessSecret = #{accessSecret}
+		AND
+		f.manageState = 'enable'
+		<if test="orgIdForUser != null and orgIdForUser != ''">
+			AND
+			f.facilitiesTypeId IN (
+			<!-- 获取该系统登录人员能够操作命令的设施类型集合 -->
+			SELECT DISTINCT
+			dp.facilityTypeId
+			FROM
+			DistributionPowers dp
+			WHERE
+			dp.accessSecret =
+			#{accessSecret}
+			AND
+			dp.manageState = 'enabled'
+			AND
+			DATE(NOW()) &gt;=
+			DATE(dp.startTime)
+			AND
+			DATE(NOW()) &lt;=
+			DATE(dp.endTime)
+			AND
+			dp.userInfo LIKE CONCAT('%',
+			#{orgIdForUser},'%')
+			AND dp.userInfo LIKE
+			CONCAT ('%',#{userId},'%')
+			<!-- ****** -->
+			)
+			<!-- 人员所在组织等级需大于等于设施所在组织等级 -->
+			AND f.organizationId
+			IN
+			<foreach item="item" collection="organizationId" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<!-- ****** -->
+		<if test="code != null and code != ''">
+			AND (
+			fd.deviceId = #{code}
+			OR f.facilitiesCode = #{code}
+
+			)
+		</if>
+		<if test="address != null and address != ''">
+			AND f.completeAddress LIKE CONCAT ('%',#{address},'%')
+		</if>
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			AND f.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		) as count
+		<!-- 分页返回count结束 -->
+
+
+		FROM
+		Facilities f
+		LEFT JOIN
+		Facility_Device
+		fd ON f.id = fd.facilityId
+		LEFT JOIN FacilitiesType ft
+		ON
+		f.facilitiesTypeId = ft.id
+		LEFT JOIN
+		FacilitiesTypeBase ftb ON
+		ftb.id =
+		ft.facilityTypeBaseId
+		WHERE
+		f.accessSecret = #{accessSecret}
+		AND
+		f.manageState = 'enable'
+		<if test="orgIdForUser != null and orgIdForUser != ''">
+			AND
+			f.facilitiesTypeId IN (
+			<!-- 获取该系统登录人员能够操作命令的设施类型集合 -->
+			SELECT DISTINCT
+			dp.facilityTypeId
+			FROM
+			DistributionPowers dp
+			WHERE
+			dp.accessSecret =
+			#{accessSecret}
+			AND
+			dp.manageState = 'enabled'
+			AND
+			DATE(NOW()) &gt;=
+			DATE(dp.startTime)
+			AND
+			DATE(NOW()) &lt;=
+			DATE(dp.endTime)
+			AND
+			dp.userInfo LIKE CONCAT('%',
+			#{orgIdForUser},'%')
+			AND dp.userInfo LIKE
+			CONCAT ('%',#{userId},'%')
+			<!-- ****** -->
+			)
+			<!-- 人员所在组织等级需大于等于设施所在组织等级 -->
+			AND f.organizationId
+			IN
+			<foreach item="item" collection="organizationId" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<!-- ****** -->
+		<if test="code != null and code != ''">
+			AND (
+			fd.deviceId = #{code}
+			OR f.facilitiesCode = #{code}
+
+			)
+		</if>
+		<if test="address != null and address != ''">
+			AND f.completeAddress LIKE CONCAT ('%',#{address},'%')
+		</if>
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			AND f.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		limit #{numberPage},#{sizePage}
+	</select>
+
+	<select id="getControlByDeviceId" parameterType="java.lang.String"
+		resultMap="remoteControlRecordMap">
+		SELECT
+		<include refid="Base_Column" />
+		FROM
+		RemoteControlRecord
+		WHERE
+		deviceId = #{deviceId}
+		AND controlState =
+		'valid'
+		<!-- controlTime IN ( SELECT MAX(controlTime) AS controlTime FROM RemoteControlRecord 
+			WHERE deviceId = #{deviceId} AND controlState = 'valid' GROUP BY controlItem 
+			) -->
+	</select>
+	<select id="getRemoteControlByDeviceId" parameterType="java.lang.String"
+		resultMap="remoteControlRecordMap">
+		SELECT
+		*
+		FROM
+		RemoteControlRecord
+		WHERE
+		deviceId = #{deviceId}
+		AND controlState = 'valid'
+		ORDER BY
+		controlTime DESC
+		LIMIT 1
+	</select>
+
+
+
+</mapper>
+

@@ -1,0 +1,69 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+
+	<property name="autoIncrement" value="true" dbms="mysql" />
+
+	<changeSet id="20181022_add_Device" author="郭飞龙">
+		<comment>Device表添加网关id字段</comment>
+		<addColumn tableName="Device">
+			<column name="gatewayId" type="varchar(64)" remarks="设备网关id">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="20181022_add_Factory_AppTag_appId" author="郭飞龙">
+		<comment>Factory_AppTag表添加应用id字段</comment>
+		<addColumn tableName="Factory_AppTag">
+			<column name="appId" type="varchar(64)" remarks="应用id">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="20181022_add_Factory_AppTag_appKey" author="郭飞龙">
+		<comment>Factory_AppTag表添加应用key字段</comment>
+		<addColumn tableName="Factory_AppTag">
+			<column name="appKey" type="varchar(64)" remarks="应用key">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="20181022_update_Device" author="郭飞龙">
+		<comment>Device表修改appTag字段</comment>
+		<modifyDataType tableName="Device" columnName="appTag" newDataType="varchar(128)"/>
+	</changeSet>
+
+	<changeSet id="20181022_update_Factory_AppTag" author="郭飞龙">
+		<comment>Factory_AppTag表修改appTag字段</comment>
+		<modifyDataType tableName="Factory_AppTag" columnName="appTag" newDataType="varchar(128)"/>
+	</changeSet>
+	
+	<changeSet id="20181024_add_DeviceType_accessSecret" author="郭飞龙">
+		<comment>DeviceType表添加应用key字段</comment>
+		<addColumn tableName="DeviceType">
+			<column name="accessSecret" type="varchar(64)" remarks="接入方密钥">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="20181026_update_Device" author="郭飞龙">
+		<comment>Device表修改id字段</comment>
+		<modifyDataType tableName="Device" columnName="id" newDataType="varchar(41)"/>
+	</changeSet>
+	
+	<changeSet id="20181108_add_RemoteControlRecord" author="王胜">
+		<comment>RemoteControlRecord表添加命令下发销毁时间字段</comment>
+		<addColumn tableName="RemoteControlRecord">
+			<column name="controlDestroyTime" type="varchar(64)" remarks="命令下发销毁时间">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+</databaseChangeLog>

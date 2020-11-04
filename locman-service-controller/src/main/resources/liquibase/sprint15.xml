@@ -1,0 +1,192 @@
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+
+	<property name="autoIncrement" value="true" dbms="mysql" />
+	<changeSet id="20180420_createSimpleOrder_Facilities" author="赵伟志">
+		<comment>一般工单与设施关系表</comment>
+		<createTable tableName="SimpleOrder_Facilities">
+			<column name="id" type="varchar(32)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="simpleOrderId" type="varchar(255)" remarks="工单id">
+				<constraints nullable="false" />
+			</column>
+			<column name="facilitiesId" type="varchar(255)" remarks="设施id">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="20180425_createBaseDateSynchronizationState"
+		author="郭飞龙">
+		<comment>基础数据同步状态表</comment>
+		<createTable tableName="BaseDateSynchronizationState">
+			<column name="id" type="varchar(32)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="baseAlarmRule" type="tinyint(1)"
+				remarks="同步告警规则,1:true:未同步,0:false:已同步">
+				<constraints nullable="false" />
+			</column>
+			<column name="baseDeviceInfoConvert" type="tinyint(1)"
+				remarks="同步特殊值转换,1:true:未同步,0:false:已同步">
+				<constraints nullable="false" />
+			</column>
+			<column name="baseDeviceProperties" type="tinyint(1)"
+				remarks="同步设备属性,1:true:未同步,0:false:已同步">
+				<constraints nullable="false" />
+			</column>
+			<column name="baseDevicePropertiesTemplate" type="tinyint(1)"
+				remarks="同步设备属性模板,1:true:未同步,0:false:已同步">
+				<constraints nullable="false" />
+			</column>
+			<column name="baseDeviceTypeTemplate" type="tinyint(1)"
+				remarks="同步设备类型模板,1:true:未同步,0:false:已同步">
+				<constraints nullable="false" />
+			</column>
+			<column name="baseFacilitiesType" type="tinyint(1)"
+				remarks="同步设施类型,1:true:未同步,0:false:已同步">
+				<constraints nullable="false" />
+			</column>
+			<column name="accessSecret" type="varchar(64)" remarks="接入方密钥(不可重复)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<!-- 删除无用列 -->
+	<changeSet
+		id="20180425_delete_baseDeviceProperties_and_baseDevicePropertiesTemplate"
+		author="郭飞龙">
+		<comment>删除无用列</comment>
+		<dropColumn tableName="BaseDateSynchronizationState">
+			<column name="baseDeviceProperties" type="tinyint(1)" />
+		</dropColumn>
+		<dropColumn tableName="BaseDateSynchronizationState">
+			<column name="baseDevicePropertiesTemplate" type="tinyint(1)" />
+		</dropColumn>
+	</changeSet>
+
+	<changeSet id="20180504_createBalanceSwitchPowers" author="王胜">
+		<comment>平衡告警开关权限配置表</comment>
+		<createTable tableName="BalanceSwitchPowers">
+			<column name="id" type="varchar(32)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="facilityTypeId" type="varchar(32)" remarks="设施类型id">
+				<constraints nullable="true" />
+			</column>
+			<column name="organizationId" type="varchar(32)" remarks="组织id">
+				<constraints nullable="true" />
+			</column>
+			<column name="postId" type="varchar(32)" remarks="岗位id">
+				<constraints nullable="true" />
+			</column>
+			<column name="staffType" type="varchar(32)" remarks="人员类型">
+				<constraints nullable="true" />
+			</column>
+			<column name="startTime" type="varchar(32)" remarks="起始时间">
+				<constraints nullable="true" />
+			</column>
+			<column name="endTime" type="varchar(32)" remarks="结束时间">
+				<constraints nullable="true" />
+			</column>
+			<column name="remark" type="varchar(255)" remarks="备注">
+				<constraints nullable="true" />
+			</column>
+			<column name="accessSecret" type="varchar(32)" remarks="接入方秘钥">
+				<constraints nullable="true" />
+			</column>
+			<column name="manageState" type="varchar(32)" remarks="管理状态">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="201805015_createBalanceSwitchStateRecord"
+		author="王胜">
+		<comment>平衡告警开关开启关闭记录</comment>
+		<createTable tableName="BalanceSwitchStateRecord">
+			<column name="id" type="varchar(32)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="deviceId" type="varchar(32)" remarks="设备id">
+				<constraints nullable="true" />
+			</column>
+			<column name="facilityId" type="varchar(32)" remarks="设施id">
+				<constraints nullable="true" />
+			</column>
+			<column name="deviceTypeId" type="varchar(32)" remarks="设备类型id">
+				<constraints nullable="true" />
+			</column>
+			<column name="operationTime" type="varchar(32)" remarks="平衡告警开关开启关闭操作时间">
+				<constraints nullable="true" />
+			</column>
+			<column name="accessSecret" type="varchar(32)" remarks="接入方秘钥">
+				<constraints nullable="true" />
+			</column>
+			<column name="state" type="varchar(32)" remarks="管理状态">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	</changeSet>
+	
+	<changeSet id="201805030_updateBalanceSwitchStateRecord_column_Dobbule" author="王胜">
+		<comment>修改表BalanceSwitchStateRecord的字段长度</comment>
+		<modifyDataType tableName="BalanceSwitchStateRecord" columnName="id" newDataType="varchar(64)"/>
+		<modifyDataType tableName="BalanceSwitchStateRecord" columnName="deviceId" newDataType="varchar(64)"/>
+		<modifyDataType tableName="BalanceSwitchStateRecord" columnName="facilityId" newDataType="varchar(64)"/>
+		<modifyDataType tableName="BalanceSwitchStateRecord" columnName="deviceTypeId" newDataType="varchar(64)"/>
+		<modifyDataType tableName="BalanceSwitchStateRecord" columnName="accessSecret" newDataType="varchar(64)"/>
+	</changeSet>
+	
+	<changeSet id="20180604_updateBalanceSwitchPowers_column" author="王胜">
+		<comment>修改表BalanceSwitchStateRecord的字段长度</comment>
+		<modifyDataType tableName="BalanceSwitchPowers" columnName="id" newDataType="varchar(64)"/>
+		<modifyDataType tableName="BalanceSwitchPowers" columnName="facilityTypeId" newDataType="varchar(64)"/>
+		<modifyDataType tableName="BalanceSwitchPowers" columnName="organizationId" newDataType="varchar(64)"/>
+		<modifyDataType tableName="BalanceSwitchPowers" columnName="postId" newDataType="varchar(64)"/>
+		<modifyDataType tableName="BalanceSwitchPowers" columnName="accessSecret" newDataType="varchar(64)"/>
+	</changeSet>
+	
+	<changeSet id="20180605_updateFactoryAndFactory_AppTag_column" author="王胜">
+		<comment>修改表BalanceSwitchStateRecord的字段长度</comment>
+		<modifyDataType tableName="Factory" columnName="id" newDataType="varchar(64)"/>
+		<modifyDataType tableName="Factory_AppTag" columnName="factoryId" newDataType="varchar(64)"/>
+		<modifyDataType tableName="Factory_AppTag" columnName="appTag" newDataType="varchar(64)"/>
+	</changeSet>
+	
+	<changeSet id="20180606_updateFacility_Device_column" author="王胜">
+		<comment>修改表BalanceSwitchStateRecord的字段长度</comment>
+		<modifyDataType tableName="Facility_Device" columnName="id" newDataType="varchar(64)"/>
+		<modifyDataType tableName="Facility_Device" columnName="deviceId" newDataType="varchar(64)"/>
+		<modifyDataType tableName="Facility_Device" columnName="facilityId" newDataType="varchar(64)"/>
+		<modifyDataType tableName="Facility_Device" columnName="deviceTypeId" newDataType="varchar(64)"/>
+	</changeSet>
+	
+
+	<changeSet id="20180613_addAlarmOrderStateType" author="张贺">
+		<comment>添加告警工单待处理状态</comment>
+		<insert tableName="AlarmOrderStateType">
+			<column name="id" value="4e8d59826ea911e891b9002324deca66"></column>
+			<column name="sign" value="5"></column>
+			<column name="name" value="待处理"></column>
+			<column name="type" value="1"></column>
+		</insert>
+	</changeSet>
+	<changeSet id="20180614_addColumn_HourAndMinute" author="王胜">
+		<comment>DistributionPowers表添加hour和minute字段</comment>
+		<addColumn tableName="DistributionPowers">
+			<column name="hour" type="varchar(32)" remarks="超时未关所配小时">
+				<constraints nullable="true" />
+			</column>
+			<column name="minute" type="varchar(32)" remarks="超时未关所配分钟">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+</databaseChangeLog>

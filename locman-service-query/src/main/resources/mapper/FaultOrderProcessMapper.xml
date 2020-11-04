@@ -1,0 +1,1115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.query.repository.FaultOrderProcessQueryRepository">
+
+	<sql id="Base_Column">
+		id, serialNumber,
+		createTime,createBy,faultType,mark,accessSecret,phone,deviceCount,manager,processState,processId,
+		userId,updateTime,orderImg,factoryId,orderName,faultProcessType
+	</sql>
+
+	<resultMap id="BaseResultMap" type="com.run.locman.api.entity.FaultOrderProcess">
+		<result column="id" property="id" javaType="String" />
+		<result column="serialNumber" javaType="String" property="serialNumber" />
+		<result column="orderName" javaType="String" property="orderName" />
+		<result column="createTime" javaType="String" property="createTime" />
+		<result column="createBy" javaType="String" property="createBy" />
+		<result column="faultType" javaType="Integer" property="faultType" />
+		<result column="mark" javaType="String" property="mark" />
+		<result column="accessSecret" javaType="String" property="accessSecret" />
+		<result column="phone" javaType="String" property="phone" />
+		<result column="deviceCount" javaType="Integer" property="deviceCount" />
+		<result column="manager" javaType="String" property="manager" />
+		<result column="processState" javaType="String" property="processState" />
+		<result column="processId" javaType="String" property="processId" />
+		<result column="userId" javaType="String" property="userId" />
+		<result column="updateTime" javaType="String" property="updateTime" />
+		<result column="orderImg" javaType="String" property="orderImg" />
+		<result column="factoryId" javaType="String" property="factoryId" />
+		<result column="faultProcessType" javaType="String" property="faultProcessType" />
+	</resultMap>
+	<select id="queryDevicesForFaultOrder" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT
+		*
+		FROM
+		(
+		SELECT
+		fd.facilityId,
+		f.facilitiesCode,
+		fd.deviceId,
+		ft.facilityTypeAlias,
+		ftt.facilityTypeName,
+		f.completeAddress,
+		f.address,
+		f.facilitiesTypeId,
+		f.accessSecret,
+		fa.factoryId as id,
+		fac.factoryName,
+		fac.id as factoryId,
+		d.deviceName
+		FROM Device d left
+		join
+		Facility_Device fd
+		on d.id = fd.deviceId
+		LEFT
+		JOIN Facilities f ON
+		fd.facilityId = f.id
+		LEFT JOIN
+		FacilitiesType ft ON
+		f.facilitiesTypeId =
+		ft.id
+		LEFT JOIN
+		FacilitiesTypeBase ftt on ftt.id =
+		ft.facilityTypeBaseId
+		LEFT JOIN
+		Factory_AppTag fa ON d.appTag =
+		fa.appTag
+		LEFT JOIN Factory fac
+		ON
+		fac.id = fa.factoryId
+		WHERE 1=1 and
+		ft.manageState = 'enabled' and
+		f.manageState = 'enable'
+		and
+		ftt.manageState = 'enabled' and
+		d.manageState = 'enabled'
+		<if test="selectKey !=null and selectKey !=''">
+			and (
+			f.facilitiesCode like CONCAT('%',#{selectKey},'%')
+			OR
+			fd.deviceId like CONCAT('%',#{selectKey},'%')
+			OR f.address like
+			CONCAT('%',#{selectKey},'%')
+			OR f.completeAddress like
+			CONCAT('%',#{selectKey},'%')
+			)
+		</if>
+		<if test="facilitiesTypeId !=null and facilitiesTypeId !=''">
+			AND
+			f.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		<if test="factoryId !=null and factoryId !=''">
+			AND fa.factoryId = #{factoryId}
+		</if>
+		AND
+		f.accessSecret = #{accessSecret}
+		) a
+		<if test="selectAll !=null and selectAll =='false'">
+			WHERE
+			a.deviceId
+		</if>
+		<if test="binding !=null and binding =='unBound'">
+			not
+		</if>
+		<if test="select !=null and select =='false'">
+			IN (
+			SELECT
+			deviceId
+			FROM
+			FaultOrder_Device sd
+			WHERE
+			sd.faultOrderId = #{faultOrderId}
+			)
+		</if>
+	</select>
+
+	<select id="findById" parameterType="String" resultMap="BaseResultMap">
+		SELECT *
+		from FaultOrderProcess where id = #{id}
+	</select>
+
+	<select id="queryFaultOrderInfoById" parameterType="String"
+		resultType="java.util.Map">
+		SELECT *
+		from FaultOrderProcess where id = #{id}
+	</select>
+
+	<select id="getFaultOrderList" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		SELECT
+		*
+		FROM
+		FaultOrderProcess fop
+		LEFT JOIN FaultOrder_Device fod
+		ON
+		fop.id =
+		fod.faultOrderId
+		WHERE
+		1=1
+		<if test="selectKey !=null and selectKey !=''">
+			AND (
+			serialNumber like CONCAT('%',#{selectKey},'%')
+			or
+			orderName like CONCAT('%',#{selectKey},'%')
+			or
+			manager like
+			CONCAT('%',#{selectKey},'%')
+			or fod.deviceId = #{selectKey}
+			)
+		</if>
+		<if test="appointStartTime !=null and appointStartTime !=''">
+			AND TO_DAYS(createTime) &gt;=
+			TO_DAYS(#{appointStartTime})
+		</if>
+		<if test="appointEndTime !=null and appointEndTime !=''">
+			AND TO_DAYS(createTime) &lt;=
+			TO_DAYS(#{appointEndTime})
+		</if>
+		<if test="faultType !=null and faultType !=''">
+			and faultType = #{faultType}
+		</if>
+		<if test="processState !=null and processState !=''">
+			and processState = #{processState}
+		</if>
+		<if test="manager !=null and manager !=''">
+			and manager = #{manager}
+		</if>
+		<if test="factoryId !=null and factoryId !=''">
+			and factoryId = #{factoryId}
+		</if>
+		and userId=#{userId} and accessSecret=#{accessSecret}
+		order by
+		serialNumber desc
+	</select>
+
+	<select id="queryAgendaOrProcessFaultOrderList" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		SELECT
+		*
+		FROM
+		FaultOrderProcess fop
+		LEFT JOIN FaultOrder_Device fod ON
+		fop.id =
+		fod.faultOrderId
+		WHERE
+		1=1
+		<if test="appOrderId != null and appOrderId != ''">
+			and fop.id = #{appOrderId}
+		</if>
+		<if test="selectKey !=null and selectKey !=''">
+			AND (
+			serialNumber like CONCAT('%',#{selectKey},'%')
+			or
+			orderName like CONCAT('%',#{selectKey},'%')
+			or fod.deviceId =
+			#{selectKey}
+			)
+		</if>
+		<if test="appointStartTime !=null and appointStartTime !=''">
+			AND TO_DAYS(createTime) &gt;=
+			TO_DAYS(#{appointStartTime})
+		</if>
+		<if test="appointEndTime !=null and appointEndTime !=''">
+			AND TO_DAYS(createTime) &lt;=
+			TO_DAYS(#{appointEndTime})
+		</if>
+		<if test="faultType !=null and faultType !=''">
+			and faultType = #{faultType}
+		</if>
+		<if test="processState !=null and processState !=''">
+			and processState = #{processState}
+		</if>
+		<if test="manager !=null and manager !=''">
+			and manager = #{manager}
+		</if>
+		and fop.id in
+		<foreach collection="set" index="index" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+		order by serialNumber desc
+	</select>
+	
+	
+	<select id="queryAgendaOrProcessFaultOrderListNew" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		
+		SELECT DISTINCT
+		fop.id,
+		fop.serialNumber,
+		fop.createTime,
+		fop.createBy,
+		fop.mark,
+		fop.phone,
+		fop.faultType,
+		fop.deviceCount,
+		fop.manager,
+		fop.processState,
+		fop.processId,
+		fop.userId,
+		fop.updateTime,
+		fop.orderImg,
+		fop.factoryId,
+		fop.orderName,
+		fop.faultProcessType,
+		(
+		
+		SELECT
+				GROUP_CONCAT(temp.deviceId
+				SEPARATOR
+				',') e
+				FROM(
+				SELECT DISTINCT
+				ao.deviceId AS deviceId
+				FROM
+				FaultOrderProcess a
+				LEFT
+				JOIN
+				FaultOrder_Device ao ON
+				a.id = ao.faultOrderId
+				WHERE
+				a.id in 
+				<foreach collection="set" index="index" item="item" open="("
+					separator="," close=")">
+					#{item}
+				</foreach>
+				
+		) temp ) deviceIds
+		
+		FROM
+		FaultOrderProcess fop
+		LEFT JOIN FaultOrder_Device fod ON
+		fop.id =
+		fod.faultOrderId
+		WHERE
+		1=1
+		<if test="appOrderId != null and appOrderId != ''">
+			and fop.id = #{appOrderId}
+		</if>
+		<if test="selectKey !=null and selectKey !=''">
+			AND (
+			serialNumber like CONCAT('%',#{selectKey},'%')
+			or
+			orderName like CONCAT('%',#{selectKey},'%')
+			or fod.deviceId =
+			#{selectKey}
+			)
+		</if>
+		<if test="appointStartTime !=null and appointStartTime !=''">
+			AND TO_DAYS(createTime) &gt;=
+			TO_DAYS(#{appointStartTime})
+		</if>
+		<if test="appointEndTime !=null and appointEndTime !=''">
+			AND TO_DAYS(createTime) &lt;=
+			TO_DAYS(#{appointEndTime})
+		</if>
+		<if test="faultType !=null and faultType !=''">
+			and faultType = #{faultType}
+		</if>
+		<if test="processState !=null and processState !=''">
+			and processState = #{processState}
+		</if>
+		<if test="manager !=null and manager !=''">
+			and manager = #{manager}
+		</if>
+		and fop.id in
+		<foreach collection="set" index="index" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+		order by serialNumber desc
+	</select>
+	
+	<select id="getFaultOrderListNew" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		SELECT DISTINCT
+		fop.id,
+		fop.serialNumber,
+		fop.createTime,
+		fop.createBy,
+		fop.mark,
+		fop.phone,
+		fop.faultType,
+		fop.deviceCount,
+		fop.manager,
+		fop.processState,
+		fop.processId,
+		fop.userId,
+		fop.updateTime,
+		fop.orderImg,
+		fop.factoryId,
+		fop.orderName,
+		fop.faultProcessType,
+		d.e AS deviceIds
+		FROM
+		FaultOrderProcess fop
+		LEFT JOIN FaultOrder_Device fod ON fop.id = fod.faultOrderId
+		LEFT JOIN (
+			SELECT
+				temp.id,
+				GROUP_CONCAT(temp.deviceId SEPARATOR ',') e
+			FROM
+				(
+					SELECT
+						a.id,
+						ao.deviceId AS deviceId
+					FROM
+						FaultOrderProcess a
+					LEFT JOIN FaultOrder_Device ao ON a.id = ao.faultOrderId
+					WHERE
+						userId = '45b735f225d0483b89c9aa39e6f7c66a'
+					AND accessSecret = 'c021f337-ea9f-47e9-865b-c9389e6cc63b'
+				) temp
+			GROUP BY
+				temp.id
+		) d ON d.id = fop.id
+		WHERE
+		1=1
+		<if test="selectKey !=null and selectKey !=''">
+			AND (
+			serialNumber like CONCAT('%',#{selectKey},'%')
+			or
+			orderName like CONCAT('%',#{selectKey},'%')
+			or
+			manager like
+			CONCAT('%',#{selectKey},'%')
+			or fod.deviceId = #{selectKey}
+			)
+		</if>
+		<if test="appointStartTime !=null and appointStartTime !=''">
+			AND TO_DAYS(createTime) &gt;=
+			TO_DAYS(#{appointStartTime})
+		</if>
+		<if test="appointEndTime !=null and appointEndTime !=''">
+			AND TO_DAYS(createTime) &lt;=
+			TO_DAYS(#{appointEndTime})
+		</if>
+		<if test="faultType !=null and faultType !=''">
+			and faultType = #{faultType}
+		</if>
+		<if test="processState !=null and processState !=''">
+			and processState = #{processState}
+		</if>
+		<if test="manager !=null and manager !=''">
+			and manager = #{manager}
+		</if>
+		<if test="factoryId !=null and factoryId !=''">
+			and factoryId = #{factoryId}
+		</if>
+		and userId=#{userId} and accessSecret=#{accessSecret}
+		order by
+		serialNumber desc
+	</select>
+	
+	
+	
+	<select id="getfaultOrderCount" resultType="Integer">
+		SELECT
+		count(1)
+		FROM
+		FaultOrderProcess t
+		WHERE
+		t.id in
+		<foreach collection="list" index="index" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+	<select id="findOrderNumber" parameterType="String" resultType="String">
+		SELECT
+		IFNULL(MAX(t.serialNumber) + 1, 1000)
+		FROM
+		FaultOrderProcess t
+		WHERE
+		t.accessSecret = #{accessSecret}
+	</select>
+
+	<select id="countFaultOrderInfoByAS" parameterType="String"
+		resultType="com.run.locman.api.dto.CountFaultOrderDto">
+		SELECT
+		fop.orderName AS orderName,
+		fop.serialNumber AS serialNumber,
+		fop.createTime AS createTime,
+		fopt.name AS faultType,
+		f.factoryName AS
+		factoryName,
+		fops.name AS orderState,
+		faci.address AS address,
+		fop.processId AS processId,
+		fop.accessSecret AS accessSecret,
+		fop.manager AS personName,
+		fop.phone AS phoneNumber,
+		ar.areaName AS area
+		FROM
+		FaultOrderProcess fop
+		LEFT JOIN FaultOrderProcessState fops ON
+		fop.processState = fops.sign
+		LEFT JOIN Factory f ON fop.factoryId =
+		f.id
+		LEFT JOIN FaultOrderProcessType fopt ON fop.faultType = fopt.id
+		LEFT JOIN FaultOrder_Device fod ON fop.id = fod.faultOrderId
+		RIGHT JOIN
+		Device d ON d.id = fod.deviceId
+		LEFT JOIN Facility_Device fd ON
+		fd.deviceId = fod.deviceId
+		LEFT JOIN Facilities faci ON faci.id =
+		fd.facilityId
+		LEFT JOIN Area ar ON ar.areaCode = RIGHT(faci.areaId,6)
+		WHERE
+		fop.accessSecret = #{accessSecret}
+		<if test="searchKey !=null and searchKey !=''">
+			AND (
+			serialNumber like CONCAT('%',#{searchKey},'%')
+			or
+			faci.address like CONCAT('%',#{searchKey},'%')
+			or
+			fop.manager like
+			CONCAT('%',#{searchKey},'%')
+			)
+		</if>
+		<if test="faultTypeId !=null and faultTypeId !=''">
+			AND fopt.id = #{faultTypeId}
+		</if>
+		<if test="startTime !=null and startTime !=''">
+			AND createTime &gt;=
+			#{startTime}
+		</if>
+		<if test="endTime !=null and endTime !=''">
+			AND createTime &lt;=
+			#{endTime}
+		</if>
+		AND fd.deviceId IS NOT NULL
+		ORDER BY fop.createTime DESC
+	</select>
+
+	<select id="faultOrder2Histogram" parameterType="String"
+		resultType="com.run.locman.api.dto.FaultOrderHistogramDto">
+		SELECT
+		areaName,
+		areaCode,
+		SUM(other) AS other,
+		SUM(hardwareFault) AS
+		hardwareFault,
+		SUM(hardwareControl) AS hardwareControl,
+		SUM(destroy) AS
+		destroy,
+		SUM(keyholeFault) AS keyholeFault,
+		SUM(deviceCollect) AS
+		deviceCollect,
+		SUM(app) AS app,
+		SUM(iot) AS iot,
+		SUM(wrong) AS wrong,
+		SUM(timeoutReport) AS timeoutReport
+		FROM
+		(
+		SELECT
+		a.areaName AS areaName,
+		a.areaCode AS areaCode,
+		CASE a.areaName
+		WHEN fopt.id = 0 THEN
+		'0'
+		ELSE
+		count(fop.id)
+		END AS other,
+		CASE a.areaName
+		WHEN fopt.id = 1 THEN
+		'0'
+		ELSE
+		count(fop.id)
+		END AS hardwareFault,
+		CASE a.areaName
+		WHEN fopt.id = 2 THEN
+		'0'
+		ELSE
+		count(fop.id)
+		END AS hardwareControl,
+		CASE a.areaName
+		WHEN fopt.id
+		= 3 THEN
+		'0'
+		ELSE
+		count(fop.id)
+		END AS destroy,
+		CASE a.areaName
+		WHEN fopt.id
+		= 4 THEN
+		'0'
+		ELSE
+		count(fop.id)
+		END AS keyholeFault,
+		CASE a.areaName
+		WHEN
+		fopt.id = 5 THEN
+		'0'
+		ELSE
+		count(fop.id)
+		END AS deviceCollect,
+		CASE
+		a.areaName
+		WHEN fopt.id = 6 THEN
+		'0'
+		ELSE
+		count(fop.id)
+		END AS app,
+		CASE
+		a.areaName
+		WHEN fopt.id = 7 THEN
+		'0'
+		ELSE
+		count(fop.id)
+		END AS iot,
+		CASE
+		a.areaName
+		WHEN fopt.id = 8 THEN
+		'0'
+		ELSE
+		count(fop.id)
+		END AS wrong,
+		CASE
+		a.areaName
+		WHEN fopt.id = 9 THEN
+		'0'
+		ELSE
+		count(fop.id)
+		END AS
+		timeoutReport
+		FROM
+		FaultOrderProcess fop
+		LEFT JOIN FaultOrderProcessType
+		fopt ON fop.faultType = fopt.id
+		LEFT JOIN FaultOrder_Device fod ON
+		fod.faultOrderId = fop.id
+		RIGHT JOIN Device d ON d.id = fod.deviceId
+		LEFT JOIN Facility_Device fd ON d.id = fd.deviceId
+		RIGHT JOIN
+		Facilities f ON f.id = fd.facilityId
+		LEFT JOIN Area a ON RIGHT
+		(f.areaId, 6) = a.areaCode
+		WHERE
+		fopt. NAME IS NOT NULL
+		AND
+		fop.accessSecret = #{accessSecret}
+		<if test="searchKey !=null and searchKey !=''">
+			AND (
+			serialNumber like CONCAT('%',#{searchKey},'%')
+			or
+			f.address like CONCAT('%',#{searchKey},'%')
+			or
+			fop.manager like
+			CONCAT('%',#{searchKey},'%')
+			)
+		</if>
+		<if test="faultTypeId !=null and faultTypeId !=''">
+			AND fopt.id = #{faultTypeId}
+		</if>
+		<if test="startTime !=null and startTime !=''">
+			AND createTime &gt;=
+			#{startTime}
+		</if>
+		<if test="endTime !=null and endTime !=''">
+			AND createTime &lt;=
+			#{endTime}
+		</if>
+		GROUP BY
+		a.areaName,
+		a.areaCode,
+		fopt.id
+		) red
+		GROUP BY
+		areaCode,
+		areaName
+	</select>
+
+	<select id="queryFaultOrderByDeviceId" parameterType="String"
+		resultType="String">
+		SELECT
+		DISTINCT deviceId
+		FROM
+		FaultOrderProcess fop
+		LEFT JOIN
+		FaultOrder_Device fod
+		ON fop.id = fod.faultOrderId
+		WHERE
+		fod.deviceId =
+		#{deviceId}
+		<!-- 0，6，2, 1分别是已经完成了该工单的状态 -->
+		AND fop.processState NOT IN (0, 6, 2, 1)
+	</select>
+
+
+	<select id="queryFaultOrderByDeviceIdTo" parameterType="String"
+		resultType="String">
+		SELECT
+		DISTINCT deviceId
+		FROM
+		FaultOrderProcess fop
+		LEFT JOIN
+		FaultOrder_Device fod
+		ON fop.id = fod.faultOrderId
+		WHERE
+		fod.deviceId =
+		#{deviceId}
+		<!-- 0，6，2分别是已经完成了该工单的状态 -->
+		AND fop.processState NOT IN (0, 6, 2, 1)
+	</select>
+
+
+	<select id="countFaultOrderNumByOrganizationAndType" resultType="java.util.Map">
+		SELECT DISTINCT
+		f.organizationId AS organizationId,
+		(
+		SELECT
+		count(1)
+		FROM
+		FaultOrderProcess fp
+		LEFT JOIN FaultOrder_Device fpd ON fp.id =
+		fpd.faultOrderId
+		LEFT
+		JOIN Facility_Device fd ON fpd.deviceId =
+		fd.deviceId
+		LEFT JOIN
+		Facilities f ON f.id = fd.facilityId
+		WHERE
+		fp.accessSecret = #{accessSecret}
+		AND f.organizationId = organizationId
+		AND
+		fp.faultType =
+		0
+		<if test="endTime != null and endTime != ''">
+			AND fp.createTime &lt;= #{endTime}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND fp.createTime &gt;= #{startTime}
+		</if>
+		<if
+			test="organizationId != null and organizationId.toString() != '' and organizationId.size > 0">
+			AND f.organizationId in
+			<foreach collection="organizationId" index="index" item="item"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+
+		</if>
+		) AS other,
+		(
+		SELECT
+		count(1)
+		FROM
+		FaultOrderProcess fp
+		LEFT JOIN
+		FaultOrder_Device fpd ON fp.id = fpd.faultOrderId
+		LEFT
+		JOIN
+		Facility_Device fd ON fpd.deviceId = fd.deviceId
+		LEFT JOIN
+		Facilities f
+		ON f.id = fd.facilityId
+		WHERE
+		fp.accessSecret = #{accessSecret}
+		AND
+		fp.faultType = 1
+		AND f.organizationId =
+		organizationId
+		<if test="endTime != null and endTime != ''">
+			AND fp.createTime &lt;= #{endTime}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND fp.createTime &gt;= #{startTime}
+		</if>
+		<if
+			test="organizationId != null and organizationId.toString() != '' and organizationId.size > 0">
+			AND f.organizationId in
+			<foreach collection="organizationId" index="index" item="item"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+
+		</if>
+		) AS hardLockTrouble,
+		(
+		SELECT
+		count(1)
+		FROM
+		FaultOrderProcess fp
+		LEFT JOIN
+		FaultOrder_Device fpd ON fp.id = fpd.faultOrderId
+		LEFT
+		JOIN
+		Facility_Device fd ON fpd.deviceId = fd.deviceId
+		LEFT JOIN
+		Facilities f
+		ON f.id = fd.facilityId
+		WHERE
+		fp.accessSecret = #{accessSecret}
+		AND
+		fp.faultType = 2
+		AND f.organizationId =
+		organizationId
+		<if test="endTime != null and endTime != ''">
+			AND fp.createTime &lt;= #{endTime}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND fp.createTime &gt;= #{startTime}
+		</if>
+		<if
+			test="organizationId != null and organizationId.toString() != '' and organizationId.size > 0">
+			AND f.organizationId in
+			<foreach collection="organizationId" index="index" item="item"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+
+		</if>
+		) AS hardControllerBox,
+		(
+		SELECT
+		count(1)
+		FROM
+		FaultOrderProcess fp
+		LEFT
+		JOIN FaultOrder_Device fpd ON fp.id = fpd.faultOrderId
+		LEFT
+		JOIN
+		Facility_Device fd ON fpd.deviceId = fd.deviceId
+		LEFT JOIN
+		Facilities f
+		ON f.id = fd.facilityId
+		WHERE
+		fp.accessSecret = #{accessSecret}
+		AND
+		fp.faultType = 3
+		AND f.organizationId =
+		organizationId
+		<if test="endTime != null and endTime != ''">
+			AND fp.createTime &lt;= #{endTime}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND fp.createTime &gt;= #{startTime}
+		</if>
+		<if
+			test="organizationId != null and organizationId.toString() != '' and organizationId.size > 0">
+			AND f.organizationId in
+			<foreach collection="organizationId" index="index" item="item"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+
+		</if>
+		) AS outSideForce,
+		(
+		SELECT
+		count(1)
+		FROM
+		FaultOrderProcess fp
+		LEFT JOIN
+		FaultOrder_Device fpd ON fp.id = fpd.faultOrderId
+		LEFT
+		JOIN
+		Facility_Device fd ON fpd.deviceId = fd.deviceId
+		LEFT JOIN
+		Facilities f
+		ON f.id = fd.facilityId
+		WHERE
+		fp.accessSecret = #{accessSecret}
+		AND
+		fp.faultType = 4
+		AND f.organizationId =
+		organizationId
+		<if test="endTime != null and endTime != ''">
+			AND fp.createTime &lt;= #{endTime}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND fp.createTime &gt;= #{startTime}
+		</if>
+		<if
+			test="organizationId != null and organizationId.toString() != '' and organizationId.size > 0">
+			AND f.organizationId in
+			<foreach collection="organizationId" index="index" item="item"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+
+		</if>
+		) AS keyHoleTrouble,
+		(
+		SELECT
+		count(1)
+		FROM
+		FaultOrderProcess fp
+		LEFT JOIN
+		FaultOrder_Device fpd ON fp.id = fpd.faultOrderId
+		LEFT
+		JOIN
+		Facility_Device fd ON fpd.deviceId = fd.deviceId
+		LEFT JOIN
+		Facilities f
+		ON f.id = fd.facilityId
+		WHERE
+		fp.accessSecret = #{accessSecret}
+		AND
+		fp.faultType = 5
+		AND f.organizationId =
+		organizationId
+		<if test="endTime != null and endTime != ''">
+			AND fp.createTime &lt;= #{endTime}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND fp.createTime &gt;= #{startTime}
+		</if>
+		<if
+			test="organizationId != null and organizationId.toString() != '' and organizationId.size > 0">
+			AND f.organizationId in
+			<foreach collection="organizationId" index="index" item="item"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+
+		</if>
+		) AS deviceCollect,
+		(
+		SELECT
+		count(1)
+		FROM
+		FaultOrderProcess fp
+		LEFT JOIN
+		FaultOrder_Device fpd ON fp.id = fpd.faultOrderId
+		LEFT
+		JOIN
+		Facility_Device fd ON fpd.deviceId = fd.deviceId
+		LEFT JOIN
+		Facilities f
+		ON f.id = fd.facilityId
+		WHERE
+		fp.accessSecret = #{accessSecret}
+		AND
+		fp.faultType = 6
+		AND f.organizationId =
+		organizationId
+		<if test="endTime != null and endTime != ''">
+			AND fp.createTime &lt;= #{endTime}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND fp.createTime &gt;= #{startTime}
+		</if>
+		<if
+			test="organizationId != null and organizationId.toString() != '' and organizationId.size > 0">
+			AND f.organizationId in
+			<foreach collection="organizationId" index="index" item="item"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+
+		</if>
+		) AS app,
+		(
+		SELECT
+		count(1)
+		FROM
+		FaultOrderProcess fp
+		LEFT JOIN
+		FaultOrder_Device fpd ON fp.id = fpd.faultOrderId
+		LEFT
+		JOIN
+		Facility_Device fd ON fpd.deviceId = fd.deviceId
+		LEFT JOIN
+		Facilities f
+		ON f.id = fd.facilityId
+		WHERE
+		fp.accessSecret = #{accessSecret}
+		AND
+		fp.faultType = 7
+		AND f.organizationId =
+		organizationId
+		<if test="endTime != null and endTime != ''">
+			AND fp.createTime &lt;= #{endTime}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND fp.createTime &gt;= #{startTime}
+		</if>
+		<if
+			test="organizationId != null and organizationId.toString() != '' and organizationId.size > 0">
+			AND f.organizationId in
+			<foreach collection="organizationId" index="index" item="item"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+
+		</if>
+		) AS platform,
+		(
+		SELECT
+		count(1)
+		FROM
+		FaultOrderProcess fp
+		LEFT JOIN
+		FaultOrder_Device fpd ON fp.id = fpd.faultOrderId
+		LEFT
+		JOIN
+		Facility_Device fd ON fpd.deviceId = fd.deviceId
+		LEFT JOIN
+		Facilities f
+		ON f.id = fd.facilityId
+		WHERE
+		fp.accessSecret = #{accessSecret}
+		AND
+		fp.faultType = 8
+		AND f.organizationId =
+		organizationId
+		<if test="endTime != null and endTime != ''">
+			AND fp.createTime &lt;= #{endTime}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND fp.createTime &gt;= #{startTime}
+		</if>
+		<if
+			test="organizationId != null and organizationId.toString() != '' and organizationId.size > 0">
+			AND f.organizationId in
+			<foreach collection="organizationId" index="index" item="item"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+
+		</if>
+		) AS systemUseFault,
+		(
+		SELECT
+		count(1)
+		FROM
+		FaultOrderProcess fp
+		LEFT JOIN
+		FaultOrder_Device fpd ON fp.id = fpd.faultOrderId
+		LEFT
+		JOIN
+		Facility_Device fd ON fpd.deviceId = fd.deviceId
+		LEFT JOIN
+		Facilities f
+		ON f.id = fd.facilityId
+		WHERE
+		fp.accessSecret = #{accessSecret}
+		AND
+		fp.faultType = 9
+		AND f.organizationId =
+		organizationId
+		<if test="endTime != null and endTime != ''">
+			AND fp.createTime &lt;= #{endTime}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND fp.createTime &gt;= #{startTime}
+		</if>
+		<if
+			test="organizationId != null and organizationId.toString() != '' and organizationId.size > 0">
+			AND f.organizationId in
+			<foreach collection="organizationId" index="index" item="item"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+
+		</if>
+		) AS reportOvertime
+		FROM
+		FaultOrderProcess fp
+		LEFT JOIN FaultOrder_Device
+		fpd ON fp.id = fpd.faultOrderId
+		LEFT JOIN Facility_Device fd ON
+		fpd.deviceId = fd.deviceId
+		LEFT JOIN Facilities f ON f.id =
+		fd.facilityId
+		WHERE
+		fp.accessSecret = #{accessSecret}
+		AND
+		f.organizationId IS NOT NULL
+		<if
+			test="organizationId != null and organizationId.toString() != '' and organizationId.size > 0">
+			AND f.organizationId in
+			<foreach collection="organizationId" index="index" item="item"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+
+		</if>
+	</select>
+	
+	<select id="getFaultOrderListInfoNew" resultType="java.util.Map" parameterType="java.util.Map">
+		
+		SELECT
+			f.facilitiesCode,
+			fop.serialNumber,
+			fops.`name` AS processState,
+			(
+				CASE fop.faultProcessType
+				WHEN 1 THEN
+					'告警转故障'
+				WHEN 2 THEN
+					'新建故障工单'
+				ELSE
+					fop.faultProcessType
+				END
+			) faultProcessType,
+			fopt.`name` AS faultType,
+			fop.createTime,
+			fop.updateTime,
+			fop.mark,
+			fop.manager,
+			fop.orderImg,
+			fop.orderName,
+			f.address,
+			fop.processId,
+			fop.id,
+			fop.factoryId
+		FROM
+			FaultOrderProcess fop
+		LEFT JOIN FaultOrder_Device fod on fod.faultOrderId =fop.id
+		LEFT JOIN Device d ON fod.deviceId = d.id
+		LEFT JOIN Facility_Device fd ON fd.deviceId = d.id
+		LEFT JOIN Facilities f ON f.id = fd.facilityId
+		
+		LEFT JOIN FaultOrderProcessState fops ON fops.sign = fop.processState
+		LEFT JOIN FaultOrderProcessType fopt ON fopt.id = fop.faultType
+		WHERE
+			
+		 d.accessSecret = #{accessSecret}
+		 and f.id is not NULL
+		<if test="processState !=null and processState !=''">
+		AND fop.processState  =#{processState}
+		</if>
+		<if test="markName !=null and markName !=''">
+		and(
+		 fop.mark like CONCAT('%',#{markName},'%')
+		 OR
+		 fop.manager LIKE CONCAT('%',#{markName},'%')
+		 OR
+		 f.facilitiesCode like CONCAT('%',#{markName},'%')
+		 OR
+		 fop.serialNumber like CONCAT('%',#{markName},'%')
+		 )
+		</if>
+		<if test="faultProcessType !=null and faultProcessType !=''">
+		and fop.faultProcessType = #{faultProcessType}
+		</if>
+		
+		ORDER BY
+			updateTime DESC,createTime DESC
+	</select>
+	
+	<select id="faultOrderStateCount" resultType="java.util.Map" parameterType="java.util.Map">
+		SELECT
+		fops.sign,
+		fops.`name` as processState,
+		ifnull(A.count,0) num
+		FROM
+			FaultOrderProcessState fops
+		LEFT JOIN (
+			SELECT
+				count(fop.processState) count,
+				fop.processState
+			FROM
+				FaultOrderProcess fop
+			LEFT JOIN FaultOrder_Device fod ON fod.faultOrderId = fop.id
+			LEFT JOIN Device d ON d.id = fod.deviceId
+			LEFT JOIN Facility_Device fd ON fd.deviceId = d.id
+			LEFT JOIN Facilities f ON f.id = fd.facilityId
+			WHERE
+				f.id IS NOT NULL
+			AND d.accessSecret =#{accessSecret}
+			GROUP BY
+				fop.processState
+		)A on fops.sign = A.processState
+		ORDER BY sign
+	</select>
+	
+</mapper>
+

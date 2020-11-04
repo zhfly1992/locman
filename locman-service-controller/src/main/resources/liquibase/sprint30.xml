@@ -1,0 +1,246 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+	<property name="autoIncrement" value="true" dbms="mysql" />
+
+
+
+	<changeSet id="20200313_create_Inspection" author="钟滨远">
+		<comment>设备检测表 </comment>
+		<createTable tableName="Inspection">
+			<column name="id" type="varchar(64)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="deviceId" type="varchar(64)" remarks="设备ID">
+				<constraints nullable="false" />
+			</column>
+			<column name="reportedTime" type="varchar(64)" remarks="上报时间">
+				<constraints nullable="false" />
+			</column>
+			<column name="inspectionTime" type="varchar(64)" remarks="开始检测时间">
+				<constraints nullable="true" />
+			</column>
+
+		</createTable>
+	</changeSet>
+
+
+
+	<changeSet id="20200422_create_DynamicAddress" author="钟滨远">
+		<comment>访问方区域表</comment>
+		<createTable tableName="DynamicAddress">
+			<column name="accessSecret" type="varchar(64)" remarks="密钥">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="areaName" type="varchar(64)" remarks="区域名称">
+				<constraints nullable="false" />
+			</column>
+			<column name="longitude" type="varchar(64)" remarks="经度">
+				<constraints nullable="false" />
+			</column>
+			<column name="latitude" type="varchar(64)" remarks="纬度">
+				<constraints nullable="false" />
+			</column>
+			<column name="zoom" type="varchar(64)" remarks="缩放等级">
+				<constraints nullable="false" />
+			</column>
+			<column name="companyName" type="varchar(64)" remarks="公司名称">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	</changeSet>
+
+
+
+	<changeSet id="20200424_update_DynamicAddress" author="郭飞龙">
+		<comment>DynamicAddress表添加路径参数字段</comment>
+		<addColumn tableName="DynamicAddress">
+			<column name="urlStr" type="varchar(64)" remarks="路径参数字段"
+				defaultValue="">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+		<addColumn tableName="DynamicAddress">
+			<column name="displayedWords" type="varchar(64)" remarks="首页显示文字"
+				defaultValue="">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="20200426_create_FocusSecurity" author="钟滨远">
+		<comment>重点保障表</comment>
+		<createTable tableName="FocusSecurity">
+			<column name="id" type="varchar(64)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="securityName" type="varchar(64)" remarks="保障名称">
+				<constraints nullable="false" />
+			</column>
+			<column name="startTime" type="varchar(64)" remarks="开始时间">
+				<constraints nullable="false" />
+			</column>
+			<column name="endTime" type="varchar(64)" remarks="结束时间">
+				<constraints nullable="false" />
+			</column>
+			<column name="createTime" type="varchar(64)" remarks="创建时间">
+				<constraints nullable="false" />
+			</column>
+			<column name="userId" type="varchar(64)" remarks="创建人">
+				<constraints nullable="false" />
+			</column>
+			<column name="organization" type="varchar(64)" remarks="设施的组织">
+				<constraints nullable="false" />
+			</column>
+			<column name="status" type="varchar(64)" remarks="启用（enable）/停用（disable）">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet id="20200426_create_Facilities_FocusSecurity"
+		author="钟滨远">
+		<comment>重保设施中间表</comment>
+		<createTable tableName="Facilities_FocusSecurity">
+			<column name="id" type="varchar(64)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="securityId" type="varchar(64)" remarks="保障ID">
+				<constraints nullable="false" />
+			</column>
+			<column name="facilityId" type="varchar(64)" remarks="设施Id">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet id="20200424_update_FocusSecurity" author="钟滨远">
+		<comment>FocusSecurity表添加预演时间字段</comment>
+		<addColumn tableName="FocusSecurity">
+			<column name="previewTime" type="varchar(64)" remarks="预演时间"
+				defaultValue="">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+	<changeSet id="20200427_update_Facilities_FocusSecurity"
+		author="钟滨远">
+		<comment>Facilities_FocusSecurity表添加预演时间字段</comment>
+		<addColumn tableName="Facilities_FocusSecurity">
+			<column name="IotReceivingStatus" type="varchar(64)" remarks="IOt命令接收状态"
+				defaultValue="">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+	<changeSet id="20200428_update_FocusSecurity" author="钟滨远">
+		<comment>FocusSecurity修改org字段大小</comment>
+		<modifyDataType tableName="FocusSecurity" columnName="organization"
+			newDataType="text" />
+	</changeSet>
+
+
+	<changeSet id="20200429_update_Device_RealRported" author="郭飞龙">
+		<comment>设备实时状态表新增sumXYZ,sumNum字段</comment>
+		<addColumn tableName="Device_RealRported">
+			<column name="commandReceive" type="varchar(64)" remarks="命令状态，0:无开关命令属性,1:收到,2:未收到"
+				defaultValue="0">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+	<changeSet id="20200430_update_FocusSecurity" author="钟滨远">
+		<comment>FocusSecurity表添加密钥字段</comment>
+		<addColumn tableName="FocusSecurity">
+			<column name="accessSecret" type="varchar(64)" remarks="密钥">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="20200605_create_ScheduledTasks" author="钟滨远">
+		<comment>定时器持久化任务表</comment>
+		<createTable tableName="ScheduledTasks">
+			<column name="id" type="varchar(64)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="status" type="varchar(64)" remarks="状态 1.启动2.暂停3.删除4.重启特殊">
+				<constraints nullable="false" />
+			</column>
+			<column name="trrigerName" type="varchar(64)" remarks="job名称">
+				<constraints nullable="false" />
+			</column>
+			<column name="trrigerGroup" type="varchar(64)" remarks="组">
+				<constraints nullable="false" />
+			</column>
+			<column name="performTime" type="varchar(64)" remarks="执行时间">
+				<constraints nullable="false" />
+			</column>
+			<column name="dataMap" type="text" remarks="其他数据传入">
+				<constraints nullable="false" />
+			</column>
+			<column name="jobDescribe" type="text" remarks="工作描述">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+
+	<changeSet id="20200610_create_ProductApiKey" author="zh">
+		<comment>wingsIot产品和apikey对应表</comment>
+		<createTable tableName="ProductApiKey">
+			<column name="id" type="int(10)">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="productId" type="varchar(32)" remarks="产品id">
+				<constraints nullable="false" />
+			</column>
+			<column name="ApiKey" type="varchar(256)" remarks="产品对应apiKey">
+				<constraints nullable="false" />
+			</column>
+			<column name="accessSecret" type="varchar(64)" remarks="接入方秘钥">
+			</column>
+		</createTable>
+	</changeSet>
+	
+	<changeSet id="20200611_update_FocusSecurity_personName" author="郭飞龙">
+		<comment>FocusSecurity表添加负责人字段</comment>
+		<addColumn tableName="FocusSecurity">
+			<column name="personName" type="varchar(64)" remarks="负责人"
+				defaultValue="">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+		
+	<changeSet id="20200611_update_FocusSecurity_personTel" author="郭飞龙">
+		<comment>FocusSecurity表添加负责人电话字段</comment>
+		<addColumn tableName="FocusSecurity">
+			<column name="personTel" type="varchar(64)" remarks="负责人电话"
+				defaultValue="">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+		
+	<changeSet id="20200615_update_process_info_add_mark" author="郭飞龙">
+		<comment>process_info表添加重保标记字段</comment>
+		<addColumn tableName="process_info">
+			<column name="mark" type="varchar(64)" remarks="重保标记，值为1表示重点保障生效时使用该配置"
+				defaultValue="">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="20200624_update_Facilities_FocusSecurity_EndStatus" author="钟滨远">
+		<comment>Facilities_FocusSecurity表添加结束下发命令状态</comment>
+		<addColumn tableName="Facilities_FocusSecurity">
+			<column name="endStatus" type="varchar(64)" remarks="重保时间结束下发命令状态 1下发成功 0失败"
+				defaultValue="">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+</databaseChangeLog>

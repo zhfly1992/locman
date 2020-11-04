@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+    http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+
+	<dubbo:protocol name="dubbo" port="${service.port:80}"
+		accesslog="true" />
+	<dubbo:provider id="payload" payload="419430400" />	<!-- 配置最大io传输限制 -->
+
+	<!-- 基础功能 -->
+	<dubbo:service
+		interface="com.run.locman.api.query.service.FacilitiesQueryService"
+		ref="facilitiesQueryService" protocol="dubbo" timeout="5000" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.FacilitiesTypeQueryService"
+		ref="facilitiesTypeQueryService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.FacilitiesDataTypeQueryRpcService"
+		ref="facilitiesDataTypeQueryRpcService" protocol="dubbo" timeout="3000" />
+	<dubbo:service interface="com.run.locman.api.base.query.FacilitesService"
+		ref="facilitesServiceImp" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.FacilitiesTypeBaseQueryService"
+		ref="facilitiesTypeBaseQueryService" protocol="dubbo" />
+	<dubbo:service interface="com.run.locman.api.query.service.StaffTypeQueryService"
+		ref="staffTypeQueryService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.DistributionPowersQueryService"
+		ref="distributionPowersQueryService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.DeviceTypeTemplateService"
+		ref="deviceTypeTemplateService" protocol="dubbo" />
+	<dubbo:service interface="com.run.locman.api.query.service.AlarmRuleQueryService"
+		ref="alarmRuleQueryService" protocol="dubbo" />
+	<!--<dubbo:service interface="com.run.locman.api.query.service.FaultOrderDeviceQueryService" 
+		ref="faultOrderDeviceQueryService" protocol="dubbo"/> -->
+	<dubbo:service
+		interface="com.run.locman.api.query.service.FaultOrderProcessQueryService"
+		ref="faultOrderProcessQueryService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.FaultOrderProcessTypeQueryService"
+		ref="faultOrderProcessTypeQueryService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.FaultOrderProcessStateQueryService"
+		ref="faultOrderProcessStateQueryService" protocol="dubbo" />
+
+	<dubbo:service
+		interface="com.run.locman.api.query.service.DeviceTypeTemplateService"
+		ref="deviceTypeTemplateService" protocol="dubbo" />    <!-- 被调用的基础beans -->
+	<dubbo:service
+		interface="com.run.locman.api.query.service.FacilityDeviceQueryService"
+		ref="facilityDeviceQueryService" protocol="dubbo" timeout="100000" />
+
+	<dubbo:service interface="com.run.locman.api.query.service.FactoryQueryService"
+		ref="factoryQueryService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.PropertiesQueryService"
+		ref="propertiesQueryService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.PropertiesTemplateQueryService"
+		ref="propertiesTemplateQueryService" protocol="dubbo" />
+	<dubbo:service interface="com.run.locman.api.query.service.AlarmInfoQueryService"
+		ref="alarmInfoQueryService" protocol="dubbo" timeout="20000" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.SimpleOrderTypeQueryService"
+		ref="simpleOrderTypeQueryService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.SimpleOrderQueryService"
+		ref="simpleOrderQueryService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.AlarmOrderQueryService"
+		ref="alarmOrderQueryServiceImpl" protocol="dubbo" timeout="10000" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.StatisticsQueryService"
+		ref="statisticsQueryServiceImp" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.RemoteControlRecordQueryService"
+		ref="remoteControlRecordQueryService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.AlarmRuleFacilityQueryService"
+		ref="alarmRuleFacilityQueryService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.AlarmRuleFacilityQueryService"
+		ref="alarmRuleFacilityQueryService" protocol="dubbo" />
+	<!-- <dubbo:service interface="com.run.locman.api.query.service.ProcessInfoQueryService" 
+		ref="processInfoQueryService" protocol="dubbo"/> -->
+	<dubbo:service
+		interface="com.run.locman.api.query.service.ProcessTypeBaseQueryService"
+		ref="processTypeBaseQueryService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.OrderProcessQueryService"
+		ref="orderProcessQueryService" protocol="dubbo" />
+	<dubbo:service interface="com.run.locman.api.query.service.DeviceQueryService"
+		ref="deviceQueryService" protocol="dubbo" timeout="10000" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.DeviceTypeQueryService"
+		ref="deviceTypeQueryService" protocol="dubbo" timeout="10000" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.DeviceInfoConvertQueryService"
+		ref="deviceInfoConvertQueryService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.BasicDeviceAttributeTemplateQueryService"
+		ref="basicDeviceAttributeTemplateQueryService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.BalanceSwitchPowersQueryService"
+		ref="balanceSwitchPowersQueryService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.InfoSummaryQueryService"
+		ref="infoSummaryQueryService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.BalanceSwitchStateRecordQueryService"
+		ref="balanceSwitchStateRecordQueryService" protocol="dubbo" />
+	<dubbo:service interface="com.run.locman.api.query.service.AreaQueryService"
+		ref="areaQueryService" protocol="dubbo" />
+
+	<dubbo:service
+		interface="com.run.locman.api.query.service.TimeoutReportConfigQueryService"
+		ref="timeoutReportConfigQueryService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.FacilitiesTimeoutReportConfigQueryService"
+		ref="facilitiesTimeoutReportConfigQueryService" protocol="dubbo" />
+
+	<dubbo:service interface="com.run.locman.api.query.service.SmsQueryService"
+		ref="smsQueryService" protocol="dubbo" />
+	<dubbo:service interface="com.run.locman.api.query.service.DeviceJobQueryService"
+		ref="deviceJobQueryService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.OpenRecordQueryService"
+		ref="openRecordQueryService" protocol="dubbo" />
+
+	<dubbo:service
+		interface="com.run.locman.api.query.service.SwitchLockRecordQueryService"
+		ref="switchLockRecordQueryService" protocol="dubbo" />
+
+	<dubbo:service
+		interface="com.run.locman.api.query.service.DeviceDataStorageQueryService"
+		ref="deviceDataStorageQueryService" protocol="dubbo" />
+
+	<dubbo:service interface="com.run.locman.api.query.service.MysqlDataQueryService"
+		ref="mysqlDataQueryService" protocol="dubbo" timeout="10000" />
+
+	<dubbo:service interface="com.run.locman.api.query.service.Query4ExcelService"
+		ref="query4ExcelService" protocol="dubbo" />
+
+	<dubbo:service interface="com.run.locman.api.query.service.Query4ExcelService"
+		ref="query4ExcelService" protocol="dubbo" />
+
+	<dubbo:service
+		interface="com.run.locman.api.query.service.FacilitiesRenovationQueryService"
+		ref="facilitiesRenovationQueryService" protocol="dubbo" />
+
+	<dubbo:service
+		interface="com.run.locman.api.query.service.NewFaultOrderQueryService"
+		ref="newFaultOrderQueryService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.query.service.FocusSecurityQueryService"
+		ref="focusSecurityQueryService" protocol="dubbo" />
+	<!-- 实现类 -->
+
+	<bean id="facilitiesQueryService" class="com.run.locman.query.service.FacilitiesQueryServiceImpl" />
+	<bean id="facilitiesTypeQueryService"
+		class="com.run.locman.query.service.FacilitiesTypeQueryServiceImpl" />
+	<bean id="facilitiesDataTypeQueryRpcService"
+		class="com.run.locman.query.service.FacilitiesDataTypeQueryRpcServiceImpl" />
+	<bean id="facilitesServiceImp" class="com.run.locman.query.service.FacilitesServiceImpl" />
+	<bean id="facilitiesTypeBaseQueryService"
+		class="com.run.locman.query.service.FacilitiesTypeBaseQueryServiceImpl" />
+
+	<bean id="staffTypeQueryService" class="com.run.locman.query.service.StaffTypeQueryServiceImpl" />
+	<bean id="distributionPowersQueryService"
+		class="com.run.locman.query.service.DistributionPowersQueryServiceImpl" />
+	<bean id="deviceTypeTemplateService"
+		class="com.run.locman.query.service.DeviceTypeTemplateServiceImpl" />
+	<bean id="facilityDeviceQueryService"
+		class="com.run.locman.query.service.FacilityDeviceQueryServiceImpl" />
+	<bean id="alarmRuleQueryService" class="com.run.locman.query.service.AlarmRuleQueryServiceImpl" />
+
+	<bean id="factoryQueryService" class="com.run.locman.query.service.FactoryQueryServiceImpl" />
+	<bean id="propertiesQueryService" class="com.run.locman.query.service.PropertiesQueryServiceImpl" />
+	<bean id="propertiesTemplateQueryService"
+		class="com.run.locman.query.service.PropertiesTemplateQueryServiceImpl" />
+	<bean id="alarmInfoQueryService" class="com.run.locman.query.service.AlarmInfoQueryServiceImpl" />
+	<bean id="faultOrderProcessQueryService"
+		class="com.run.locman.query.service.FaultOrderProcessQueryServiceImpl" />
+	<bean id="faultOrderProcessStateQueryService"
+		class="com.run.locman.query.service.FaultOrderProcessStateQueryServiceImpl" />
+	<bean id="faultOrderProcessTypeQueryService"
+		class="com.run.locman.query.service.FaultOrderProcessTypeQueryServiceImpl" />
+	<bean id="simpleOrderTypeQueryService"
+		class="com.run.locman.query.service.SimpleOrderTypeQueryServiceImpl" />
+	<bean id="simpleOrderQueryService"
+		class="com.run.locman.query.service.SimpleOrderQueryServiceImpl" />
+	<bean id="alarmOrderQueryServiceImpl" class="com.run.locman.query.service.AlarmOrderQueryServiceImpl" />
+	<bean id="statisticsQueryServiceImp" class="com.run.locman.query.service.StatisticsQueryServiceImpl" />
+	<bean id="remoteControlRecordQueryService"
+		class="com.run.locman.query.service.RemoteControlRecordQueryServiceImpl" />
+	<bean id="alarmRuleFacilityQueryService"
+		class="com.run.locman.query.service.AlarmRuleFacilityQueryServiceImpl" />
+	<!-- <bean id="processInfoQueryService" class="com.run.locman.query.service.ProcessInfoQueryServiceImpl"/> -->
+	<bean id="processTypeBaseQueryService"
+		class="com.run.locman.query.service.ProcessTypeBaseQueryServiceImpl" />
+	<bean id="orderProcessQueryService"
+		class="com.run.locman.query.service.OrderProcessQueryServiceImpl" />
+	<bean id="deviceQueryService" class="com.run.locman.query.service.DeviceQueryServiceImpl" />
+	<bean id="deviceTypeQueryService" class="com.run.locman.query.service.DeviceTypeQueryServiceImpl" />
+	<bean id="deviceInfoConvertQueryService"
+		class="com.run.locman.query.service.DeviceInfoConvertQueryServiceImpl" />
+	<bean id="basicDeviceAttributeTemplateQueryService"
+		class="com.run.locman.query.service.BasicDeviceAttributeTemplateQueryServiceImpl" />
+	<bean id="balanceSwitchPowersQueryService"
+		class="com.run.locman.query.service.BalanceSwitchPowersQueryServiceImpl" />
+	<bean id="infoSummaryQueryService"
+		class="com.run.locman.query.service.InfoSummaryQueryServiceImpl" />
+	<bean id="balanceSwitchStateRecordQueryService"
+		class="com.run.locman.query.service.BalanceSwitchStateRecordQueryServiceImpl" />
+	<bean id="areaQueryService" class="com.run.locman.query.service.AreaQueryServiceImpl" />
+	<bean id="timeoutReportConfigQueryService"
+		class="com.run.locman.query.service.TimeoutReportConfigQueryServiceImpl" />
+	<bean id="facilitiesTimeoutReportConfigQueryService"
+		class="com.run.locman.query.service.FacilitiesTimeoutReportConfigQueryServiceImpl" />
+	<bean id="smsQueryService" class="com.run.locman.query.service.SmsQueryServiceImpl" />
+	<bean id="deviceJobQueryService" class="com.run.locman.query.service.DeviceJobQueryServiceImpl" />
+
+	<bean id="openRecordQueryService" class="com.run.locman.query.service.OpenRecordQueryServiceImpl" />
+
+	<bean id="switchLockRecordQueryService"
+		class="com.run.locman.query.service.SwitchLockRecordQueryServiceImpl" />
+
+	<bean id="deviceDataStorageQueryService"
+		class="com.run.locman.query.service.DeviceDataStorageQueryServiceImpl" />
+
+	<bean id="mysqlDataQueryService" class="com.run.locman.query.service.MysqlDataQueryServiceImpl" />
+
+	<bean id="query4ExcelService" class="com.run.locman.query.service.Query4ExcelServiceImpl" />
+
+	<bean id="facilitiesRenovationQueryService"
+		class="com.run.locman.query.service.FacilitiesRenovationQueryServiceImpl" />
+
+	<bean id="newFaultOrderQueryService"
+		class="com.run.locman.query.service.NewFaultOrderQueryServiceImpl" />
+	<!-- test -->
+	<dubbo:service
+		interface="com.run.locman.api.query.service.DeviceStateQueryService"
+		ref="deviceStateQueryService" protocol="dubbo" />
+	<bean id="deviceStateQueryService"
+		class="com.run.locman.query.service.DeviceStateQueryServiceImpl" />
+	<bean id="focusSecurityQueryService"
+		class="com.run.locman.query.service.FocusSecurityQueryServiceImpl" />
+
+</beans>

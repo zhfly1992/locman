@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.run.locman.api.crud.repository.FactoryCrudRepository">
+	<resultMap id="FactoryResultMap" type="com.run.locman.api.entity.Factory">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="factoryName" jdbcType="VARCHAR" property="factoryName" />
+		<result column="contacts" jdbcType="VARCHAR" property="contacts" />
+		<result column="contactsPhone" jdbcType="VARCHAR" property="contactsPhone" />
+		<result column="address" jdbcType="VARCHAR" property="address" />
+		<result column="remark" jdbcType="VARCHAR" property="remark" />
+		<result column="accessSecret" jdbcType="VARCHAR" property="accessSecret" />
+		<result column="manageState" property="manageState" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id, factoryName, contacts, contactsPhone, address,
+		remark, accessSecret, manageState
+	</sql>
+	<sql id="Base_Condition">
+		<if test="id != null">
+			and id=#{id}
+		</if>
+		<if test="factoryName != null">
+			and factoryName=#{factoryName}
+		</if>
+		<if test="contacts != null">
+			and contacts=#{contacts}
+		</if>
+		<if test="contactsPhone != null">
+			and contactsPhone=#{contactsPhone}
+		</if>
+		<if test="address != null">
+			and address=#{address}
+		</if>
+		<if test="remark != null">
+			and remark=#{remark}
+		</if>
+		<if test="accessSecret != null">
+			and accessSecret=#{accessSecret}
+		</if>
+		<if test="manageState != null">
+			and manageState=#{manageState}
+		</if>
+	</sql>
+	
+	<insert id="insertModel" keyProperty="id"
+		parameterType="com.run.locman.api.entity.Factory">
+		<selectKey keyProperty="id" resultType="String" order="BEFORE">
+			SELECT REPLACE(UUID(),'-','') FROM DUAL
+		</selectKey>
+		insert into Factory(
+		<include refid="Base_Column" />
+		) values (#{id}, #{factoryName}, #{contacts}, #{contactsPhone},
+		#{address}, #{remark}, #{accessSecret}, #{manageState})
+	</insert>
+	
+	<update id="updatePart" parameterType="com.run.locman.api.entity.Factory">
+		update Factory set
+		<if test="id != null and id != ''">
+			id=#{id}
+		</if>
+		<if test="factoryName != null and factoryName != ''">
+			,factoryName=#{factoryName}
+		</if>
+		<if test="contacts != null and contacts != ''">
+			,contacts=#{contacts}
+		</if>
+		<if test="contactsPhone != null and contactsPhone != ''">
+			,contactsPhone=#{contactsPhone}
+		</if>
+		<if test="address != null and address != ''">
+			,address=#{address}
+		</if>
+		<if test="manageState != null and manageState != ''">
+			,manageState=#{manageState}
+		</if>
+		<if test="accessSecret != null and accessSecret != ''">
+			,accessSecret=#{accessSecret}
+		</if>
+		<if test="remark != null and remark != ''">
+			,remark=#{remark}
+		</if>
+		where id=#{id}
+	</update>
+	
+	<delete id="deleteFactoryById" parameterType="String">
+		DELETE FROM Factory WHERE id = #{id}
+	</delete>
+	
+	
+	<insert id="insertNewFactory" parameterType="com.run.locman.api.entity.Factory">
+		insert into Factory(
+		<include refid="Base_Column" />
+		) values (#{id}, #{factoryName}, #{contacts}, #{contactsPhone},
+		#{address}, #{remark}, #{accessSecret}, #{manageState})
+	</insert>
+</mapper>

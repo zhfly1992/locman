@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.query.repository.OrderProcessQueryRepository">
+
+	<resultMap id="BaseResultMap" type="com.run.locman.api.dto.ProcessInfoListDto">
+		<result column="id" property="id" javaType="String" />
+		<result column="processType" javaType="String" property="processType" />
+		<result column="processTypeName" javaType="String" property="processTypeName" />
+		<result column="createBy" javaType="String" property="createBy" />
+		<result column="createTime" javaType="String" property="createTime" />
+		<result column="accessSecret" javaType="String" property="accessSecret" />
+		<result column="manageState" javaType="String" property="manageState" />
+		<result column="updateBy" javaType="String" property="updateBy" />
+		<result column="updateTime" javaType="String" property="updateTime" />
+		<result column="fileId" javaType="String" property="fileId" />
+	</resultMap>
+
+	<resultMap type="com.run.locman.api.dto.ProcessInfoDto" id="processInfoResultMap">
+		<result column="id" property="id" javaType="String" />
+		<result column="processType" property="processType" javaType="String" />
+		<result column="updateTime" property="updateTime" javaType="String" />
+		<result column="createTime" property="createTime" javaType="String" />
+		<result column="createBy" property="createBy" javaType="String" />
+		<result column="updateBy" property="updateBy" javaType="String" />
+		<result column="manageState" property="manageState" javaType="String" />
+		<result column="accessSecret" property="accessSecret" javaType="String" />
+		<result column="node" property="node" javaType="String" />
+		<result column="personId" property="personId" javaType="String" />
+		<result column="organizeId" property="organizeId" javaType="String" />
+		<result column="fileId" property="fileId" javaType="String" />
+		<result column="nodeName" property="nodeName" javaType="String" />
+		<result column="orderByNum" property="orderByNum" javaType="String" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id,processType,updateTime,createTime,createBy,updateBy,manageState,accessSecret,node,personId,organizeId
+	</sql>
+
+	<select id="queryOrderProcessById" parameterType="String"
+		resultMap="processInfoResultMap">
+		SELECT
+		pnp.realOrganizeId,
+		pnp.realOrganizeName,
+		pi.id as id,
+		pi.manageState as manageState,
+		pi.fileId as
+		fileId,
+		pi.updateBy as
+		updateBy,pi.createBy as createBy,
+		pi.createTime
+		as
+		createTime,pi.updateTime as updateTime,
+		pi.manageState as
+		manageState,pi.accessSecret as accessSecret,
+		pnp.node as
+		node,pnp.organizeId as organizeId,pnp.personId as personId,
+		pnp.nodeName as nodeName,pnp.orderByNum as orderByNum,
+		ptb.id as
+		processType
+		FROM process_info pi
+		LEFT JOIN process_node_person pnp on
+		pnp.processId = pi.id
+		LEFT JOIN process_type_base ptb on ptb.id =
+		pi.processType
+		where 1=1 AND pi.id = #{id} order by pnp.orderByNum
+	</select>
+
+	<select id="queryOrderProcessList" resultMap="BaseResultMap"
+		parameterType="java.util.Map">
+		SELECT
+		pi.id,
+		pi.fileId,
+		pi.processType,
+		ptb.processType as
+		processTypeName,createBy,createTime,manageState,updateBy,updateTime,accessSecret
+		FROM
+		process_info pi
+		LEFT JOIN process_type_base ptb on pi.processType =
+		ptb.id
+		WHERE 1=1
+		<if test="processType !=null and processType !=''">
+			and
+			ptb.processType
+			LIKE
+			CONCAT('%',#{processType},'%')
+		</if>
+		and accessSecret=#{accessSecret}
+		order by manageState desc,updateTime
+		desc
+	</select>
+
+	<select id="queryOrderProcessManagerState" resultType="java.lang.String"
+		parameterType="java.lang.String">
+		SELECT
+		manageState
+		FROM
+		process_info
+		WHERE
+		id=#{id}
+	</select>
+
+	<select id="queryNodeInfoForActivity" parameterType="java.util.Map"
+		resultMap="processNodeMap">
+		SELECT
+		node AS node,
+		personId
+		FROM
+		process_node_person
+		WHERE
+		processId IN (
+		SELECT
+		DISTINCT
+		processId
+		FROM
+		process_node_person pnp
+		LEFT
+		JOIN process_info pi ON pi.id
+		= pnp.processId
+		LEFT JOIN
+		process_type_base ptb ON ptb.id =
+		pi.processType
+		WHERE
+		ptb.processType =
+		#{processType}
+		AND pi.manageState
+		=
+		'enabled'
+		AND pi.accessSecret =
+		#{accessSecret}
+		)
+		AND organizeId =
+		#{organizeId}
+	</select>
+
+	<resultMap type="com.run.locman.api.entity.ProcessNodeInfo"
+		id="processNodeMap">
+		<result property="node" column="node" />
+		<collection property="personId" ofType="java.lang.String">
+			<result property="id" column="personId" />
+		</collection>
+	</resultMap>
+
+	<select id="countManagerState" resultType="java.lang.String"
+		parameterType="java.util.Map">
+		SELECT
+		count(1)
+		from process_type_base ptb
+		LEFT JOIN
+		process_info pi on pi.processType = ptb.id
+		WHERE 1=1 and
+		pi.processType
+		= #{processTypeId}
+		and pi.accessSecret=#{accessSecret}
+		and
+		pi.manageState = #{manageState}
+	</select>
+
+
+	<select id="findStartUsers" resultType="String" parameterType="java.util.Map">
+		select DISTINCT pnp.personId from process_node_person
+		pnp
+		LEFT JOIN
+		process_info pi on pnp.processId = pi.id
+		LEFT JOIN
+		process_type_base ptb
+		on pi.processType = ptb.id
+		where pnp.node =
+		#{nodeId} and
+		ptb.processSign = #{processSign}
+		and pi.manageState =
+		#{manageState}
+	</select>
+
+	<select id="findBpmnId" resultType="String" parameterType="java.util.Map">
+		select DISTINCT pi.fileId from process_node_person pnp
+		LEFT JOIN
+		process_info pi on pnp.processId = pi.id
+		LEFT JOIN process_type_base
+		ptb on pi.processType = ptb.id
+		where ptb.processSign = #{processSign}
+		and pi.manageState = #{manageState}
+		and pi.accessSecret =
+		#{accessSecret}
+	</select>
+
+
+	<select id="existUserInProcess" resultType="String"
+		parameterType="List">
+		SELECT
+		DISTINCT realOrganizeId
+		FROM
+		process_info pi
+		LEFT
+		JOIN
+		process_node_person pnp ON pi.id = pnp.processId
+		where
+		pi.manageState =
+		'enabled'
+		and pnp.personId = #{userId}
+	</select>
+
+
+	<select id="existUserInAlarm" resultType="String" parameterType="String">
+		SELECT DISTINCT
+		'true'
+		FROM
+		process_info pi
+		LEFT JOIN process_node_person
+		pnp ON pi.id = pnp.processId
+		LEFT JOIN process_type_base ptb ON
+		pi.processType = ptb.id
+		WHERE
+		pi.manageState = 'enabled'
+		AND
+		ptb.processSign = 'alarmProcess'
+		AND pnp.personId = #{userId}
+	</select>
+
+	<select id="findPersonByAccessSecret" resultType="java.util.Map">
+		SELECT
+		node AS
+		node,pn.organizeId,
+		personId AS
+		personId,
+		nodeName
+		FROM
+		process_node_person pn
+		WHERE
+		processId IN (
+		SELECT
+		DISTINCT
+		processId
+		FROM
+		process_node_person pnp
+		LEFT JOIN process_info pi ON pi.id
+		=
+		pnp.processId
+		LEFT JOIN process_type_base ptb ON ptb.id =
+		pi.processType
+		WHERE
+		ptb.processType = #{processType}
+		AND pi.accessSecret
+		= #{accessSecret}
+		AND pi.manageState
+		= 'enabled'
+		)
+	</select>
+</mapper>
+

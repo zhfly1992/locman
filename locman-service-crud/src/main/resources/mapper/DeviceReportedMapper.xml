@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.crud.repository.DeviceReportedCrudRepository">
+
+	<sql id="Base_Column">
+		id,
+		deviceId,device_bv,device_sig,device_rsrp,device_sinr,device_ls,device_fv
+	</sql>
+
+	<insert id="saveDeviceRealReporte" parameterType="java.util.Map">
+		insert into Device_RealRported (
+		<include refid="Base_Column" />
+		)
+		values (#{id}, #{deviceId}, #{device_bv}, #{device_sig},
+		#{device_rsrp}, #{device_sinr},#{device_ls},#{device_fv})
+	</insert>
+
+	<update id="updateDeviceRealReporte" parameterType="java.util.Map">
+		update Device_RealRported
+		<trim prefix="set" suffixOverrides=",">
+			<if test="deviceId != null and deviceId !=''">
+				deviceId=#{deviceId},
+			</if>
+			<if test="device_bv != null and device_bv !=''">
+				device_bv=#{device_bv},
+			</if>
+			<if test="device_sig != null and device_sig !=''">
+				device_sig=#{device_sig},
+			</if>
+			<if test="device_rsrp != null and device_rsrp !=''">
+				device_rsrp=#{device_rsrp},
+			</if>
+			<if test="device_sinr != null and device_sinr !=''">
+				device_sinr=#{device_sinr},
+			</if>
+			<if test="device_ls != null and device_ls !=''">
+				device_ls=#{device_ls},
+			</if>
+			<if test="device_fv != null and device_fv !=''">
+				device_fv=#{device_fv},
+			</if>
+			<if test="sumXYZ != null and sumXYZ !=''">
+				sumXYZ=#{sumXYZ},
+			</if>
+			<if test="sumXYZ != null and sumXYZ !=''">
+				sumNum = 1 + sumNum
+			</if>
+		</trim>
+		where deviceId=#{deviceId}
+	</update>
+
+	<select id="getXYZAvg" resultType="com.alibaba.fastjson.JSONObject">
+		SELECT
+			ra.xavtvAvg xavtvAvg,
+			ra.yavtvAvg yavtvAvg,
+			ra.zavtvAvg zavtvAvg,
+			ra.xgcmAvg xgcmAvg,
+			ra.ygcmAvg ygcmAvg,
+			ra.ractvAvg ractvAvg
+		FROM
+			RportedAvg ra
+		WHERE
+			ra.deviceId = #{deviceId}
+		AND ra.manageState = 'enable'
+		AND ra.id NOT IN (
+									SELECT
+										d.id
+									FROM
+										(
+											SELECT
+												MIN(c.id) id
+											FROM
+												RportedAvg c
+											GROUP BY
+												deviceId,
+												dateNum
+											HAVING
+												COUNT(*) > 1
+										) d
+								)
+		ORDER BY
+			ra.dateNum DESC
+		LIMIT 1
+	</select>
+	
+	<select id="getDeviceFaultOrderState" resultType="java.util.Map">
+		SELECT
+			d.accessSecret,
+			fop.processState,
+			fop.updateTime,
+			fop.processId,
+			fop.userId,
+			fop.faultProcessType,
+			fop.id
+		FROM
+			FaultOrderProcess fop
+		LEFT JOIN FaultOrder_Device fod ON fod.faultOrderId = fop.id
+		LEFT JOIN Device d ON d.id = fod.deviceId
+		WHERE
+			d.id = #{locmanDeviceId}
+		ORDER BY
+			fop.updateTime DESC
+		LIMIT 1
+	
+	</select>
+	<insert id="insertInspection" parameterType="com.run.locman.api.entity.Inspection">
+	
+		INSERT INTO Inspection (id,deviceId,reportedTime,inspectionTime)
+		VALUES
+			(#{id},#{deviceId},#{reportedTime},#{inspectionTime})
+	</insert>
+	<select id="countByDeviceId" parameterType="java.util.Map" resultType="int">
+		select
+		COUNT(DISTINCT id)
+		FROM
+		Inspection i
+		where i.deviceId = #{deviceId}
+		and reportedTime > #{updateTime}
+		and  reportedTime &lt;= #{endTime}
+	</select>
+	
+	<select id="getTranTable" resultType="java.util.Map">
+		SELECT engKey,chineseValue FROM ParamTransTable 
+	</select>
+	
+	<select id="updateCommandReceive" resultType="int">
+		update Device_RealRported set commandReceive = #{commandReceive} where deviceId = #{deviceId}
+	</select>
+
+</mapper>

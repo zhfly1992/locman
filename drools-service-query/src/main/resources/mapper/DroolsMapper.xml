@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.run.locman.api.query.repository.DroolsRepository">
+
+	<select id="getAllDroolsByPage" resultType="java.util.Map" parameterType="java.util.Map">
+		SELECT * FROM Drools where isDelete="valid"
+		<if test="serchKey != null and serchKey != ''">
+			AND ruleName=#{serchKey}
+		</if>
+	</select>
+	
+	<select id="getDroolInfoById" resultType="java.util.Map" parameterType="java.lang.String">
+		SELECT * FROM Drools where isDelete="valid"
+			AND id=#{id}
+	</select>
+	
+	<select id="getAllDrools" resultType="java.util.Map">
+		SELECT * FROM Drools where isDelete="valid" and state="valid"
+	</select>
+	
+
+</mapper>

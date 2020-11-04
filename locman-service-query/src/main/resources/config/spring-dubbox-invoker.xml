@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+    http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+	<dubbo:consumer timeout="5000" />
+	<dubbo:reference id="registryService"
+		interface="com.alibaba.dubbo.registry.RegistryService" check="false" />
+
+	<!-- 本地调试 -->
+
+	<dubbo:reference interface="com.run.usc.base.query.AccSourceBaseQueryService"
+		id="accSourceBaseQueryService" check="false" />
+	<dubbo:reference interface="com.run.usc.base.query.UserBaseQueryService"
+		id="userQueryRpcService" check="false" />
+	<!-- <dubbo:reference interface="com.run.data.center.api.es.query.DeviceEsQueryService" 
+		id="deviceEsQueryService" check="false" timeout="10000"/> -->
+	<dubbo:reference interface="com.run.activity.api.query.ActivityProgressQuery"
+		id="activityProgressQuery" check="false" timeout="200000" />
+	<dubbo:reference interface="com.run.usc.base.query.UserBaseQueryService"
+		id="userBaseQueryService" check="false" timeout="10000" />
+	<dubbo:reference
+		interface="com.run.activity.api.query.service.ProcessFileQueryService"
+		id="processFileQueryService" check="false" timeout="10000" />
+	<dubbo:reference id="deviceQueryService"
+		interface="com.run.locman.api.query.service.DeviceQueryService" check="false"
+		timeout="10000" />
+	<dubbo:reference id="facilityDeviceQueryService"
+		interface="com.run.locman.api.query.service.FacilityDeviceQueryService"
+		check="false" timeout="20000" />
+	<dubbo:reference id="faultOrderProcessCudService"
+		interface="com.run.locman.api.crud.service.FaultOrderProcessCudService"
+		check="false" />
+	<dubbo:reference id="orderProcessQueryService"
+		interface="com.run.locman.api.query.service.OrderProcessQueryService"
+		check="false" />
+	<dubbo:reference id="facilitiesCrudService"
+		interface="com.run.locman.api.crud.service.FacilitiesCrudService"
+		check="false" />
+	<dubbo:reference id="focusSecurityCrudService"
+		interface="com.run.locman.api.crud.service.FocusSecurityCrudService"
+		check="false" />
+	<dubbo:reference id="updateRedisCrudService"
+		interface="com.run.locman.api.crud.service.UpdateRedisCrudService"
+		check="false" />
+</beans>

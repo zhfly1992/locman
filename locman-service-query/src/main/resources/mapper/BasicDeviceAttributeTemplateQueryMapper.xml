@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.query.repository.BasicDeviceAttributeTemplateQueryRepository">
+
+	<select id="queryDevicePropertiesBasicByTemplateId"
+		parameterType="String" resultType="com.run.locman.api.entity.DeviceProperties">
+		SELECT
+		*
+		FROM
+		Base_DeviceProperties
+		WHERE
+		templateId
+		= #{templateId}
+	</select>
+
+	<select id="queryDevicePropertiesTemplateBasic" resultType="com.run.locman.api.entity.DevicePropertiesTemplate">
+		SELECT
+		*
+		FROM
+		Base_DeviceProperties_Template
+	</select>
+
+	<select id="existDeviceProperties" resultType="String">
+		SELECT
+		id
+		FROM
+		DeviceProperties
+		LIMIT 1,
+		1
+	</select>
+
+	<select id="existDevicePropertiesTemplate" resultType="String"
+		parameterType="String">
+		SELECT
+		DISTINCT "true"
+		FROM
+		DeviceProperties_Template
+		WHERE
+		accessSecret =
+		#{accessSecret}
+	</select>
+
+	<select id="existDeviceTypeTemplate" resultType="String"
+		parameterType="String">
+		SELECT
+		DISTINCT "true"
+		FROM
+		DeviceType_Template
+		WHERE
+		accessSecret =
+		#{accessSecret}
+	</select>
+
+	<select id="findBaseDeviceTypeId" parameterType="String"
+		resultType="String">
+		SELECT
+		deviceTypePropertyConfigId
+		FROM
+		Base_DeviceType_Template
+		WHERE
+		devicePropertyTemplateId =
+		#{templateId}
+	</select>
+
+</mapper>

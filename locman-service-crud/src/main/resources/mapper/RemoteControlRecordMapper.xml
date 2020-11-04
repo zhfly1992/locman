@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.crud.repository.RemoteControlRecordCrudRepository">
+	<resultMap type="com.run.locman.api.entity.RemoteControlRecord"
+		id="remoteControlRecordMap">
+		<result column="id" property="id" javaType="String" />
+		<result column="deviceId" property="deviceId" javaType="String" />
+		<result column="controlItem" property="controlItem" javaType="String" />
+		<result column="controlValue" property="controlValue" javaType="String" />
+		<result column="controlTime" property="controlTime" javaType="String" />
+		<result column="controlUserId" property="controlUserId"
+			javaType="String" />
+		<result column="operateUserName" property="operateUserName"
+			javaType="String" />
+		<result column="operateUserPhone" property="operateUserPhone"
+			javaType="String" />
+		<result column="reason" property="reason" javaType="String" />
+		<result column="controlType" property="controlType" javaType="Integer" />
+		<result column="controlState" property="controlState" javaType="String" />
+		<result column="controlDestroyTime" property="controlDestroyTime"
+			javaType="String" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id, deviceId, controlItem, controlValue, controlTime,
+		controlUserId, operateUserName, operateUserPhone, reason,
+		controlType,controlState,controlDestroyTime
+	</sql>
+
+	<sql id="Base_condition">
+		<if test="id != null and id != ''">
+			AND id = #{id}
+		</if>
+		<if test="deviceId != null and deviceId != ''">
+			AND deviceId = #{deviceId}
+		</if>
+		<if test="controlItem != null and controlItem != ''">
+			AND controlItem = #{controlItem}
+		</if>
+		<if test="controlValue != null and controlValue != ''">
+			AND controlValue = #{controlValue}
+		</if>
+		<if test="controlTime != null and controlTime != ''">
+			AND controlTime = #{controlTime}
+		</if>
+		<if test="controlUserId != null and controlUserId != ''">
+			AND controlUserId = #{controlUserId}
+		</if>
+		<if test="operateUserName != null and operateUserName != ''">
+			AND operateUserName = #{operateUserName}
+		</if>
+		<if test="operateUserPhone != null and operateUserPhone != ''">
+			AND operateUserPhone = #{operateUserPhone}
+		</if>
+		<if test="reason != null and reason != ''">
+			AND reason = #{reason}
+		</if>
+		<if test="controlType != null and controlType != ''">
+			AND controlType = #{controlType}
+		</if>
+		<if test="controlState != null and controlState != ''">
+			AND controlState = #{controlState}
+		</if>
+		<if test="controlDestroyTime != null and controlDestroyTime != ''">
+			AND controlDestroyTime = #{controlDestroyTime}
+		</if>
+	</sql>
+
+	<insert id="insertModel" parameterType="com.run.locman.api.entity.RemoteControlRecord">
+		INSERT INTO RemoteControlRecord(
+		<include refid="Base_Column" />
+		)
+		VALUES(#{id}, #{deviceId}, #{controlItem}, #{controlValue},
+		#{controlTime},
+		#{controlUserId}, #{operateUserName},
+		#{operateUserPhone}, #{reason},
+		#{controlType},#{controlState},#{controlDestroyTime})
+	</insert>
+
+	<select id="getRemoteRecordByDevId" resultType="com.run.locman.api.entity.RemoteControlRecord"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column" />
+		from RemoteControlRecord where deviceId=#{deviceId} ORDER BY
+		controlTime desc limit 1
+	</select>
+
+	<update id="updateControlState" parameterType="java.util.Map">
+		UPDATE RemoteControlRecord
+		SET controlState =
+		'invalid',controlDestroyTime = #{controlDestroyTime}
+		WHERE
+		deviceId =
+		#{deviceId}
+		AND id IN
+		<foreach item="item" collection="idDelList" index="index"
+			open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+	</update>
+
+</mapper>
+

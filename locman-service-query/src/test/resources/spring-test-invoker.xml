@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+    http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+	<dubbo:application name="dubbo-test-consumer" />
+	<dubbo:registry address="zookeeper://193.168.0.90:2181" />
+	<!-- 本地调试 -->
+	<dubbo:reference id="facilitiesQueryService"
+		interface="com.run.locman.api.query.service.FacilitiesQueryService" />
+
+	<dubbo:reference id="facilitesServiceImp"
+					 interface="com.run.locman.api.query.service.FacilitiesDataTypeQueryRpcService" />
+	<dubbo:reference id="alarmRuleQueryService"
+					 interface="com.run.locman.api.query.service.AlarmRuleQueryService" />
+	<dubbo:reference id="deviceQueryService"
+					 interface="com.run.locman.api.query.service.DeviceQueryService" />
+	<!--<dubbo:reference id="facilitiesTypeQueryService"-->
+		<!--interface="com.run.locman.api.query.service.FacilitiesTypeQueryService" />-->
+	<!--&lt;!&ndash;<dubbo:reference interface="com.run.usc.base.query.UserBaseQueryService" -->
+		<!--id="userQueryRpcService" check="false"/> &ndash;&gt;-->
+	<!--&lt;!&ndash; <dubbo:reference id="wUserInfoByMongodbCommonRest" interface="com.run.shared.service.ucs.api.writer.user.UserBaseRestWriterService" -->
+		<!--url="dubbo:http://172.168.0.100:8888/user/register"/> &ndash;&gt;-->
+
+	<!--<dubbo:reference id="facilitiesDataTypeQueryRpcService"-->
+		<!--interface="com.run.locman.api.base.query.service.FacilitiesDataTypeQueryRpcService" />-->
+</beans>

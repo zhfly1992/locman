@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.query.repository.FacilitiesTypeBaseQueryRepository">
+
+	<resultMap type="com.run.locman.api.entity.FacilitiesTypeBase"
+		id="FacilitiesTypeBaseResultMap">
+		<result column="id" property="id" javaType="String" />
+		<result column="facilityTypeName" property="facilityTypeName"
+			javaType="String" />
+		<result column="facilityTypeIco" property="facilityTypeIco"
+			javaType="String" />
+		<result column="manageState" property="manageState" javaType="String" />
+		<result column="createTime" property="createTime" javaType="String" />
+		<result column="createUser" property="createUser" javaType="String" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id, facilityTypeName, facilityTypeIco, manageState,
+		createTime, createUser
+	</sql>
+	<sql id="Base_Condition">
+		<if test="id != null">
+			and id=#{id}
+		</if>
+		<if test="facilityTypeName != null">
+			and facilityTypeName=#{facilityTypeName}
+		</if>
+		<if test="facilityTypeIco != null">
+			and facilityTypeIco=#{facilityTypeIco}
+		</if>
+		<if test="manageState != null">
+			and manageState=#{manageState}
+		</if>
+		<if test="createTime != null">
+			and createTime=#{createTime}
+		</if>
+		<if test="creationTime != null">
+			and createUser=#{createUser}
+		</if>
+	</sql>
+
+	<select id="findById" resultMap="FacilitiesTypeBaseResultMap"
+		parameterType="String">
+		select
+		<include refid="Base_Column" />
+		FROM FacilitiesTypeBase FTB
+		where FTB.id=#{id}
+	</select>
+	<select id="findAll" resultMap="FacilitiesTypeBaseResultMap">
+		select
+		<include refid="Base_Column" />
+		FROM FacilitiesTypeBase FTB
+	</select>
+	<select id="findByParams" resultMap="FacilitiesTypeBaseResultMap"
+		parameterType="java.util.Map">
+		select
+		<include refid="Base_Column" />
+		FROM FacilitiesTypeBase FTB
+		where 1=1
+		<include refid="Base_Condition" />
+	</select>
+
+	<select id="validFacilitiesTypeName" parameterType="String"
+		resultType="java.lang.Integer">
+		SELECT
+		COUNT(1)
+		FROM FacilitiesTypeBase FTB
+		WHERE
+		FTB.facilityTypeName=#{facilityTypeName}
+	</select>
+
+	<select id="queryFacilitiesTypeBaseListPage" parameterType="java.util.Map"
+		resultMap="FacilitiesTypeBaseResultMap">
+		SELECT
+		<include refid="Base_Column" />
+		FROM FacilitiesTypeBase FTB
+		<if test="searchKey != null">
+			WHERE FTB.facilityTypeName like CONCAT
+			('%',#{searchKey},'%')
+		</if>
+		order by FTB.manageState desc,FTB.createTime desc
+	</select>
+	<select id="findAllFacilitiesTypeBase" resultType="java.util.Map">
+		SELECT * FROM
+		FacilitiesTypeBase FTB where FTB.manageState = 'enabled'
+	</select>
+	<select id="updateFacilitiesTypeBaseCheck" parameterType="java.util.Map"
+		resultType="int">
+		SELECT
+		COUNT(1)
+		FROM
+		FacilitiesTypeBase
+		WHERE
+		facilityTypeName =
+		#{facilityTypeName}
+		AND id != #{id}
+	</select>
+
+</mapper>

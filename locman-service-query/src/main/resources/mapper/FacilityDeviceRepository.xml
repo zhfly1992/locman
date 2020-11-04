@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.query.repository.FacilityDeviceQueryRepository">
+	<resultMap id="BaseResultMap"
+		type="com.run.locman.api.entity.FacilityDevice">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="deviceId" jdbcType="VARCHAR"
+			property="deviceId" />
+		<result column="facilityId" jdbcType="VARCHAR"
+			property="facilityId" />
+		<result column="deviceTypeId" jdbcType="VARCHAR"
+			property="deviceTypeId" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id, deviceId, facilityId,deviceTypeId
+	</sql>
+
+
+	<select id="queryAllBoundDeviceId" resultType="String"
+		parameterType="String">
+		select
+		DISTINCT
+		deviceId
+		from Facility_Device
+	</select>
+	<select id="queryAllDeviceInfo" parameterType="java.util.Map"
+		resultType="String">
+		SELECT deviceId from Facility_Device fd where
+		fd.facilityId=#{facId}
+	</select>
+
+	<select id="queryFacilityBindingState" resultType="String"
+		parameterType="String">
+		select
+		deviceId
+		from Facility_Device
+		<where>
+			facilityId = #{facilityId}
+		</where>
+	</select>
+
+	<select id="queryDeviceBindingState" resultType="String"
+		parameterType="String">
+		select
+		facilityId
+		from Facility_Device
+		<where>
+			deviceId = #{deviceId}
+		</where>
+	</select>
+
+	<select id="queryFacilityById" resultType="java.util.Map"
+		parameterType="String">
+		select
+		f.id as facilityId, f.facilitiesCode as facilityCode,
+		f.facilitiesTypeId as facilityTypeId,
+		ftb.facilityTypeName as
+		facilityTypeName,ft.facilityTypeAlias as
+		facilityTypeAlias,f.address,f.creationTime,
+		
+		f.presentPic,
+		f.hiddenTroubleDesc,
+		f.organizationId,
+		f.latitude,
+		f.longitude,
+		f.defenseState
+		
+		from Facilities f
+		LEFT JOIN
+		FacilitiesType ft ON f.facilitiesTypeId = ft.id
+		LEFT JOIN
+		FacilitiesTypeBase ftb ON ft.facilityTypeBaseId = ftb.id
+		<where>
+			f.id =#{facilityId}
+		</where>
+	</select>
+
+	<select id="queryFacilityBindListByPage"
+		parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT * from(
+		select
+		f.id as facilityId,
+		f.facilitiesCode as
+		facilityCode,
+		f.facilitiesTypeId as facilitiesTypeId,
+		ftb.facilityTypeName as facilitiesTypeName,
+		ft.facilityTypeAlias as
+		facilityTypeAlias,
+		f.address,f.creationTime,f.organizationId,f.manageState as
+		manageState,
+		if(ISNULL(GROUP_CONCAT(fd.deviceId)),'unbound','bound')
+		as
+		bingStatus
+		from Facilities f
+		LEFT JOIN
+		FacilitiesType ft ON
+		f.facilitiesTypeId =
+		ft.id
+		LEFT JOIN
+		FacilitiesTypeBase ftb ON
+		ft.facilityTypeBaseId = ftb.id
+		LEFT JOIN
+		Facility_Device fd ON
+		f.id =
+		fd.facilityId
+		<where>
+			f.accessSecret=#{accessSecret}
+		</where>
+		GROUP BY f.id,
+		f.facilitiesCode ,
+		f.facilitiesTypeId,
+		ftb.facilityTypeName ,
+		ft.facilityTypeAlias ,
+		f.address,
+		f.creationTime,
+		f.organizationId,
+		f.manageState ) t
+		<where>
+			<if test="bingStatus != null and bingStatus != ''">
+				and t.bingStatus=#{bingStatus}
+			</if>
+			<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+				and t.facilitiesTypeId=#{facilitiesTypeId}
+			</if>
+			<if
+				test="organizationId != null and organizationId.toString() != '' and organizationId.size > 0">
+				and t.organizationId in
+				<foreach collection="organizationId" index="index"
+					item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="manageState != null and manageState != ''">
+				and t.manageState=#{manageState}
+			</if>
+			<if test="facilityCode != null and facilityCode != '' ">
+				and t.facilityCode like CONCAT('%',#{facilityCode},'%')
+			</if>
+			<if test="address != null and address != ''">
+				and t.address like CONCAT('%',#{address},'%')
+			</if>
+			<if test="searchKey != null and searchKey != ''">
+				and (t.address like CONCAT('%',#{searchKey},'%') or
+				t.facilityCode like CONCAT('%',#{searchKey},'%') or t.gis like
+				CONCAT('%',#{searchKey},'%'))
+			</if>
+		</where>
+		order by facilityCode
+	</select>
+
+
+
+	<select id="findAllBindData" parameterType="java.lang.String"
+		resultType="java.util.Map">
+		SELECT
+		FD.deviceId, FA.id, FA.facilitiesCode, FA.areaId,
+		FA.organizationId, FA.address,
+		FA.latitude, FA.longitude
+		FROM
+		Facility_Device FD
+		LEFT JOIN Facilities FA ON FD.facilityId = FA.id
+		WHERE FA.id IS NOT NULL
+		AND FA.accessSecret = #{accessSecret}
+	</select>
+
+	<select id="findDeviceByFacIds" resultType="String"
+		parameterType="java.util.Map">
+		SELECT
+		deviceId
+		FROM
+		Facility_Device
+		WHERE
+		facilityId IN
+		<foreach item="item" collection="facIds" index="index"
+			open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+	</select>
+	
+	
+	<select id="findOnlineQuery" resultType="java.util.Map">
+		SELECT 
+		f.id as facilityId,
+		f.address,
+		d.id AS deviceId,
+		d.accessSecret
+		FROM
+		Facilities f 
+		LEFT JOIN Facility_Device fd on f.id=fd.facilityId
+		LEFT JOIN Device d ON fd.deviceId =d.id
+		where d.id is not null
+	</select>
+</mapper>

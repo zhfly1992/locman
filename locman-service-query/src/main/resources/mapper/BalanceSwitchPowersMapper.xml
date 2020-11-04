@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.query.repository.BalanceSwitchPowersQueryRepository">
+
+	<resultMap type="com.run.locman.api.entity.BalanceSwitchPowers"
+		id="BalanceSwitchPowersResultMap">
+		<result column="id" property="id" javaType="String" />
+		<result column="facilityTypeId" property="facilityTypeId"
+			javaType="String" />
+		<result column="organizationId" property="organizationId"
+			javaType="String" />
+		<result column="postId" property="postId" javaType="String" />
+		<result column="staffType" property="staffType" javaType="String" />
+		<result column="startTime" property="startTime" javaType="String" />
+		<result column="endTime" property="endTime" javaType="String" />
+		<result column="remark" property="remark" javaType="String" />
+		<result column="accessSecret" property="accessSecret" javaType="String" />
+		<result column="manageState" property="manageState" javaType="String" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id, facilityTypeId, organizationId, postId, staffType,
+		startTime, endTime, remark, accessSecret, manageState
+	</sql>
+	<sql id="Base_Condition">
+		<if test="id != null">
+			and id=#{id}
+		</if>
+		<if test="facilityTypeId != null">
+			and facilityTypeId=#{facilityTypeId}
+		</if>
+		<if test="organizationId != null and organizationId.size > 0">
+			AND organizationId in
+			<foreach item="item" collection="organizationId" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="postId != null">
+			and postId=#{postId}
+		</if>
+		<if test="staffType != null">
+			and staffType=#{staffType}
+		</if>
+		<if test="startTime != null">
+			and startTime=#{startTime}
+		</if>
+		<if test="endTime != null">
+			and endTime=#{endTime}
+		</if>
+		<if test="remark != null">
+			and remark=#{remark}
+		</if>
+		<if test="manageState != null">
+			and manageState=#{manageState}
+		</if>
+		<if test="accessSecret != null">
+			and accessSecret=#{accessSecret}
+		</if>
+	</sql>
+
+	<select id="getBalanceSwitchPowersList" parameterType="java.util.Map"
+		resultMap="BalanceSwitchPowersResultMap">
+		SELECT
+		<include refid="Base_Column" />
+		FROM BalanceSwitchPowers bs
+		WHERE bs.accessSecret=#{accessSecret}
+		<if test="facilityTypeId != null and facilityTypeId != ''">
+			AND bs.facilityTypeId=#{facilityTypeId}
+		</if>
+		<if test="organizationId != null and organizationId != ''">
+			AND bs.organizationId=#{organizationId}
+		</if>
+		<if test="postId != null and postId != ''">
+			AND bs.postId=#{postId}
+		</if>
+		<if test="manageState != null and manageState != ''">
+			AND bs.manageState=#{manageState}
+		</if>
+	</select>
+
+	<select id="getBalanceSwitchPowersById" parameterType="java.lang.String"
+		resultMap="BalanceSwitchPowersResultMap">
+		SELECT
+		<include refid="Base_Column" />
+		FROM BalanceSwitchPowers bs
+		WHERE bs.id=#{id}
+	</select>
+
+	<select id="checkByFacilityTypeId" parameterType="java.lang.String"
+		resultMap="BalanceSwitchPowersResultMap">
+		SELECT
+		<include refid="Base_Column" />
+		FROM BalanceSwitchPowers bs
+		WHERE bs.facilityTypeId=#{facilityTypeId}
+		AND bs.manageState = "enabled"
+		AND DATE(NOW()) &gt;= bs.startTime
+		AND
+		bs.endTime &gt;= DATE(NOW())
+	</select>
+
+	<!-- 校验当前设施类型当前组织及下级组织或当前组织岗位是否配有平衡告警开关开启权限，用于控制地图人井开启操作判断 -->
+	<select id="checkBalanceSwitchPowers" parameterType="java.util.Map"
+		resultMap="BalanceSwitchPowersResultMap">
+		SELECT
+		*
+		FROM
+		BalanceSwitchPowers dp
+		WHERE DATE(dp.startTime) &lt;=
+		DATE(Now())
+		AND DATE(Now()) &lt;= DATE(dp.endTime) and
+		dp.facilityTypeId
+		=#{facilityTypeId}
+		AND dp.accessSecret =
+		#{accessSecret}
+		AND dp.manageState = "enabled"
+		AND (
+		dp.organizationId in
+		<foreach item="item" collection="organizationId" index="index"
+			open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+		<!-- dp.organizationId =#{organizationId} -->
+		AND
+		dp.postId IS NULL
+		)<!-- 分权分域配置在组织下的 -->
+		OR (
+		dp.organizationId in
+		<foreach item="item" collection="organizationId" index="index"
+			open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+		<!-- dp.organizationId = #{organizationId} -->
+		AND
+		dp.postId = #{postId}
+		AND
+		dp.postId IS NOT
+		NULL AND DATE(dp.startTime)
+		&lt;= DATE(Now())
+		AND
+		DATE(Now()) &lt;= DATE(dp.endTime)
+		and
+		dp.facilityTypeId
+		=#{facilityTypeId}
+		AND dp.accessSecret =
+		#{accessSecret}
+		AND
+		dp.manageState = "enabled"
+		)<!-- 分权分域配置在岗位下的 -->
+	</select>
+</mapper>

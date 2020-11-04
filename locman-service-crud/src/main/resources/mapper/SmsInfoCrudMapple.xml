@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.run.locman.api.crud.repository.SmsRegistCrudRepository">
+	<insert id="saveSmsRegistInformation" parameterType="java.util.Map">
+		insert into SmsInfo (id,accessSecret,gatewayUrl,creatTime)
+		values
+		(#{id},#{accessSecret},#{smsUrl},#{creatTime})
+	</insert>
+    
+    <insert id="addSmsRecord" parameterType="java.util.Map">
+        insert into SmsRecord (id,alarmSerialNum,userName,phoneNumber,smsContent,createTime,accessSecret,state)
+        values
+        (#{id},#{alarmSerialNum},#{userName},#{phoneNumber},#{smsContent},#{createTime},#{accessSecret},#{state})
+    </insert>
+</mapper>

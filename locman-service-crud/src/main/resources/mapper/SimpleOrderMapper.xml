@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.crud.repository.SimpleOrderCrudRepository">
+	<sql id="Base_Column">
+		id,orderName,serialNumber,orderType,createBy,createTime,processStartTime,constructBy,accessSecret,manager,phone,
+		processEndTime,mark,orderImg,deviceCount,processState,processId,userId,updateTime,remindTime,remindRule
+	</sql>
+	<insert id="insertModel"
+		parameterType="com.run.locman.api.entity.SimpleOrderProcess">
+		insert into SimpleOrderProcess(
+		<include refid="Base_Column" />
+		) values
+		(#{id},#{orderName},(SELECT IFNULL(MAX(t.serialNumber)+1,
+		1000) FROM SimpleOrderProcess t WHERE t.accessSecret =
+		#{accessSecret})
+		,#{orderType},#{createBy},#{createTime},#{processStartTime},#{constructBy},#{accessSecret},#{manager},
+		#{phone},#{processEndTime},#{mark},#{orderImg},#{deviceCount},#{processState},#{processId},#{userId},
+		#{updateTime},#{remindTime},#{remindRule})
+	</insert>
+	<update id="updateModel"
+		parameterType="com.run.locman.api.entity.SimpleOrderProcess">
+		update SimpleOrderProcess set
+		<if test="id != null and id != ''">
+			id=#{id}
+		</if>
+		<if test="deviceCount != null and deviceCount != ''">
+			,deviceCount=#{deviceCount}
+		</if>
+		<if test="updateTime != null and updateTime != ''">
+			,updateTime=#{updateTime}
+		</if>
+		<if test="orderName != null and orderName != ''">
+			,orderName=#{orderName}
+		</if>
+		<if test="orderType != null and orderType != ''">
+			,orderType=#{orderType}
+		</if>
+		<if test="constructBy != null and constructBy != ''">
+			,constructBy=#{constructBy}
+		</if>
+
+		<if test="manager != null and manager != ''">
+			,manager=#{manager}
+		</if>
+		<if test="phone != null and phone != ''">
+			,phone=#{phone}
+		</if>
+		<if test="processStartTime != null and processStartTime != ''">
+			,processStartTime=#{processStartTime}
+		</if>
+		<if test="processEndTime != null and processEndTime != ''">
+			,processEndTime=#{processEndTime}
+		</if>
+		<if test="mark != null and mark != ''">
+			,mark=#{mark}
+		</if>
+		<if test="orderImg != null and orderImg != ''">
+			,orderImg=#{orderImg}
+		</if>
+		<if test="processState != null and processState != ''">
+			,processState=#{processState}
+		</if>
+		<if test="remindTime != null and remindTime != ''">
+			,remindTime=#{remindTime}
+		</if>
+		<if test="remindRule != null and remindRule != ''">
+			,remindRule=#{remindRule}
+		</if>
+		where id=#{id}
+	</update>
+
+	<select id="findProcessEndTimeById" parameterType="String"
+		resultType="String">
+		select processEndTime from SimpleOrderProcess where id =
+		#{orderId}
+	</select>
+	
+	<select id="findProcessInfoById" parameterType="String"
+		resultType="com.run.locman.api.dto.SimpleOrderDto">
+		select id,serialNumber,processStartTime,processEndTime,userId,remindTime,accessSecret from SimpleOrderProcess where id =
+		#{orderId}
+	</select>
+</mapper>
+

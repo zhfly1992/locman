@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+    http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+	
+	<dubbo:reference id="registryService" interface="com.alibaba.dubbo.registry.RegistryService" check="false" />
+	<!-- 本地调试 -->
+	<!-- <dubbo:reference id="wUserInfoByMongodbCommonRest" interface="com.run.shared.service.ucs.api.writer.user.UserBaseRestWriterService" url="dubbo:http://172.168.0.100:8888/user/register"/> -->
+	
+	<dubbo:reference id="alarmInfoCrudService" interface="com.run.locman.api.crud.service.AlarmInfoCrudService" check="false" timeout="10000"/>
+	<dubbo:reference id="deviceJobCrudService" interface="com.run.locman.api.crud.service.DeviceJobCrudService" check="false" timeout="10000"/>
+	<dubbo:reference id="userRoleBaseQueryService" interface="com.run.authz.base.query.UserRoleBaseQueryService" check="false" timeout="10000"/>
+	<dubbo:reference id="rabbitMqCrudService" interface="com.run.rabbit.activity.server.RabbitMqCrudService" check="false" timeout="10000"/>
+	<dubbo:reference id="smsQueryService" interface="com.run.locman.api.query.service.SmsQueryService" check="false" timeout="10000"/>
+	<dubbo:reference id="smsRegistService" interface="com.run.locman.api.crud.service.SmsRegistService" check="false" timeout="20000000"/>
+	<dubbo:reference id="activityProgressCrud" interface="com.run.activity.api.crud.ActivityProgressCrud" check="false" timeout="5000" />
+	<dubbo:reference id="activityProgressQuery" interface="com.run.activity.api.query.ActivityProgressQuery" check="false" timeout="5000" />
+	<dubbo:reference id="alarmInfoQueryService" interface="com.run.locman.api.query.service.AlarmInfoQueryService" check="false" timeout="100000"/>
+	<dubbo:reference id="jiguangService" interface="com.run.sms.api.JiguangService" check="false" timeout="10000"/>
+	<dubbo:reference id="alarmOrderQueryService" interface="com.run.locman.api.query.service.AlarmOrderQueryService" check="false" timeout="100000"/>
+	<dubbo:reference id="alarmOrderCrudService" interface="com.run.locman.api.crud.service.AlarmOrderCrudService" check="false" timeout="1000000"/>
+	<dubbo:reference id="deviceReportedCrudService" interface="com.run.locman.api.crud.service.DeviceReportedCrudService" check="false" timeout="15000"/>
+	<dubbo:reference id="facilitiesCrudService" interface="com.run.locman.api.crud.service.FacilitiesCrudService" check="false" timeout="15000"/>
+	<dubbo:reference id="focusSecurityCrudService" interface="com.run.locman.api.crud.service.FocusSecurityCrudService" check="false" timeout="15000"/>
+	<dubbo:reference id="processFileCurdService" interface="com.run.activity.api.crud.service.ProcessFileCurdService" check="false" timeout="15000"/>
+	
+</beans>

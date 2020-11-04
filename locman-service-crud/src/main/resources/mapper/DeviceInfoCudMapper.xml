@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.crud.repository.DeviceInfoCudRepository">
+	<resultMap id="BaseResultMap"
+		type="com.run.locman.api.entity.Device">
+		<id column="id" property="id" javaType="String" />
+		<result column="deviceName" property="deviceName"
+			javaType="String" />
+		<result column="deviceKey" property="deviceKey"
+			javaType="String" />
+		<result column="protocolType" property="alarmTime"
+			javaType="String" />
+		<result column="openProtocols" property="openProtocols"
+			javaType="String" />
+		<result column="deviceType" property="deviceType"
+			javaType="String" />
+		<result column="appTag" property="appTag" javaType="String" />
+		<result column="manageState" property="manageState"
+			javaType="String" />
+		<result column="accessSecret" property="accessSecret"
+			javaType="String" />
+		<result column="gatewayId" property="gatewayId"
+			javaType="String" />
+			<result column="subDeviceId" property="subDeviceId"
+			javaType="String" />
+	</resultMap>
+	<sql id="Base_Column">
+		id, deviceName, deviceKey, protocolType, openProtocols,
+		deviceType,appTag,manageState,accessSecret,gatewayId,subDeviceId
+	</sql>
+
+	<insert id="saveDeviceBatch" parameterType="java.util.List">
+		INSERT INTO Device (
+		<include refid="Base_Column" />
+		)
+		VALUES
+		<foreach collection="list" item="device" index="index"
+			separator=",">
+			(#{device.id}, #{device.deviceName}, #{device.deviceKey},
+			#{device.protocolType}, #{device.openProtocols},
+			#{device.deviceType},#{device.appTag},#{device.manageState},#{device.accessSecret},#{device.gatewayId},
+			#{device.subDeviceId})
+		</foreach>
+	</insert>
+
+	<delete id="deleteDeviceBatch" parameterType="java.util.List">
+		DELETE FROM Device WHERE id IN
+		<foreach collection="list" item="id" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	<delete id="deleteDeviceBatchByAppTags"
+		parameterType="java.util.List">
+		DELETE FROM Device WHERE appTag IN
+		<foreach collection="list" item="appTag" open="("
+			separator="," close=")">
+			#{appTag}
+		</foreach>
+	</delete>
+
+
+	<update id="updateDeviceLastReportTime"
+		parameterType="String">
+		update
+		Device_RealRported set lastReportTime =
+		#{lastReportTime} where deviceId = #{deviceId}
+
+	</update>
+	<update id="updateDeviceOnLineState" parameterType="String">
+		update Device_RealRported
+		set onLineState = #{onLineState} where deviceId = #{deviceId}
+	</update>
+
+
+	<update id="updateDeviceDefendState"
+		parameterType="java.util.Map">
+		UPDATE Device
+		SET
+		<if
+			test="deviceState != null and deviceState != '' and deviceState == 'false'">
+			deviceDefendState = 'fault'
+		</if>
+		<if
+			test="deviceState != null and deviceState != '' and deviceState == 'true'">
+			deviceDefendState = 'normal'
+		</if>
+		WHERE
+		id =
+		#{deviceId}
+	</update>
+	
+	
+	<select id="queryDeviceExistsBySubDeviceId" resultType="Integer">
+		select
+		count(1) from Device where subDeviceId = #{subDeviceId}
+	</select>
+
+
+	<insert id="addDeviceFromDataConversion" parameterType="java.util.Map">
+		INSERT INTO Device (
+		<include refid="Base_Column" />
+		)
+		VALUES (#{id}, #{deviceName},#{deviceKey},
+		#{protocolType}, #{openProtocols},
+		#{deviceType},#{appTag},#{manageState},#{accessSecret},#{gatewayId},
+		#{subDeviceId})
+	</insert>
+
+</mapper>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.query.repository.FacInfoOrderQueryRepository">
+
+	<select id="findPageList" parameterType="com.run.locman.api.model.FacilitiesModel"
+		resultType="com.run.locman.api.entity.Facilities">
+		SELECT * FROM
+		(
+		SELECT
+		f.id,
+		f.facilitiesCode,
+		f.address,
+		f.completeAddress,
+		ft.facilityTypeAlias,
+		facilitiesTypeId
+		FROM
+		Facilities f
+		LEFT JOIN
+		FacilitiesType ft ON
+		f.facilitiesTypeId = ft.id
+		where f.accessSecret =
+		#{accessSecret}
+		<if test="binding != null and binding != '' and binding == 'bound'">
+			and f.id in(
+			SELECT
+			facilitiesId
+			FROM
+			SimpleOrder_Facilities
+			WHERE 1= 1
+			<if test="simplerOrFacId != null and simplerOrFacId != ''">
+				and simpleOrderId = #{simplerOrFacId}
+			</if>
+			)
+		</if>
+		<if test="binding != null and binding != '' and binding == 'unBound' ">
+			and f.id not in(
+			SELECT
+			facilitiesId
+			FROM
+			SimpleOrder_Facilities
+			WHERE 1=
+			1
+			<if test="simplerOrFacId != null and simplerOrFacId != ''">
+				and simpleOrderId = #{simplerOrFacId}
+			</if>
+			)
+		</if>
+		<if test="manageState != null and  manageState != ''">
+			and f.manageState = #{manageState}
+		</if>
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			and f.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		<if test="facilitiesCode != null and facilitiesCode != ''">
+			and f.facilitiesCode = #{facilitiesCode}
+		</if>
+		<if test="address != null and address != ''">
+			and f.address like CONCAT('%',#{address},'%')
+		</if>
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			and ft.id = #{facilitiesTypeId}
+		</if>
+		) a
+		where 1=1
+		<if test="searchKey != null and searchKey != ''">
+			and a.facilitiesCode like
+			CONCAT('%',#{searchKey},'%')
+			or
+			a.address like
+			CONCAT('%',#{searchKey},'%')
+			or
+			a.completeAddress like
+			CONCAT('%',#{searchKey},'%')
+		</if>
+	</select>
+
+
+	<select id="findFacIdsByOrerId" parameterType="com.run.locman.api.model.FacilitiesModel"
+		resultType="String">
+		SELECT
+		facilitiesId
+		FROM
+		SimpleOrder_Facilities
+		WHERE 1= 1
+		<if test="simplerOrFacId != null and simplerOrFacId != ''">
+			and simpleOrderId = #{simplerOrFacId}
+		</if>
+
+	</select>
+
+</mapper>
+

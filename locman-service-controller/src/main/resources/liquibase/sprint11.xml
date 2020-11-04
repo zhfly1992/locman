@@ -1,0 +1,401 @@
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+
+	<property name="autoIncrement" value="true" dbms="mysql" />
+
+
+	<!-- 基础流程类型表 -->
+	<changeSet id="20180131_createprocess_type_base" author="郭飞龙">
+		<comment>基础流程类型表</comment>
+		<createTable tableName="process_type_base">
+			<column name="id" type="varchar(32)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="processType" type="varchar(255)" remarks="流程类型">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<!-- 流程信息表 -->
+	<changeSet id="20180211_createprocess_info" author="郭飞龙">
+		<comment>流程信息表</comment>
+		<createTable tableName="process_info">
+			<column name="id" type="varchar(32)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="processType" type="varchar(255)" remarks="基础流程类型ID">
+				<constraints nullable="false" />
+			</column>
+			<column name="updateTime" type="varchar(255)" remarks="修改时间">
+				<constraints nullable="true" />
+			</column>
+			<column name="createTime" type="varchar(255)" remarks="创建时间">
+				<constraints nullable="false" />
+			</column>
+			<column name="createBy" type="varchar(255)" remarks="创建人">
+				<constraints nullable="false" />
+			</column>
+			<column name="updateBy" type="varchar(255)" remarks="修改人">
+				<constraints nullable="true" />
+			</column>
+			<column name="manageState" type="varchar(255)" remarks="管理状态">
+				<constraints nullable="false" />
+			</column>
+			<column name="accessSecret" type="varchar(255)" remarks="接入方秘钥">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<!-- 流程与节点、人员、组织关系表 -->
+	<changeSet id="20180131_createprocess_node_person" author="郭飞龙">
+		<comment>流程与节点、人员、组织关系表</comment>
+		<createTable tableName="process_node_person">
+			<column name="id" type="varchar(32)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="processId" type="varchar(255)" remarks="流程id">
+				<constraints nullable="false" />
+			</column>
+			<column name="node" type="varchar(255)" remarks="节点">
+				<constraints nullable="false" />
+			</column>
+			<column name="personId" type="varchar(255)" remarks="人员id">
+				<constraints nullable="false" />
+			</column>
+			<column name="organizeId" type="varchar(255)" remarks="组织id">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<!-- 删除列 -->
+	<!-- <changeSet id="20180111-03" author="査炳"> <comment>测试liquibase 删除列</comment> 
+		<dropColumn tableName="user"> <column name="phonenumber" type="varchar(255)"/> 
+		</dropColumn> </changeSet> -->
+	<!-- 插入默认的值 -->
+	<changeSet id="20180131-01" author="郭飞龙">
+		<comment>插入process_type_base</comment>
+		<insert tableName="process_type_base">
+			<column name="id" value="6276d1c54ea04e1cb7d461681b00a8cb"></column>
+			<column name="processType" value="一般工单流程"></column>
+		</insert>
+		<insert tableName="process_type_base">
+			<column name="id" value="cd9fa91213854f2bb7bb66ff59bd1d3d"></column>
+			<column name="processType" value="故障工单流程"></column>
+		</insert>
+		<insert tableName="process_type_base">
+			<column name="id" value="cf9d330fb3934a53b676f6ff7ad18b81"></column>
+			<column name="processType" value="告警工单流程"></column>
+		</insert>
+		<insert tableName="process_type_base">
+			<column name="id" value="efaf3c2c81e44f17afcd1599228e66cd"></column>
+			<column name="processType" value="巡检工单流程"></column>
+		</insert>
+	</changeSet>
+
+	<!-- 创建设备基础数据表 -->
+	<changeSet id="20180309_createDevice" author="田明">
+		<comment>设备基础数据表</comment>
+		<createTable tableName="Device">
+			<column name="id" type="varchar(32)" remarks="主键id（设备id）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="deviceName" type="varchar(36)" remarks="设备名称">
+				<constraints nullable="true" />
+			</column>
+			<column name="deviceKey" type="varchar(36)" remarks="设备秘钥">
+				<constraints nullable="true" />
+			</column>
+			<column name="protocolType" type="varchar(36)" remarks="协议类型">
+				<constraints nullable="true" />
+			</column>
+			<column name="openProtocols" type="varchar(36)" remarks="开放/私有协议">
+				<constraints nullable="true" />
+			</column>
+			<column name="deviceType" type="varchar(36)" remarks="设备类型id">
+				<constraints nullable="true" />
+			</column>
+			<column name="appTag" type="varchar(36)" remarks="appTag">
+				<constraints nullable="true" />
+			</column>
+			<column name="manageState" type="varchar(36)" remarks="设备有效状态">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<!-- 创建设备类型表 -->
+	<changeSet id="20180131_createDeviceType" author="屈龙">
+		<comment>设备基础数据表</comment>
+		<createTable tableName="DeviceType">
+			<column name="id" type="varchar(32)" remarks="主键id">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="deviceTypeName" type="varchar(255)" remarks="设备类型名称">
+				<constraints nullable="false" />
+			</column>
+			<column name="parentId" type="varchar(32)" remarks="父类型id">
+				<constraints nullable="true" />
+			</column>
+			<column name="createTime" type="varchar(255)" remarks="创建时间">
+				<constraints nullable="true" />
+			</column>
+			<column name="updateTime" type="varchar(255)" remarks="修改时间">
+				<constraints nullable="true" />
+			</column>
+			<column name="createBy" type="varchar(255)" remarks="创建人">
+				<constraints nullable="true" />
+			</column>
+			<column name="updateBy" type="varchar(255)" remarks="修改人">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<!-- 插入默认的值 -->
+	<changeSet id="20180131_addDataToDeviceType" author="屈龙">
+		<comment>设备类型基础数据录入</comment>
+		<insert tableName="DeviceType">
+			<column name="id" value="1283cd57bd12463db531f784c47c9487" />
+			<column name="deviceTypeName" value="户外设备" />
+			<column name="parentId" />
+			<column name="createTime" />
+			<column name="updateTime" />
+			<column name="createBy" />
+			<column name="updateBy" />
+		</insert>
+		<insert tableName="DeviceType">
+			<column name="id" value="399d887b25d949798cb7ceb9a26f57ae" />
+			<column name="deviceTypeName" value="智能家居" />
+			<column name="parentId" />
+			<column name="createTime" />
+			<column name="updateTime" />
+			<column name="createBy" value="屈龙" />
+			<column name="updateBy" />
+		</insert>
+		<insert tableName="DeviceType">
+			<column name="id" value="7477e1ed3a764e64989e968a2e454b65" />
+			<column name="deviceTypeName" value="智能交通" />
+			<column name="parentId" />
+			<column name="createTime" />
+			<column name="updateTime" />
+			<column name="createBy" value="屈龙" />
+			<column name="updateBy" />
+		</insert>
+		<insert tableName="DeviceType">
+			<column name="id" value="bf8c1084f9fe4020a1acc7468301e968" />
+			<column name="deviceTypeName" value="工业设备" />
+			<column name="parentId" />
+			<column name="createTime" />
+			<column name="updateTime" />
+			<column name="createBy" value="屈龙" />
+			<column name="updateBy" />
+		</insert>
+		<insert tableName="DeviceType">
+			<column name="id" value="7600c6b0493143a9936c358a3e3d0a95" />
+			<column name="deviceTypeName" value="压缩机" />
+			<column name="parentId" value="bf8c1084f9fe4020a1acc7468301e968" />
+			<column name="createTime" />
+			<column name="updateTime" />
+			<column name="createBy" />
+			<column name="updateBy" />
+		</insert>
+		<insert tableName="DeviceType">
+			<column name="id" value="832d22aedda04862849e4e2a408666df" />
+			<column name="deviceTypeName" value="人井998" />
+			<column name="parentId" value="1283cd57bd12463db531f784c47c9487" />
+			<column name="createTime" />
+			<column name="updateTime" />
+			<column name="createBy" value="屈龙2" />
+			<column name="updateBy" />
+		</insert>
+		<insert tableName="DeviceType">
+			<column name="id" value="8e7cee7cd6ac4097bd038f08d06d41d9" />
+			<column name="deviceTypeName" value="锅炉" />
+			<column name="parentId" value="bf8c1084f9fe4020a1acc7468301e968" />
+			<column name="createTime" />
+			<column name="updateTime" />
+			<column name="createBy" value="屈龙" />
+			<column name="updateBy" />
+		</insert>
+		<insert tableName="DeviceType">
+			<column name="id" value="c8ff48120b4e400cb562a861f3827fec" />
+			<column name="deviceTypeName" value="路灯" />
+			<column name="parentId" value="1283cd57bd12463db531f784c47c9487" />
+			<column name="createTime" />
+			<column name="updateTime" />
+			<column name="createBy" value="屈龙" />
+			<column name="updateBy" />
+		</insert>
+		<insert tableName="DeviceType">
+			<column name="id" value="ca604b088b5440e88e7d24424380bf9c" />
+			<column name="deviceTypeName" value="交接箱" />
+			<column name="parentId" value="1283cd57bd12463db531f784c47c9487" />
+			<column name="createTime" />
+			<column name="updateTime" />
+			<column name="createBy" />
+			<column name="updateBy" />
+		</insert>
+		<insert tableName="DeviceType">
+			<column name="id" value="d4707fe9277a42b5abb3f286968c5004" />
+			<column name="deviceTypeName" value="智能红绿灯" />
+			<column name="parentId" value="7477e1ed3a764e64989e968a2e454b65" />
+			<column name="createTime" />
+			<column name="updateTime" />
+			<column name="createBy" />
+			<column name="updateBy" />
+		</insert>
+		<insert tableName="DeviceType">
+			<column name="id" value="e2aa58e73031479499f5c9aef9130a9d" />
+			<column name="deviceTypeName" value="垃圾箱" />
+			<column name="parentId" value="1283cd57bd12463db531f784c47c9487" />
+			<column name="createTime" />
+			<column name="updateTime" />
+			<column name="createBy" value="屈龙" />
+			<column name="updateBy" />
+		</insert>
+		<insert tableName="DeviceType">
+			<column name="id" value="eb645069e2a34916ad9fc1f42593e6c3" />
+			<column name="deviceTypeName" value="智能空调" />
+			<column name="parentId" value="399d887b25d949798cb7ceb9a26f57ae" />
+			<column name="createTime" value="2017-10-17 17:48:25" />
+			<column name="updateTime" value="2017-10-17 17:48:44" />
+			<column name="createBy" value="屈龙" />
+			<column name="updateBy" />
+		</insert>
+	</changeSet>
+
+	<changeSet id="2018-02-11.xml" author="田明">
+		<comment>process_info表添加fileId字段</comment>
+		<addColumn tableName="process_info">
+			<column name="fileId" type="varchar(255)" remarks="xml文件id">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+	<changeSet id="20180223_add_nodeName" author="郭飞龙">
+		<comment>process_node_person表添加nodeName字段</comment>
+		<addColumn tableName="process_node_person">
+			<column name="nodeName" type="varchar(255)" remarks="节点名">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+	<changeSet id="20180223_add_orderByNum" author="郭飞龙">
+		<comment>process_node_person表添加orderByNum字段</comment>
+		<addColumn tableName="process_node_person">
+			<column name="orderByNum" type="varchar(255)" remarks="节点排序">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="20180226_ADD_process_type_base_DATA" author="田明">
+		<comment>插入process_type_base基础数据</comment>
+		<insert tableName="process_type_base">
+			<column name="id" value="h876d1c14ea04f1cb7d771681b00afm4"></column>
+			<column name="processType" value="告警转故障工单流程"></column>
+		</insert>
+	</changeSet>
+
+	<changeSet id="20180307_create_DeviceInfoConvert" author="赵伟志">
+		<comment>信息转换数据表</comment>
+		<createTable tableName="DeviceInfoConvert">
+			<column name="id" type="varchar(255)" remarks="主键id(UUID)">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="dicKey" type="varchar(255)" remarks="字典key">
+				<constraints nullable="false" />
+			</column>
+			<column name="dicValue" type="varchar(255)" remarks="字典value">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="2018-03-16_add_process_sign" author="赵伟志">
+		<comment>process_type_base表添加sign字段</comment>
+		<addColumn tableName="process_type_base">
+			<column name="processSign" type="varchar(255)" remarks="流程标识">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="liquibase-docs" id="update_process_sign">
+		<sql>
+			update process_type_base set processSign = 'alarmProcess' where
+			processType = '告警工单流程'
+		</sql>
+		<sql>
+			update process_type_base set processSign = 'inspectionProcess'
+			where
+			processType = '巡检工单流程'
+		</sql>
+		<sql>
+			update process_type_base set processSign = 'generalProcess' where
+			processType = '一般工单流程'
+		</sql>
+		<sql>
+			update process_type_base set processSign = 'alarmFailureProcess'
+			where
+			processType = '告警转故障工单流程'
+		</sql>
+		<sql>
+			update process_type_base set processSign = 'manualFailureProcess'
+			where
+			processType = '故障工单流程'
+		</sql>
+	</changeSet>
+
+	<changeSet id="2018-03-28_add_deviceConvert_createTime"
+		author="赵伟志">
+		<comment>DeviceInfoConvert表添加createTime字段</comment>
+		<addColumn tableName="DeviceInfoConvert">
+			<column name="createTime" type="varchar(255)" remarks="创建时间">
+					<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+	<changeSet id="2018-03-28_add_deviceConvert_updateTime"
+		author="赵伟志">
+		<comment>DeviceInfoConvert表添加updateTime字段</comment>
+		<addColumn tableName="DeviceInfoConvert">
+			<column name="updateTime" type="varchar(255)" remarks="更新时间">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+	<changeSet id="2018-03-28_add_deviceConvert_accessSecret"
+		author="赵伟志">
+		<comment>DeviceInfoConvert表添加accessSecret字段</comment>
+		<addColumn tableName="DeviceInfoConvert">
+			<column name="accessSecret" type="varchar(255)" remarks="接入方密钥">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+	<changeSet id="20180403_add_columnFordevice" author="王胜">
+		<comment>向Device设备表添加接入方秘钥accessSecret字段</comment>
+		<addColumn tableName="Device">
+			<column name="accessSecret" type="varchar(64)" remarks="接入方秘钥">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+	<changeSet id="20180404_add_columnForFacilitiesType" author="王胜">
+		<comment>向FacilitiesType设施类型表添加备注remark字段</comment>
+		<addColumn tableName="FacilitiesType">
+			<column name="remark" type="varchar(64)" remarks="备注">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.crud.repository.DevicePropertiesCrudRepository">
+	<resultMap id="DevicePropertiesResultMap" type="com.run.locman.api.entity.DeviceProperties">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="devicePropertiesName" jdbcType="VARCHAR"
+			property="devicePropertiesName" />
+		<result column="devicePropertiesSign" jdbcType="VARCHAR"
+			property="devicePropertiesSign" />
+		<result column="dataType" jdbcType="VARCHAR" property="dataType" />
+		<result column="dataValue" jdbcType="VARCHAR" property="dataValue" />
+		<result column="readWrite" jdbcType="INTEGER" property="readWrite" />
+		<result column="icon" jdbcType="VARCHAR" property="icon" />
+		<result column="appIcon" jdbcType="VARCHAR" property="appIcon" />
+		<result column="remark" jdbcType="VARCHAR" property="remark" />
+		<result column="creationTime" jdbcType="VARCHAR" property="creationTime" />
+		<result column="templateId" jdbcType="VARCHAR" property="templateId" />
+		<result column="orderNo" jdbcType="INTEGER" property="order" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id, devicePropertiesName, devicePropertiesSign, dataType,
+		dataValue, readWrite, icon,remark, creationTime, templateId, orderNo,appIcon
+	</sql>
+	<sql id="Base_Condition">
+		<if test="id != null">
+			and id=#{id}
+		</if>
+		<if test="devicePropertiesName != null">
+			and devicePropertiesName=#{devicePropertiesName}
+		</if>
+		<if test="devicePropertiesSign != null">
+			and devicePropertiesSign=#{devicePropertiesSign}
+		</if>
+		<if test="dataType != null">
+			and dataType=#{dataType}
+		</if>
+		<if test="dataValue != null">
+			and dataValue=#{dataValue}
+		</if>
+		<if test="readWrite != null">
+			and readWrite=#{readWrite}
+		</if>
+		<if test="icon != null">
+			and icon=#{icon}
+		</if>
+		<if test="appIcon != null">
+			and appIcon=#{appIcon}
+		</if>
+		<if test="remark != null">
+			and remark=#{remark}
+		</if>
+		<if test="creationTime != null">
+			and creationTime=#{creationTime}
+		</if>
+		<if test="templateId != null">
+			and templateId=#{templateId}
+		</if>
+		<if test="order != null">
+			and orderNo=#{order}
+		</if>
+	</sql>
+	
+	<insert id="insertModel" keyProperty="id"
+		parameterType="com.run.locman.api.entity.DeviceProperties">
+		<selectKey keyProperty="id" resultType="String" order="BEFORE">
+			SELECT REPLACE(UUID(),'-','') FROM DUAL
+		</selectKey>
+		insert into DeviceProperties(
+		<include refid="Base_Column" />
+		) values (#{id}, #{devicePropertiesName}, #{devicePropertiesSign}, #{dataType}, #{dataValue}, #{readWrite}
+		, #{icon}, #{remark}, #{creationTime}, #{templateId}, #{order}, #{appIcon})
+	</insert>
+	
+	<update id="updatePart" parameterType="com.run.locman.api.entity.DeviceProperties">
+		update DeviceProperties set
+		<if test="id != null and id != ''">
+			id=#{id}
+		</if>
+		<if test="devicePropertiesName != null and devicePropertiesName != ''">
+			,devicePropertiesName=#{devicePropertiesName}
+		</if>
+		<if test="creationTime != null and creationTime != ''">
+			,creationTime=#{creationTime}
+		</if>
+		<if test="devicePropertiesSign != null and devicePropertiesSign != ''">
+			,devicePropertiesSign=#{devicePropertiesSign}
+		</if>
+		<if test="dataType != null and dataType != ''">
+			,dataType=#{dataType}
+		</if>
+		<if test="dataValue != null and dataValue != ''">
+			,dataValue=#{dataValue}
+		</if>
+		<if test="readWrite != null">
+			,readWrite=#{readWrite}
+		</if>
+		<if test="icon != null and icon != ''">
+			,icon=#{icon}
+		</if>
+		<if test="appIcon != null and appIcon != ''">
+			,appIcon=#{appIcon}
+		</if>
+		<if test="remark != null and remark != ''">
+			,remark=#{remark}
+		</if>
+		<if test="templateId != null and templateId != ''">
+			,templateId=#{templateId}
+		</if>
+		<if test="order != null">
+			,orderNo=#{order}
+		</if>
+		where id=#{id}
+	</update>
+	
+	<delete id="deleteById" parameterType="String">
+		delete from DeviceProperties
+		where id=#{id}
+	</delete>
+	
+	<update id="updateOrder" parameterType="java.util.Map">
+		update DeviceProperties set orderNo = orderNo + 1
+		where templateId=#{templateId} and orderNo <![CDATA[ >= ]]> #{order}
+		and id <![CDATA[ <> ]]> #{propertiesId}
+	</update>
+	<select id="checkNameAndSigExist" parameterType="com.run.locman.api.entity.DeviceProperties" resultType="com.alibaba.fastjson.JSONObject">
+		SELECT
+			dp.devicePropertiesName,
+			dp.devicePropertiesSign
+		FROM
+			DeviceProperties dp
+		WHERE
+			dp.templateId = #{templateId}
+		AND (
+		dp.devicePropertiesSign = #{devicePropertiesSign}
+		OR	dp.devicePropertiesName = #{devicePropertiesName}
+		)
+		<if test="id != null and id != ''">
+		AND dp.id != #{id}
+		</if>
+	</select>
+
+	
+</mapper>

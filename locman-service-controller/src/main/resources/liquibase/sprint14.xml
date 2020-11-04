@@ -1,0 +1,40 @@
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+
+	<property name="autoIncrement" value="true" dbms="mysql" />
+	<changeSet id="20180411_addSimpleOrderProcessState" author="赵伟志">
+		<insert tableName="SimpleOrderProcessState">
+			<column name="id" value="007" />
+			<column name="name" value="已过期" />
+			<column name="sign" value="7" />
+			<column name="accessSecret" value="a8f5d1bb1f8b8780" />
+		</insert>
+	</changeSet>
+	<!-- 告警信息和告警工单关系表 -->
+	<changeSet id="20180419_createAlarm_Order" author="王胜">
+		<comment>告警信息告警工单关系表</comment>
+		<createTable tableName="Alarm_Order">
+			<column name="id" type="varchar(32)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="alarmId" type="varchar(255)" remarks="告警Id">
+				<constraints nullable="false" />
+			</column>
+			<column name="alarmOrderId" type="varchar(255)" remarks="告警工单Id">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet id="20180423_addColumn_accessSecret" author="王胜">
+		<comment>DeviceType_Template表添加accessSecret字段</comment>
+		<addColumn tableName="DeviceType_Template">
+			<column name="accessSecret" type="varchar(255)" remarks="接入方秘钥">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+</databaseChangeLog>

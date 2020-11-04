@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.timer.query.repository.OrderProcessQueryRepository">
+
+	<select id="findPersonByAccessSecret" resultType="java.util.Map">
+		SELECT
+		node AS
+		node,pn.organizeId,
+		personId AS
+		personId,
+		nodeName
+		FROM
+		process_node_person pn
+		WHERE
+		processId IN (
+		SELECT
+		DISTINCT
+		processId
+		FROM
+		process_node_person pnp
+		LEFT JOIN process_info pi ON pi.id
+		= pnp.processId
+		LEFT JOIN process_type_base ptb ON ptb.id =
+		pi.processType
+		WHERE
+		ptb.processType = #{processType}
+		AND pi.accessSecret
+		= #{accessSecret}
+		AND pi.manageState
+		= 'enabled'
+		)
+	</select>
+	
+	<select id="queryNodeInfoForActivity" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT
+		node AS node,
+		GROUP_CONCAT(DISTINCT personId) AS
+		personId
+		FROM
+		process_node_person
+		WHERE
+		processId IN (
+		SELECT
+		DISTINCT
+		processId
+		FROM
+		process_node_person pnp
+		LEFT JOIN process_info pi ON pi.id
+		= pnp.processId
+		LEFT JOIN process_type_base ptb ON ptb.id =
+		pi.processType
+		WHERE
+		ptb.processType = #{processType}
+		AND pi.manageState
+		= 'enabled'
+		AND pi.accessSecret = #{accessSecret}
+		)
+		AND organizeId =
+		#{organizeId}
+		GROUP BY
+		node
+	</select>
+</mapper>
+

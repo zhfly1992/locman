@@ -1,0 +1,29 @@
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+
+	<property name="autoIncrement" value="true" dbms="mysql" />
+
+
+	<!-- 创建设备历史数据表 -->
+	<changeSet id="20180115_createDeviceStateHistory" author="屈龙">
+		<comment>设备历史数据表</comment>
+		<createTable tableName="DeviceStateHistory">
+			<column name="id" type="varchar(32)" remarks="主键id">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="deviceId" type="varchar(32)" remarks="设备id">
+				<constraints nullable="true" />
+			</column>
+			<column name="datas" type="text" remarks="状态数据">
+				<constraints nullable="true" />
+			</column>
+			<column name="reportTime" type="varchar(32)" remarks="上报时间">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	</changeSet>
+</databaseChangeLog>

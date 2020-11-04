@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.run.locman.api.crud.repository.FacilityRenovationCrudRepository">
+	
+	
+	<insert id="addFacilitiesRenovation" keyProperty="id">
+		INSERT INTO FacilitiesRenovation (
+			id,
+			facilityId,
+			applicationInfo,
+			createTime,
+			manageState,
+			createBy
+		)
+		VALUES
+			(
+				#{id},
+				#{facilityId},
+				#{applicationInfo},
+				NOW(),
+				"1",
+				#{userId}
+			);
+	</insert>
+	
+	<update id="updateFacRenovationManageState" parameterType="java.util.Map">
+		update FacilitiesRenovation set
+		<if test="facilityId != null and facilityId != ''">
+			facilityId=#{facilityId}
+		</if>
+		<if test="manageState != null and manageState != '' ">
+			,manageState=#{manageState}
+			<if test="manageState == '0'.toString()">
+			,dealBy=#{userId}
+			,dealTime = NOW()
+			</if>
+			<if test="manageState == '2'.toString()">
+			,auditor=#{userId}
+			,auditTime = NOW()
+			</if>
+			<if test="manageState == '3'.toString()">
+			,auditor=#{userId}
+			,auditTime = NOW()
+			</if>
+			
+		</if>
+		
+		where facilityId=#{facilityId}
+		<if test="manageState != null and manageState != '' ">
+			<!-- 信息状态为审批通过待处理才能进行转故障处理 -->
+			<if test="manageState == '0'.toString()">
+				AND manageState = '3'
+			</if>
+			<!-- 信息状态为待审核才能进行审核或拒绝-->
+			<if test="manageState != '0'.toString()">
+				AND manageState = '1'
+			</if>
+		</if>
+		
+	</update>
+	
+</mapper>

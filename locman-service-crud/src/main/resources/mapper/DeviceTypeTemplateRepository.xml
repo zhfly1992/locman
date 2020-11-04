@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.crud.repository.DeviceTypeTemplateCudRepository">
+	<resultMap id="BaseResultMap" type="com.run.locman.api.entity.DeviceTypeTemplate">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="deviceTypePropertyConfigId" jdbcType="VARCHAR"
+			property="deviceTypePropertyConfigId" />
+		<result column="devicePropertyTemplateId" jdbcType="VARCHAR"
+			property="devicePropertyTemplateId" />
+		<result column="accessSecret" jdbcType="VARCHAR" property="accessSecret" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id, deviceTypePropertyConfigId,
+		devicePropertyTemplateId,accessSecret
+	</sql>
+
+	<delete id="unbindDeviceTypePropertyAndTemplate" parameterType="java.util.Map">
+		delete from DeviceType_Template  where
+		deviceTypePropertyConfigId
+		=#{deviceTypePropertyConfigId} and
+		accessSecret = #{accessSecret}
+	</delete>
+
+	<insert id="bindDeviceTypePropertyAndTemplate" parameterType="com.run.locman.api.entity.DeviceTypeTemplate">
+		insert into DeviceType_Template(
+		<include refid="Base_Column" />
+		)
+		values (
+		(SELECT REPLACE(UUID(),'-','') FROM
+		DUAL),
+		#{deviceTypePropertyConfigId},
+		#{devicePropertyTemplateId},#{accessSecret}
+		)
+	</insert>
+</mapper>

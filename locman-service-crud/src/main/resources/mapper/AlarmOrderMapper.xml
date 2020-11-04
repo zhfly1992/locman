@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.run.locman.api.crud.repository.AlarmOrderCrudRepository">
+	<sql id="Base_Column_List">
+		id, serialNum, alarmId, processId, accessSecret,
+		processState, userId,
+		userName, phone, createTime
+	</sql>
+
+	<insert id="insertModel" parameterType="com.run.locman.api.entity.AlarmOrder">
+		insert into AlarmOrder (
+		<include refid="Base_Column_List" />
+		)
+		values (#{id}, (SELECT IFNULL(MAX(t.serialNum)+1, 10000) FROM
+		AlarmOrder t WHERE t.accessSecret = #{accessSecret}),
+		#{alarmId},
+		#{processId}, #{accessSecret}, #{processState}, #{userId},
+		#{userName}, #{phone}, #{createTime})
+	</insert>
+
+	<update id="updatePart">
+		UPDATE AlarmOrder
+		<trim prefix="set" suffixOverrides=",">
+			<if test="processId != null and processId != ''">
+				processId = #{processId},
+			</if>
+			<if test="processState != null and processState != ''">
+				processState = #{processState},
+			</if>
+			<if test="userId != null and userId != ''">
+				userId = #{userId},
+			</if>
+			<if test="userName != null and userName != ''">
+				userName = #{userName},
+			</if>
+			<if test="phone != null and phone != ''">
+				phone = #{phone},
+			</if>
+			<if test="phone != null and phone != ''">
+				phone = #{phone},
+			</if>
+			<if test="faultOrderId != null and faultOrderId != ''">
+				faultOrderId = #{faultOrderId},
+			</if>
+			<if test="alarmOrderStateTypeId != null and alarmOrderStateTypeId != ''">
+				alarmOrderStateTypeId = #{alarmOrderStateTypeId},
+			</if>
+			<if test="receiveTime != null and receiveTime != ''">
+				receiveTime = #{receiveTime}
+			</if>
+		</trim>
+		WHERE id = #{id}
+	</update>
+
+	<!-- 同一个设备同一个规则的告警，仅更新告警ID -->
+	<update id="updateOrderAlarmId" parameterType="java.util.Map">
+		<selectKey keyProperty='alarmOrderId' resultType='java.util.Map'
+			order='BEFORE'>
+			SELECT
+			(
+			SELECT
+			AO.id alarmOrderId
+			FROM
+			AlarmOrder AO
+			LEFT JOIN
+			AlarmInfo AI ON AO.alarmId = AI.id
+			WHERE
+			AI.deviceId = #{deviceId}
+			AND (
+			AO.processState IS NOT NULL
+			AND AO.processState != 3
+			AND
+			AO.processState != 4
+			)
+			ORDER BY AO.createTime DESC
+			LIMIT 1
+			)alarmOrderId
+			from DUAL
+		</selectKey>
+		UPDATE AlarmOrder
+		AOX
+		INNER JOIN (
+		SELECT
+		AO.id id
+		FROM
+		AlarmOrder AO
+		LEFT
+		JOIN AlarmInfo AI ON AO.alarmId = AI.id <!-- 修改以前需求，一个设备不同规则只生成一条工单 -->
+		WHERE <!-- AI.alarmDesc = #{alarmDesc} AND AI.rule = #{rule} AND -->
+		AI.deviceId = #{deviceId}
+		AND
+		(AO.processState IS NOT NULL AND
+		AO.processState != 3 AND
+		AO.processState != 4)	<!-- 更新未完成的工单 -->
+		) t ON t.id = AOX.id
+		SET AOX.alarmId = #{alarmId}<!-- , AOX.createTime = 
+			#{createTime} -->
+	</update>
+
+	<insert id="saveAlarmOrderAndInfo" parameterType="java.util.Map">
+		insert into
+		Alarm_Order (id,alarmId,alarmOrderId) values
+		<foreach collection="list" item="alarm" index="index"
+			separator=",">
+			(#{alarm.id},#{alarm.alarmId},#{alarm.alarmOrderId})
+		</foreach>
+	</insert>
+
+	<!-- 获取生成的工单跟同设备通告警规则还未处理的的告警信息id关系集合 -->
+	<select id="getAlarmIdAndOrderIdByAlarmId" resultType="java.util.Map"
+		parameterType="java.lang.String">
+		SELECT
+		REPLACE (UUID(), '-', '') AS id,
+		a.id AS alarmId,
+		(
+		SELECT
+		id
+		FROM
+		AlarmOrder ao
+		WHERE
+		ao.alarmId = #{alarmId}
+		) AS alarmOrderId
+		FROM
+		AlarmInfo a,
+		(
+		SELECT
+		*
+		FROM
+		AlarmInfo ai
+		WHERE
+		ai.id = #{alarmId}
+		) b
+		WHERE
+		a.rule = b.rule
+		AND a.deviceId = b.deviceId
+		AND a.isDel = '1'
+	</select>
+
+	<update id="addPresentPic" parameterType="java.util.Map">
+		UPDATE AlarmOrder
+		set
+		presentPic = #{picUrl}
+		WHERE id = #{id}
+	</update>
+
+	<update id="addEndPic" parameterType="java.util.Map">
+		UPDATE AlarmOrder
+		SET
+		endPic
+		= #{Url}
+		WHERE id = #{id}
+	</update>
+
+	<select id="IsTherePresentPic" parameterType="java.lang.String"
+		resultType="java.lang.String">
+		SELECT
+		presentPic
+		from AlarmOrder
+		where id=#{id}
+	</select>
+
+
+	<select id="alarmOrderInfoByOrderId" parameterType="java.lang.String"
+		resultType="com.run.locman.api.entity.AlarmOrder">
+		SELECT
+		a.id,
+		a.serialNum,
+		a.alarmId,
+		a.processId,
+		a.accessSecret,
+		a.processState
+		as state,
+		aos. NAME AS processState,
+		a.userId,
+		a.createTime
+		FROM
+		AlarmOrder a
+		LEFT JOIN AlarmOrderStateType aos
+		ON a.processState = aos.sign
+		WHERE
+		a.id = #{alarmOrderId}
+		AND aos.type =
+		1
+
+	</select>
+
+	<update id="updateAlarmOrderStateAndAlarmInfoIsDel"
+		parameterType="java.util.Map">
+		UPDATE AlarmOrder ao
+		LEFT JOIN Alarm_Order aiao ON aiao.alarmOrderId =
+		ao.id
+		LEFT JOIN AlarmInfo ai ON ai.id = aiao.alarmId
+		LEFT JOIN
+		Facilities f ON f.id = ai.facilitiesId
+		set ao.processState = 4,ai.isDel
+		= 3, ao.userId = 'adminDefense'
+		WHERE
+		ao.accessSecret =
+		#{accessSecret}
+		AND ao.processState NOT IN (4,
+		3)
+		and (ai.isDel = 0 or ai.isDel = 1)
+		<if test="organizationId != null and organizationId.size > 0">
+			and f.organizationId in
+			<foreach item="item" collection="organizationId" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="facIds != null and facIds.size > 0">
+			and f.id in
+			<foreach item="item" collection="facIds" index="index" open="("
+				close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+	</update>
+
+	<select id="getAlarmOrderIdPresentPicExits" parameterType="java.util.Map"
+		resultType="java.lang.String">
+		SELECT ao.id from AlarmOrder ao 
+		LEFT JOIN AlarmInfo ai 
+		on 	ao.alarmId = ai.id 
+		where ao.processState not in (3,4,5) 
+		and ao.presentPic !="" 
+		and ai.deviceId = #{deviceId}
+		and ao.accessSecret = "aecde01f-9ae2-4876-84b7-c08ea25a4788"
+
+	</select>
+</mapper>

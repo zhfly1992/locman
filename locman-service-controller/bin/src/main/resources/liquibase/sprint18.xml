@@ -1,0 +1,42 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+
+	<property name="autoIncrement" value="true" dbms="mysql" />
+
+
+	<changeSet id="20180717_alarmOrder_alarmOrderStateTypeId"
+		author="赵伟志">
+		<comment>alarmOrder表增加工单完成or无法修复状态</comment>
+		<addColumn tableName="AlarmOrder">
+			<column name="alarmOrderStateTypeId" type="varchar(255)"
+				remarks="工单完成or无法修复状态">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="20180720_process_node_person_realOrganizeName"
+		author="赵伟志">
+		<comment>process_node_person表增加真实组织名称</comment>
+		<addColumn tableName="process_node_person">
+			<column name="realOrganizeName" type="varchar(255)" remarks="真实组织名称">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+	<changeSet id="20180803_addColumn_RemoteControlRecord"
+		author="王胜">
+		<comment>RemoteControlRecord表增加有效无效状态</comment>
+		<addColumn tableName="RemoteControlRecord">
+			<column name="controlState" type="varchar(64)" remarks="valid:有效，invalid:无效">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+	
+
+
+</databaseChangeLog>

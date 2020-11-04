@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+    http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+	<dubbo:protocol name="dubbo" port="${service.port:80}"
+		accesslog="true" />
+	<dubbo:provider id="payload" payload="41943040" retries="0" />	<!-- 配置最大io传输限制 -->
+
+	<!-- 基础功能 -->
+
+	<dubbo:service interface="com.run.locman.api.crud.service.FacilitiesCrudService"
+		ref="facilitiesCrudService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.FacilitiesTypeCudService"
+		ref="facilitiesTypeCudService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.FacilitiesDataTypeCudService"
+		ref="facilitiesDataTypeCudService" protocol="dubbo" retries="1"
+		timeout="3000" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.FacilitiesTypeBaseCudService"
+		ref="facilitiesTypeBaseCudService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.FacilityDeviceCudService"
+		ref="facilityDeviceCudService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.DeviceTypeTemplateCudService"
+		ref="deviceTypeTemplateCudService" protocol="dubbo" />
+	<dubbo:service interface="com.run.locman.api.crud.service.FactoryCrudService"
+		ref="factoryCrudService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.FactoryAppTagCrudService"
+		ref="factoryAppTagCrudService" protocol="dubbo" />
+	<dubbo:service interface="com.run.locman.api.crud.service.PropertiesCrudService"
+		ref="propertiesCrudService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.PropertiesTemplateCrudService"
+		ref="propertiesTemplateCrudService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.DistributionPowersCudService"
+		ref="distributionPowersCudService" protocol="dubbo" />
+	<dubbo:service interface="com.run.locman.api.crud.service.AlarmRuleService"
+		ref="alarmRuleCudServiceImpl" protocol="dubbo" />
+	<dubbo:service interface="com.run.locman.api.crud.service.AlarmInfoCrudService"
+		ref="alarmInfoCrudServiceImpl" protocol="dubbo" />
+	<dubbo:service interface="com.run.locman.api.crud.service.AlarmOrderCrudService"
+		ref="alarmOrderCrudService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.FaultOrderProcessCudService"
+		ref="faultOrderProcessCudService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.FaultOrderDeviceCudService"
+		ref="faultOrderDeviceCudService" protocol="dubbo" />
+	<dubbo:service interface="com.run.locman.api.crud.service.SimpleOrderCrudService"
+		ref="simpleOrderCrudService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.RemoteControlRecordCrudService"
+		ref="remoteControlRecordCrudService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.DeviceStateHistoryCrudService"
+		ref="deviceStateHistoryCrudService" protocol="dubbo" />
+	<dubbo:service interface="com.run.locman.api.crud.service.OrderProcessCudService"
+		ref="orderProcessCudService" protocol="dubbo" timeout="30000" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.DeviceInfoConvertCrudService"
+		ref="deviceInfoConvertCrudService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.BasicDeviceAttributeTemplateCurdService"
+		ref="basicDeviceAttributeTemplateCurdService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.BaseFacilitiesTypeCrudService"
+		ref="baseFacilitiesTypeCrudService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.BasicDeviceInfoConvertCrudService"
+		ref="basicDeviceInfoConvertCrudService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.BalanceSwitchPowersCrudService"
+		ref="balanceSwitchPowersCrudService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.BalanceSwitchStateRecordCurdService"
+		ref="balanceSwitchStateRecordCurdService" protocol="dubbo" />
+
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.TimeoutReportConfigCrudService"
+		ref="timeoutReportConfigCrudService" protocol="dubbo" />
+
+	<dubbo:service interface="com.run.locman.api.crud.service.SmsRegistService"
+		ref="smsRegistService" protocol="dubbo" />
+	<dubbo:service interface="com.run.locman.api.crud.service.DeviceJobCrudService"
+		ref="deviceJobCrudService" protocol="dubbo" />
+	<dubbo:service interface="com.run.locman.api.crud.service.DeviceSchedulerService"
+		ref="deviceSchedulerService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.SwitchLockRecordCrudService"
+		ref="switchLockRecordCrudService" protocol="dubbo" />
+
+	<dubbo:service interface="com.run.locman.api.crud.service.DeviceInfoCudService"
+		ref="deviceInfoCudService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.DeviceReportedCrudService"
+		ref="deviceReportedCrudService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.DeviceAlarmProduceService"
+		ref="deviceAlarmProduceService" protocol="dubbo" />
+
+	<dubbo:service interface="com.run.locman.api.crud.service.DeviceTypeCudService"
+		ref="deviceTypeCudService" protocol="dubbo" />
+
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.DeviceDataStorageCudService"
+		ref="deviceDataStorageCudService" protocol="dubbo" />
+
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.DeviceDataStorageCudService"
+		ref="deviceDataStorageCudService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.FacilitiesRenovationCrudService"
+		ref="facilitiesRenovationCrudService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.FocusSecurityCrudService"
+		ref="focusSecurityCrudService" protocol="dubbo" />
+	<dubbo:service
+		interface="com.run.locman.api.crud.service.UpdateRedisCrudService"
+		ref="updateRedisCrudService" protocol="dubbo" />
+
+	<!-- 被调用的基础beans -->
+	<bean id="facilitiesCrudService" class="com.run.locman.service.crud.FacilitiesCrudServiceImpl" />
+	<bean id="facilitiesTypeCudService"
+		class="com.run.locman.service.crud.FacilitiesTypeCudServiceImpl" />
+	<bean id="facilitiesDataTypeCudService"
+		class="com.run.locman.service.crud.FacilitiesDataTypeCudServiceImpl" />
+	<bean id="facilitiesTypeBaseCudService"
+		class="com.run.locman.service.crud.FacilitiesTypeBaseCudServiceImpl" />
+	<bean id="facilityDeviceCudService"
+		class="com.run.locman.service.crud.FacilityDeviceCudServiceImpl" />
+	<bean id="deviceTypeTemplateCudService"
+		class="com.run.locman.service.crud.DeviceTypeTemplateCudServiceImpl" />
+	<bean id="factoryCrudService" class="com.run.locman.service.crud.FactoryCrudServiceImpl" />
+	<bean id="factoryAppTagCrudService"
+		class="com.run.locman.service.crud.FactoryAppTagCrudServiceImpl" />
+	<bean id="propertiesCrudService" class="com.run.locman.service.crud.PropertiesCrudServiceImpl" />
+	<bean id="propertiesTemplateCrudService"
+		class="com.run.locman.service.crud.PropertiesTemplateCrudServiceImpl" />
+	<bean id="distributionPowersCudService"
+		class="com.run.locman.service.crud.DistributionPowersCudServiceImpl" />
+	<bean id="alarmRuleCudServiceImpl" class="com.run.locman.service.crud.AlarmRuleCudServiceImpl" />
+	<bean id="alarmInfoCrudServiceImpl" class="com.run.locman.service.crud.AlarmInfoCrudServiceImpl" />
+	<bean id="alarmOrderCrudService" class="com.run.locman.service.crud.AlarmOrderCrudServiceImpl" />
+	<bean id="faultOrderProcessCudService"
+		class="com.run.locman.service.crud.FaultOrderProcessCudServiceImpl" />
+	<bean id="faultOrderDeviceCudService"
+		class="com.run.locman.service.crud.FaultOrderDeviceCudServiceImpl" />
+	<bean id="simpleOrderCrudService" class="com.run.locman.service.crud.SimpleOrderCrudServiceImpl" />
+	<bean id="remoteControlRecordCrudService"
+		class="com.run.locman.service.crud.RemoteControlRecordCrudServiceImpl" />
+	<bean id="deviceStateHistoryCrudService"
+		class="com.run.locman.service.crud.DeviceStateHistoryCrudServiceImpl" />
+	<bean id="deviceInfoCudService" class="com.run.locman.service.crud.DeviceInfoCudServiceImpl" />
+	<bean id="orderProcessCudService" class="com.run.locman.service.crud.OrderProcessCudServiceImpl" />
+	<dubbo:service interface="com.run.locman.api.drools.service.ExportDate"
+		ref="exportDate" protocol="dubbo" />
+	<bean id="exportDate" class="com.run.locman.service.crud.ExportDateTest" />
+
+	<bean id="deviceInfoConvertCrudService"
+		class="com.run.locman.service.crud.DeviceInfoConvertCrudServiceImpl" />
+	<bean id="basicDeviceAttributeTemplateCurdService"
+		class="com.run.locman.service.crud.BasicDeviceAttributeTemplateCurdServiceImpl" />
+	<bean id="baseFacilitiesTypeCrudService"
+		class="com.run.locman.service.crud.BaseFacilitiesTypeCrudServiceImpl" />
+	<bean id="basicDeviceInfoConvertCrudService"
+		class="com.run.locman.service.crud.BasicDeviceInfoConvertCrudServiceImpl" />
+	<bean id="balanceSwitchPowersCrudService"
+		class="com.run.locman.service.crud.BalanceSwitchPowersCrudServiceImpl" />
+	<bean id="balanceSwitchStateRecordCurdService"
+		class="com.run.locman.service.crud.BalanceSwitchStateRecordCurdServiceImpl" />
+	<bean id="timeoutReportConfigCrudService"
+		class="com.run.locman.service.crud.TimeoutReportConfigCrudServiceImpl" />
+
+	<bean id="smsRegistService" class="com.run.locman.service.crud.SmsRegistServiceImpl" />
+	<bean id="deviceJobCrudService" class="com.run.locman.service.crud.DeviceJobCrudServiceImpl" />
+	<bean id="deviceSchedulerService" class="com.run.locman.service.crud.DeviceSchedulerServiceImpl" />
+
+	<bean id="switchLockRecordCrudService"
+		class="com.run.locman.service.crud.SwitchLockRecordCrudServiceImpl" />
+
+	<bean id="deviceReportedCrudService"
+		class="com.run.locman.service.crud.DeviceReportedCrudServiceImpl" />
+	<bean id="deviceAlarmProduceService"
+		class="com.run.locman.service.crud.DeviceAlarmProduceServiceImpl" />
+
+	<bean id="deviceTypeCudService" class="com.run.locman.service.crud.DeviceTypeCudServiceImpl" />
+
+	<bean id="deviceDataStorageCudService"
+		class="com.run.locman.service.crud.DeviceDataStorageCudServiceImpl" />
+	<bean id="facilitiesRenovationCrudService"
+		class="com.run.locman.service.crud.FacilitiesRenovationCrudServiceImpl" />
+	<bean id="focusSecurityCrudService"
+		class="com.run.locman.service.crud.FocusSecurityCrudServiceImpl" />
+	<bean id="updateRedisCrudService"
+		class="com.run.locman.service.crud.UpdateRedisCrudServiceImpl" />
+
+</beans>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.crud.repository.BasicDeviceAttributeTemplateCurdRepository">
+
+
+	<insert id="insertDevicePropertiesTemplate" parameterType="java.util.List">
+		insert into DeviceProperties_Template
+		(id,templateName,creationTime,editorTime,manageState,accessSecret)
+		values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.id}
+			,#{item.templateName}
+			,#{item.creationTime}
+			,#{item.editorTime}
+			,#{item.manageState}
+			,#{item.accessSecret})
+		</foreach>
+	</insert>
+
+	<insert id="insertDeviceProperties" parameterType="java.util.List">
+		insert into DeviceProperties
+		(id,devicePropertiesName,devicePropertiesSign,dataType,dataValue,readWrite,icon,remark,creationTime,templateId,orderNo,appIcon)
+		values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.id}
+			,#{item.devicePropertiesName}
+			,#{item.devicePropertiesSign}
+			,#{item.dataType}
+			,#{item.dataValue}
+			,#{item.readWrite}
+			,#{item.icon}
+			,#{item.remark}
+			,#{item.creationTime}
+			,#{item.templateId}
+			,#{item.orderNo}
+			,#{item.appIcon})
+		</foreach>
+	</insert>
+
+
+
+	<insert id="insetDeviceTypeTemplate" parameterType="com.run.locman.api.entity.DeviceTypeTemplate">
+		insert into
+		DeviceType_Template(id,deviceTypePropertyConfigId,devicePropertyTemplateId,accessSecret)
+		values(#{id},#{deviceTypePropertyConfigId},#{devicePropertyTemplateId},#{accessSecret})
+	</insert>
+
+
+
+</mapper>
+

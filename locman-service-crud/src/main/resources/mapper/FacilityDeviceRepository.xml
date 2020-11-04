@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.crud.repository.FacilityDeviceCrudRepository">
+	<resultMap id="BaseResultMap" type="com.run.locman.api.entity.FacilityDevice">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="deviceId" jdbcType="VARCHAR" property="deviceId" />
+		<result column="facilityId" jdbcType="VARCHAR" property="facilityId" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id, deviceId, facilityId,deviceTypeId
+	</sql>
+
+
+	<insert id="insertModelByBatch" parameterType="java.util.Map">
+		insert into Facility_Device(
+		<include refid="Base_Column" />
+		) values
+		<foreach collection="deviceIdArray" item="deviceId" index="index"
+			separator=",">
+			((SELECT REPLACE(UUID(),'-','') FROM
+			DUAL),#{deviceId},#{facilityId})
+		</foreach>
+	</insert>
+	
+	<insert id="insertFacilityRsDevice" parameterType="java.util.Map">
+		insert into Facility_Device(
+		<include refid="Base_Column" />
+		) values ((SELECT REPLACE(UUID(),'-','') FROM
+			DUAL),#{deviceId},#{facilityId},#{deviceTypeId})
+		
+	</insert>
+
+
+	<delete id="deleteByBatch" parameterType="java.util.Map">
+		delete from Facility_Device
+		<where>
+			facilityId = #{facilityId} and 
+			deviceId in
+			<foreach collection="deviceIdArray" item="deviceId"
+				separator="," open="(" close=")">
+				#{deviceId}
+			</foreach>
+		</where>
+	</delete>
+</mapper>

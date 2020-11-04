@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.run.locman.api.query.repository.FaultOrderProcessTypeQueryRepository">
+
+	<resultMap id="BaseResultMap" type="com.run.locman.api.entity.FaultOrderProcessType">
+		<id column="id" jdbcType="VARCHAR" property="id"/>
+		<result column="name" jdbcType="VARCHAR" property="name"/>
+		<result column="accessSecret" jdbcType="VARCHAR" property="accessSecret"/>
+	</resultMap>
+
+    <select id="getFaultOrderTypeList" resultType="com.run.locman.api.entity.FaultOrderProcessType">
+		SELECT id,name from FaultOrderProcessType
+	</select>
+
+	<select id="findById" parameterType="java.lang.String" resultMap="BaseResultMap">
+		SELECT *  from FaultOrderProcessType where id = #{id}
+	</select>
+
+</mapper>
+

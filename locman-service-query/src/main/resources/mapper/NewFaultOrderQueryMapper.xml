@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.run.locman.api.query.repository.NewFaultOrderQueryRepository">
+	
+	<select id="getFaultListInfo" resultType="java.util.Map" parameterType="java.util.Map">
+		SELECT
+			nfo.id,
+			nfo.finishTime,
+			nfo.createTime,
+			nfo.creatFrom,
+			nfo.nodeNum,
+			d.deviceName,
+			f.organizationId,
+			f.address
+			from 
+			
+			NewFaultOrder nfo 
+			LEFT JOIN Facilities f on nfo.facilityId =f.id
+			LEFT JOIN Facility_Device fd on fd.facilityId =f.id
+			LEFT JOIN Device d on d.id =fd.deviceId 
+			LEFT JOIN NewFaultOrderState nfos on nfos.sign=nfo.orderState
+			
+			where nfo.orderState=#{orderState}
+			ORDER BY 
+			nfo.createTime DESC ,nfo.finishTime DESC
+	</select>
+	
+	
+	
+	
+</mapper>

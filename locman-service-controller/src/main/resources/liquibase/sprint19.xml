@@ -1,0 +1,91 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+
+	<property name="autoIncrement" value="true" dbms="mysql" />
+
+	<!-- 创建表 -->
+	<changeSet id="20180803" author="赵伟志">
+		<comment>开关锁命令记录表</comment>
+		<createTable tableName="SwitchLockRecord">
+			<column name="id" type="varchar(32)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="lockState" type="varchar(255)" remarks="开关状态">
+				<constraints nullable="false" />
+			</column>
+			<column name="reportTime" type="varchar(255)" remarks="上报时间">
+				<constraints nullable="false" />
+			</column>
+			<column name="deviceId" type="varchar(255)" remarks="设备Id">
+				<constraints nullable="false" />
+			</column>
+			<column name="arrangeUserId" type="varchar(255)" remarks="操作人Id">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="20180803_add_remoteControlRecordId" author="赵伟志">
+		<comment>alarmOrder表增加工单完成or无法修复状态</comment>
+		<addColumn tableName="SwitchLockRecord">
+			<column name="remoteControlRecordId" type="varchar(255)"
+				remarks="命令Id">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+
+	<changeSet id="20180807_add_accessSecret" author="赵伟志">
+		<comment>SwitchLockRecord增加接入方密钥</comment>
+		<addColumn tableName="SwitchLockRecord">
+			<column name="accessSecret" type="varchar(255)" remarks="接入方密钥">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="20180813_Base_AlarmRule" author="王胜">
+		<comment>修改基础告警规则同步名称</comment>
+		<sql>update Base_AlarmRule set ruleName = '锁A非法开启',remark = '锁A非法开启' where id = 'e75bbd17d3164aaa82383d6affd93183'</sql>
+		<sql>update Base_AlarmRule set ruleName = '锁B非法开启',remark = '锁B非法开启' where id = '215bf4b568494779bf6217c53a6c48f6'</sql>
+		<sql>update Base_AlarmRule set ruleName = '门A非法开启',remark = '门A非法开启' where id = '220460e568454c8bb69619549f3a2243'</sql>
+		<sql>update Base_AlarmRule set ruleName = '门B非法开启',remark = '门B非法开启' where id = 'e5a42a27f56b45a283775f476e50e471'</sql>
+	</changeSet>
+
+	<changeSet id="20180813" author="张贺">
+		<comment>告警短信发送记录表</comment>
+		<createTable tableName="SmsRecord">
+			<column name="id" type="varchar(32)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="alarmSerialNum" type="bigint(36)" remarks="告警流水号">
+				<constraints nullable="false" />
+			</column>
+			<column name="userName" type="varchar(32)" remarks="接收人姓名">
+				<constraints nullable="false" />
+			</column>
+			<column name="phoneNumber" type="varchar(32)" remarks="发送手机号">
+				<constraints nullable="false" />
+			</column>
+			<column name="smsContent" type="varchar(255)" remarks="短信内容">
+				<constraints nullable="false" />
+			</column>
+			<column name="sendTime" type="varchar(255)" remarks="发送时间">
+				<constraints nullable="false" />
+			</column>
+
+		</createTable>
+	</changeSet>
+	
+	<changeSet id="20180830_Base_DeviceProperties" author="王胜">
+		<comment>修改基础设备属性表</comment>
+		<sql>update Base_DeviceProperties set dataValue = 'open,close,illegally open',readWrite = 1,dataType='enum' where id = '22e10f5d914d11e8a5a1002324deca66'</sql>
+	</changeSet>
+
+
+
+</databaseChangeLog>

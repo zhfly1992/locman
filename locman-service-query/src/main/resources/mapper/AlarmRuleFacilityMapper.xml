@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.query.repository.AlarmRuleFacilityQueryRepository">
+
+	<!-- 查询绑定设备信息 状态 -->
+
+	<select id="queryAcilitiesBindingStatus" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT
+		fa.facilitiesCode,
+		fd.deviceId,
+		ftb.facilityTypeName,
+		fa.address,
+		fa.areaId,
+		fa.accessSecret,
+		fa.completeAddress,
+		ft.facilityTypeAlias,
+		dad.alarmRuleId
+
+		FROM
+		Facility_Device fd
+		LEFT JOIN DefinedAlarmRule_Device
+		dad
+		ON
+		fd.deviceId =
+		dad.deviceId
+		LEFT JOIN Facilities fa
+		ON
+		fd.facilityId
+		=
+		fa.id
+		LEFT JOIN
+		FacilitiesType ft
+		ON
+		ft.id = fa.facilitiesTypeId
+		LEFT
+		JOIN
+		FacilitiesTypeBase ftb
+		ON
+		ftb.id=ft.facilityTypeBaseId
+		WHERE
+		1=1
+
+		<if test="state!=null and state=='1'">
+			and
+			dad.alarmRuleId is not null
+		</if>
+		<if test="state!=null and state=='0'">
+			and ISNULL(dad.alarmRuleId)
+		</if>
+		<if test="test= searchKey !=null and searchKey!= ''">
+
+			AND (
+			(fa.facilitiesCode LIKE CONCAT('%', #{searchKey},
+			'%')
+			OR fa.address LIKE CONCAT('%', #{searchKey}, '%')
+			OR fd.deviceId
+			LIKE CONCAT('%', #{searchKey}, '%'))
+			)
+
+		</if>
+		<if test="facilitiesTypeId !=null and facilitiesTypeId != ''">
+			and
+			fa.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+
+		<if test="area !=null and area !=''">
+			and
+			fa.address = #{area}
+		</if>
+
+		<if test="accessSecret !=null and accessSecret !=''">
+			and
+			fa.accessSecret = #{accessSecret}
+		</if>
+
+		<if test="deviceId !=null and deviceId != '' ">
+			and
+			fd.deviceId = #{deviceId}
+		</if>
+	</select>
+	<select id="getFacilityDeviceList" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT
+		*
+		FROM
+		(
+		SELECT
+		f.facilitiesCode,
+		fd.deviceId,
+		f.facilitiesTypeId,
+		d.deviceType,
+		ft.facilityTypeAlias,
+		ftb.facilityTypeName,
+		f.address,
+		f.completeAddress,
+		d.deviceName
+		FROM Device d left join 
+		Facility_Device fd on d.id = fd.deviceId 
+		LEFT JOIN Facilities f ON f.id
+		= fd.facilityId
+		LEFT JOIN
+		FacilitiesType ft ON f.facilitiesTypeId =
+		ft.id
+		LEFT JOIN
+		FacilitiesTypeBase ftb ON ft.facilityTypeBaseId = ftb.id
+		WHERE
+		f.manageState = "enable"
+		AND ft.manageState = "enabled"
+		AND
+		ftb.manageState = "enabled" and d.manageState = "enabled"
+		<if test="facilitiesTypeId !=null and facilitiesTypeId !=''">
+			AND f.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		<if test="deviceTypeId !=null and deviceTypeId !=''">
+			AND d.deviceType = #{deviceTypeId}
+		</if>
+		<if test="selectKey !=null and selectKey !=''">
+			and (
+			f.facilitiesCode like CONCAT('%',#{selectKey},'%')
+			OR
+			fd.deviceId like CONCAT('%',#{selectKey},'%')
+			OR f.address like
+			CONCAT('%',#{selectKey},'%')
+			OR f.completeAddress like
+			CONCAT('%',#{selectKey},'%')
+			)
+		</if>
+		AND
+		f.accessSecret = #{accessSecret}
+		) a
+		<if test="selectAll !=null and selectAll =='false'">
+			WHERE
+			a.deviceId
+		</if>
+		<if test="binding !=null and binding =='unBound'">
+			not
+		</if>
+		<if test="select !=null and select =='false'">
+			IN (
+			SELECT
+			deviceId
+			FROM
+			DefinedAlarmRule_Device dd
+			WHERE
+			dd.alarmRuleId = #{alarmRuleId}
+			)
+		</if>
+	</select>
+</mapper>

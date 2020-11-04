@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.run.locman.api.query.repository.DeviceTypeQueryRepository">
+	<resultMap id="BaseResultMap" type="com.run.locman.api.entity.DeviceType">
+		<id column="id" property="id" javaType="String" />
+		<result column="deviceTypeName" property="deviceTypeName"
+			javaType="String" />
+		<result column="parentId" property="parentId" javaType="String" />
+		<result column="createTime" property="createTime" javaType="String" />
+		<result column="updateTime" property="updateTime" javaType="String" />
+		<result column="createBy" property="createBy" javaType="String" />
+		<result column="updateBy" property="updateBy" javaType="String" />
+		<result column="accessSecret" property="accessSecret" javaType="String" />
+	</resultMap>
+	<resultMap id="queryDeviceTypeResultMap" type="java.util.Map">
+		<id column="id" property="id" javaType="String" />
+		<result column="deviceTypeName" property="deviceTypeName"
+			javaType="String" />
+		<result column="parentId" property="parentId" javaType="String" />
+		<result column="createTime" property="createTime" javaType="String" />
+		<result column="updateTime" property="updateTime" javaType="String" />
+		<result column="createBy" property="createBy" javaType="String" />
+		<result column="updateBy" property="updateBy" javaType="String" />
+		<result column="deviceAmount" property="deviceAmount" javaType="String" />
+		<result column="accessSecret" property="accessSecret" javaType="String" />
+		<result column="typeSign" property="typeSign" javaType="String" />
+	</resultMap>
+	<select id="queryDeviceTypeList" parameterType="String" resultMap="queryDeviceTypeResultMap" >
+		SELECT
+		dt.id AS deviceTypeId,
+		dt.deviceTypeName AS deviceTypeName,
+		dt.parentId AS parentId,
+		dt.createTime AS createTime,
+		dt.updateTime AS updateTime,
+		dt.createBy AS createBy,
+		dt.accessSecret AS accessSecret,
+		dt.updateBy AS updateBy,
+		(
+			SELECT
+				count(d.deviceType)
+			FROM
+				Device AS d
+			WHERE
+				d.deviceType = dt.id
+		) AS deviceAmount
+		FROM
+			DeviceType dt
+		WHERE
+			dt.accessSecret = #{accessSecret}
+		OR dt.accessSecret IS NULL;
+	</select>
+	<select id="queryDeviceTypeListByDeviceTypeName" parameterType="java.util.Map"
+		resultMap="queryDeviceTypeResultMap">
+		SELECT
+		dt.id AS deviceTypeId,
+		dt.deviceTypeName AS deviceTypeName,
+		dt.parentId AS parentId,
+		dt.createTime AS createTime,
+		dt.updateTime AS
+		updateTime,
+		dt.createBy AS createBy,
+		dt.updateBy AS updateBy,
+		dt.typeSign AS typeSign,
+		IFNULL(a.deviceAmount, 0) AS deviceAmount,
+		IFNULL(b.propertyTemplateId, "") AS devicePropertyTemplateId,
+		IFNULL(
+		b.deivcePropertyTemplateName,
+		""
+		) as deivcePropertyTemplateName,
+		dt.accessSecret
+		FROM
+		DeviceType dt
+		LEFT JOIN (
+		SELECT
+		COUNT(d.id) AS
+		deviceAmount,
+		d.deviceType
+		FROM
+		Device d
+		WHERE
+		d.accessSecret =
+		#{accessSecret}
+		GROUP BY
+		d.deviceType
+		) a ON dt.id = a.deviceType
+		LEFT
+		JOIN (
+		SELECT
+		dtt.*, dpt.id AS propertyTemplateId,
+		dpt.templateName AS
+		deivcePropertyTemplateName
+		FROM
+		DeviceType_Template dtt
+		LEFT JOIN
+		DeviceProperties_Template dpt ON dtt.devicePropertyTemplateId =
+		dpt.id
+		WHERE
+		dtt.accessSecret = #{accessSecret}
+		) b ON dt.id =
+		b.deviceTypePropertyConfigId
+		WHERE
+		(dt.accessSecret = #{accessSecret}
+		OR dt.accessSecret is null)
+		<if test="deviceTypeName !=null and deviceTypeName !=''">
+			and
+			dt.deviceTypeName
+			LIKE
+			CONCAT('%',#{deviceTypeName},'%')
+		</if>
+		<if test="deviceTypeId !=null and deviceTypeId !=''">
+			and
+			dt.id = #{deviceTypeId}
+		</if>
+	</select>
+	
+	<select id="queryDeviceTypeByAS" parameterType="String" resultMap="BaseResultMap">
+		SELECT
+		d.id,
+		d.accessSecret,
+		d.deviceTypeName
+		FROM
+		DeviceType d
+		WHERE
+		d.accessSecret = #{accessSecret}
+	</select>
+	
+	<select id="findAllDeviceTypeAndNum" parameterType="String" resultType="java.util.Map">
+		SELECT
+			dt.deviceTypeName,
+			COUNT(d.id) AS num
+		FROM
+			DeviceType dt
+		LEFT JOIN Device d ON dt.id = d.deviceType
+		WHERE
+			dt.accessSecret = #{accessSecret}
+		GROUP BY
+			dt.id;
+	</select>
+
+</mapper>

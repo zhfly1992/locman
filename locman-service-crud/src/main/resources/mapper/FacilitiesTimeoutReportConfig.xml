@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.run.locman.api.crud.repository.FacilitiesTimeoutReportConfigCrudRepository">
+	<sql id="Base_Column">
+		id,facilityId,timeoutReportConfigId
+	</sql>
+	
+	<insert id="addBindFacility" parameterType="com.run.locman.api.entity.FacilityTimeoutReportConfig">
+		insert into Facility_TimeoutReportConfig(
+		<include refid="Base_Column" />
+		) values
+		(#{id},#{facilityId},#{timeoutReportConfigId})
+	</insert>
+	
+	<delete id="deleteByTimeoutConfigIds" parameterType="java.util.List">
+		DELETE FROM
+		Facility_TimeoutReportConfig WHERE timeoutReportConfigId in
+		<foreach item="item" collection="list" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+		</foreach>
+	</delete>
+	
+	<delete id="deleteByFacilityIds" parameterType="java.util.List">
+		DELETE FROM
+		Facility_TimeoutReportConfig WHERE facilityId in
+		<foreach item="item" collection="list" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+		</foreach>
+	</delete>
+	
+</mapper>
+

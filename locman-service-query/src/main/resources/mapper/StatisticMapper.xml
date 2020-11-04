@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.run.locman.api.query.repository.StatisticsRepository">
+
+	<select id="getStatisticsOrder" parameterType="String"
+		resultType="java.util.Map">
+		SELECT
+		(SELECT COUNT(1) FROM SimpleOrderProcess simOrd WHERE
+		simOrd.accessSecret=#{accessSecret} AND simOrd.userId=#{userId})
+		simOrd,
+		(SELECT COUNT(1) FROM AlarmOrder alaOrd WHERE
+		alaOrd.accessSecret=#{accessSecret} AND (alaOrd.userId =#{userId}))
+		alaOrd,
+		(SELECT COUNT(1)
+		FROM FaultOrderProcess fauOrd WHERE
+		fauOrd.accessSecret=#{accessSecret} AND fauOrd.userId=#{userId})
+		fauOrd
+	</select>
+</mapper>

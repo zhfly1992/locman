@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.query.repository.DevicePropertiesTemplateQueryRepository">
+	<resultMap id="DevicePropertiesTemplateResultMap"
+		type="com.run.locman.api.entity.DevicePropertiesTemplate">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="templateName" jdbcType="VARCHAR" property="templateName" />
+		<result column="creationTime" jdbcType="VARCHAR" property="creationTime" />
+		<result column="editorTime" jdbcType="VARCHAR" property="editorTime" />
+		<result column="manageState" jdbcType="VARCHAR" property="manageState" />
+		<result column="accessSecret" jdbcType="VARCHAR" property="accessSecret" />
+	</resultMap>
+	<sql id="Base_Column">
+		id, templateName, creationTime, editorTime, manageState,
+		accessSecret
+	</sql>
+	<sql id="Base_Condition">
+		<if test="id != null">
+			and id=#{id}
+		</if>
+		<if test="templateName != null">
+			and templateName=#{templateName}
+		</if>
+		<if test="creationTime != null">
+			and creationTime=#{creationTime}
+		</if>
+		<if test="editorTime != null">
+			and editorTime=#{editorTime}
+		</if>
+		<if test="manageState != null">
+			and manageState=#{manageState}
+		</if>
+		<if test="accessSecret != null">
+			and accessSecret=#{accessSecret}
+		</if>
+	</sql>
+
+	<select id="findByAccessSecret" parameterType="java.util.Map"
+		resultMap="DevicePropertiesTemplateResultMap">
+		SELECT * FROM DeviceProperties_Template
+		WHERE
+		accessSecret=#{accessSecret}
+		<if test="searchKey != null and searchKey != ''">
+			AND templateName LIKE CONCAT
+			('%',#{searchKey},'%')
+		</if>
+		<if test="manageState != null and manageState != ''">
+			AND manageState=#{manageState}
+		</if>
+		ORDER BY creationTime DESC
+	</select>
+
+	<select id="templateListForDeviceType" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT
+		dt.*, dt.id AS devicePropertyTemplateId,
+		dt.templateName AS
+		devicePropertyTemplateName,
+		IFNULL(a.deviceCountTotal, 0) AS
+		deviceCountTotal
+		FROM
+		DeviceProperties_Template dt
+		LEFT JOIN (
+		SELECT
+		COUNT(d.id) AS
+		deviceCountTotal,
+		dtt.devicePropertyTemplateId
+		FROM
+		DeviceType_Template
+		dtt
+		LEFT JOIN Device d ON d.deviceType =
+		dtt.deviceTypePropertyConfigId
+		WHERE
+		d.accessSecret = #{accessSecret}
+		GROUP BY
+		dtt.devicePropertyTemplateId
+		) a ON dt.id =
+		a.devicePropertyTemplateId
+		WHERE
+		accessSecret = #{accessSecret}
+		<if test="searchKey != null and searchKey != ''">
+			AND dt.templateName LIKE CONCAT
+			('%',#{searchKey},'%')
+		</if>
+		<if test="state != null and state != ''">
+			AND dt.manageState=#{state}
+		</if>
+	</select>
+
+	<select id="findById" resultMap="DevicePropertiesTemplateResultMap"
+		parameterType="String">
+		select
+		<include refid="Base_Column" />
+		from DeviceProperties_Template where id=#{id}
+	</select>
+
+	<select id="checkTemplateName" resultType="int" parameterType="java.util.Map">
+		select count(1)
+		from DeviceProperties_Template where
+		accessSecret=#{accessSecret} and templateName = #{templateName}
+	</select>
+</mapper>

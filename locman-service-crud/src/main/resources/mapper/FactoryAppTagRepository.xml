@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.run.locman.api.crud.repository.FactoryAppTagCrudRepository">
+	<resultMap id="FactoryAppTagResultMap" type="com.run.locman.api.entity.FactoryAppTag">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="factoryId" jdbcType="VARCHAR" property="factoryId" />
+		<result column="appTag" jdbcType="VARCHAR" property="appTag" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id, factoryId, appTag
+	</sql>
+	<sql id="Base_Condition">
+		<if test="id != null">
+			and id=#{id}
+		</if>
+		<if test="factoryId != null">
+			and factoryId=#{factoryId}
+		</if>
+		<if test="appTag != null">
+			and appTag=#{appTag}
+		</if>
+	</sql>
+
+	<delete id="deleteByFactoryId" parameterType="String">
+		delete from
+		Factory_AppTag
+		where factoryId=#{factoryId}
+	</delete>
+	
+	<insert id="addFactoryRsAppTag" parameterType="java.util.Map">
+		INSERT INTO Factory_AppTag(id, factoryId, appTag, appId, appKey) VALUES
+		<foreach collection="appTagDtoList" item="appTagDto" separator="," >
+			(#{appTagDto.id}, #{factoryId}, #{appTagDto.appTag}, #{appTagDto.appId}, #{appTagDto.appKey})
+        </foreach>
+	</insert>
+	
+	<insert id="insertModel" parameterType="com.run.locman.api.entity.FactoryAppTag">
+	insert into Factory_AppTag(id,factoryId,appTag) 
+		values (#{id},#{factoryId},#{appTag})
+	</insert>
+</mapper>

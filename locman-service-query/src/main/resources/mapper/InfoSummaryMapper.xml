@@ -1,0 +1,1449 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.run.locman.api.query.repository.InfoSummaryQueryRepository">
+
+
+
+	<select id="getDeviceCount" parameterType="String" resultType="java.util.Map">
+		SELECT
+		(
+		SELECT
+		COUNT(1)
+		FROM
+		Device d
+		WHERE
+		d.accessSecret = #{accessSecret}
+		) AS total,
+		(
+		SELECT
+		count(1)
+		FROM
+		Device d
+		WHERE
+		d.accessSecret =
+		#{accessSecret}
+		AND d.id NOT IN (
+		SELECT DISTINCT
+		deviceId
+		FROM
+		Facility_Device f
+		)
+		) AS Unbound
+	</select>
+
+
+
+	<select id="getFacilityCount" parameterType="String" resultType="java.util.Map">
+		SELECT
+		(
+		SELECT
+		COUNT(1)
+		FROM
+		Facilities f
+		WHERE
+		f.accessSecret =
+		#{accessSecret}
+		) AS total,
+		(
+		SELECT
+		count(1)
+		FROM
+		Facilities f
+		WHERE
+		f.accessSecret = #{accessSecret}
+		AND f.id NOT IN (
+		SELECT DISTINCT
+		facilityId
+		FROM
+		Facility_Device f
+		)
+		) AS Unbound,
+		(
+		SELECT
+		COUNT(DISTINCT
+		f.id)
+		FROM
+		Facilities f
+		LEFT JOIN Facility_Device fd ON f.id =
+		fd.facilityId
+		WHERE
+		fd.facilityId IS NOT NULL
+		AND 
+		f.accessSecret =
+		#{accessSecret}
+		) AS bound
+	</select>
+
+
+	<select id="getUnprocessedAlarmCount" parameterType="String"
+		resultType="Integer">
+		select count(1) from AlarmInfo where AlarmInfo.accessSecret
+		=#{accessSecret} and AlarmInfo.isDel = '1'
+	</select>
+
+	<select id="getUpprocessedOrderCount" parameterType="String"
+		resultType="java.util.Map">
+		SELECT
+		(SELECT
+		COUNT(1)
+		FROM
+		AlarmOrder
+		WHERE
+		accessSecret =
+		#{accessSecret}
+		AND processState != '4' and processState != '3') as
+		alarmCount,
+		(SELECT
+		COUNT(1)
+		FROM FaultOrderProcess
+		where accessSecret =
+		#{accessSecret}
+		and processState !='2' and processState !='6' ) as
+		faultOrder
+	</select>
+
+
+	<select id="getDeviceIdListByAccessSecret" parameterType="String"
+		resultType="String">
+		SELECT fd.deviceId FROM Facility_Device fd LEFT JOIN Device
+		d ON
+		fd.deviceId=d.id WHERE d.accessSecret=#{accessSecret}
+	</select>
+
+
+	<!--该查询可查询以当天日期为准一个月(30天)内的每天告警数量，可自动将没有告警的日期补0 -->
+	<!--可以生成最近30天的日期然后left join告警统计表，这样就是那天没有告警用IFNULL()函数设置为0 了。 -->
+	<!-- select 1 union all select 1 union all select 1,是为了生成一个一列N行的虚拟表，然后由表t与其做笛卡尔积，这样根据N行会生成n行的一个时间序列 -->
+	<select id="getDailyUrgentAlarmCountInMonth" parameterType="String"
+		resultType="java.util.Map">
+		SELECT
+		leftTable.alarmDate,
+		IFNULL(rightTable.count, 0) as count
+		FROM
+		(
+		SELECT
+		date_sub(
+		CURDATE(),
+		INTERVAL @i :=@i + 1 DAY
+		) as
+		alarmDate
+		FROM
+		(
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION
+		ALL
+		SELECT
+		1
+		UNION
+		ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION
+		ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION
+		ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		) AS tmp,
+		(SELECT @i := - 1) t
+		) AS leftTable
+		LEFT JOIN (
+		SELECT
+		DATE_FORMAT(alarmTime, '%Y-%m-%d')AS alarmDate,
+		count(id)as count
+		FROM
+		AlarmInfo
+		WHERE
+		DATEDIFF(NOW(), alarmTime) <![CDATA[<=]]>
+		30
+		AND accessSecret =
+		#{accessSecret}
+		and alarmLevel = 1
+		GROUP BY
+		alarmDate
+		) AS rightTable
+		ON
+		leftTable.alarmDate =
+		rightTable.alarmDate
+		ORDER BY alarmDate ASC
+	</select>
+
+
+
+
+	<select id="getDailyNormalAlarmCountInMonth" parameterType="String"
+		resultType="java.util.Map">
+		SELECT
+		leftTable.alarmDate,
+		IFNULL(rightTable.count, 0) as count
+		FROM
+		(
+		SELECT
+		date_sub(
+		CURDATE(),
+		INTERVAL @i :=@i + 1 DAY
+		) as
+		alarmDate
+		FROM
+		(
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION
+		ALL
+		SELECT
+		1
+		UNION
+		ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION
+		ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION
+		ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		) AS tmp,
+		(SELECT @i := - 1) t
+		) AS leftTable
+		LEFT JOIN (
+		SELECT
+		DATE_FORMAT(alarmTime, '%Y-%m-%d')AS alarmDate,
+		count(id)as count
+		FROM
+		AlarmInfo
+		WHERE
+		DATEDIFF(NOW(), alarmTime) <![CDATA[<=]]>
+		30
+		AND accessSecret =
+		#{accessSecret}
+		and alarmLevel = 2
+		GROUP BY
+		alarmDate
+		) AS rightTable
+		ON
+		leftTable.alarmDate =
+		rightTable.alarmDate
+		ORDER BY alarmDate ASC
+	</select>
+
+	<!--该查询可查询以当天日期为准一个月(30天)内的每天故障设备数，可自动将没有的日期补0 -->
+	<!--可以生成最近30天的日期然后left join故障统计表，那天没有故障用IFNULL()函数设置为0 了。 -->
+	<!-- select 1 union all select 1 union all select 1,是为了生成一个一列N行的虚拟表，然后由表t与其做笛卡尔积，这样根据N行会生成n行的一个时间序列 -->
+	<!-- 排除已撤回，待审核，已拒绝的工单 -->
+	<select id="getDailyFaultCountInMonth" parameterType="String"
+		resultType="java.util.Map">
+		SELECT
+		leftTable.date as date,
+		IFNULL(rightTable.count, 0) AS count
+		FROM
+		(
+		SELECT
+		date_sub(
+		CURDATE(),
+		INTERVAL @i :=@i + 1 DAY
+		) AS date
+		FROM
+		(
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		UNION ALL
+		SELECT
+		1
+		) AS tmp,
+		(SELECT @i := - 1) t
+		) AS leftTable
+		LEFT JOIN (
+		SELECT
+		DATE_FORMAT(createTime, '%Y-%m-%d') AS date,
+		sum(deviceCount) AS count
+		FROM
+		FaultOrderProcess
+		WHERE
+		accessSecret =
+		#{accessSecret}
+		AND DATEDIFF(NOW(), createTime)<![CDATA[<=]]>
+		30
+		AND processState != 0
+		AND processState != 2
+		AND processState != 1
+		GROUP BY
+		date
+		) AS rightTable ON leftTable.date = rightTable.date
+		ORDER
+		BY
+		date ASC
+	</select>
+
+	<select id="countAlarmNumByDate" resultType="java.util.Map">
+		SELECT
+		IFNULL(days, date) date,
+		IFNULL(num, 0) num
+		FROM
+		(
+		SELECT
+		DATE_FORMAT(
+		DATE_SUB(
+		<if test="endTime == null or endTime == '' ">
+			NOW()
+		</if>
+		<if test="endTime != null and  endTime != ''">
+			#{endTime}
+		</if>
+		,INTERVAL xc DAY
+		),
+		'%Y%m%d'
+		) AS date
+		FROM
+		(
+		SELECT
+		@xi :=@xi + 1 AS xc
+		FROM
+		(
+		SELECT
+		1
+		UNION
+		SELECT
+		2
+		UNION
+		SELECT
+		3
+		UNION
+		SELECT
+		4
+		UNION
+		SELECT
+		5
+		) xc1,
+		(
+		SELECT
+		1
+		UNION
+		SELECT
+		2
+		UNION
+		SELECT
+		3
+		UNION
+		SELECT
+		4
+		UNION
+		SELECT
+		5
+		UNION
+		SELECT
+		6
+		) xc2,
+		(SELECT @xi :=- 1) xc0
+		) dates
+		) dateList
+		LEFT JOIN (
+		SELECT
+		DATE_FORMAT(ai.alarmTime, '%Y%m%d') days,
+		COUNT(1) num
+		FROM
+		AlarmInfo ai
+		WHERE
+		ai.accessSecret = #{accessSecret}
+		GROUP BY
+		days
+		) b ON dateList.date
+		= b.days
+		ORDER BY
+		date desc
+		LIMIT
+		0,#{dayNum}
+	</select>
+
+	<select id="getAlarmOrderProcessStateStatistic" resultType="java.util.Map">
+		SELECT
+		date,
+		IFNULL(count, 0) num,
+		IFNULL(state, "done") state
+		FROM
+		(
+		SELECT
+		DATE_FORMAT(
+		DATE_SUB(
+		<if test="endTime == null or endTime == '' ">
+			NOW()
+		</if>
+		<if test="endTime != null and  endTime != ''">
+			#{endTime}
+		</if>
+		,INTERVAL xc DAY
+		),
+		'%Y%m%d'
+		) AS date
+		FROM
+		(
+		SELECT
+		@xi :=@xi + 1 AS xc
+		FROM
+		(
+		SELECT
+		1
+		UNION
+		SELECT
+		2
+		UNION
+		SELECT
+		3
+		UNION
+		SELECT
+		4
+		UNION
+		SELECT
+		5
+		) xc1,
+		(
+		SELECT
+		1
+		UNION
+		SELECT
+		2
+		UNION
+		SELECT
+		3
+		UNION
+		SELECT
+		4
+		UNION
+		SELECT
+		5
+		UNION
+		SELECT
+		6
+		)
+		xc2,
+		(SELECT @xi :=- 1) xc0
+		) dates
+		) dateList
+		LEFT JOIN (
+		SELECT
+		COUNT(1)
+		AS
+		count,
+		"done" AS state,
+		DATE_FORMAT(createTime, "%Y%m%d") AS
+		DAY
+		FROM
+		AlarmOrder
+		WHERE
+		AlarmOrder.accessSecret = #{accessSecret}
+		AND
+		(AlarmOrder.processState = 4
+		or
+		AlarmOrder.processState = 3
+		or
+		AlarmOrder.processState = 2)
+		GROUP BY
+		DAY
+		) AS temp ON dateList.date =
+		temp. DAY
+		GROUP BY
+		date,num,state
+
+		UNION
+
+		SELECT
+		date,
+		IFNULL(count, 0) num,
+		IFNULL(state,
+		"notDone") state
+		FROM
+		(
+		SELECT
+		DATE_FORMAT(
+		DATE_SUB(
+		<if test="endTime == null or endTime == '' ">
+			NOW()
+		</if>
+		<if test="endTime != null and  endTime != ''">
+			#{endTime}
+		</if>
+		,INTERVAL xc DAY
+		),
+		'%Y%m%d'
+		) AS date
+		FROM
+		(
+		SELECT
+		@i :=@i + 1 AS xc
+		FROM
+		(
+		SELECT
+		1
+		UNION
+		SELECT
+		2
+		UNION
+		SELECT
+		3
+		UNION
+		SELECT
+		4
+		UNION
+		SELECT
+		5
+		) xc1,
+		(
+		SELECT
+		1
+		UNION
+		SELECT
+		2
+		UNION
+		SELECT
+		3
+		UNION
+		SELECT
+		4
+		UNION
+		SELECT
+		5
+		UNION
+		SELECT
+		6
+		) xc2,
+		(SELECT @i :=- 1) xc0
+		) dates
+		) dateList
+		LEFT JOIN (
+		SELECT
+		COUNT(1) AS
+		count,
+		"notDone" AS state,
+		DATE_FORMAT(createTime, "%Y%m%d") AS DAY
+		FROM
+		AlarmOrder
+		WHERE
+		AlarmOrder.accessSecret = #{accessSecret}
+		AND
+		(AlarmOrder.processState = 5
+		or
+		AlarmOrder.processState = 1
+		or
+		AlarmOrder.processState = 0)
+		GROUP BY
+		DAY
+		) AS temp ON dateList.date =
+		temp. DAY
+		GROUP BY
+		date,num,state
+
+		order by date desc,state
+
+		limit
+		0,#{dayCount}
+	</select>
+
+	<select id="getFaultOrderProcessStateStatistic" resultType="java.util.Map">
+		SELECT
+		date,
+		IFNULL(count, 0) num,
+		IFNULL(state, "done") state
+		FROM
+		(
+		SELECT
+		DATE_FORMAT(
+		DATE_SUB(
+		<if test="endTime == null or endTime == '' ">
+			NOW()
+		</if>
+		<if test="endTime != null and  endTime != ''">
+			#{endTime}
+		</if>
+		,INTERVAL xc DAY
+		),
+		'%Y%m%d'
+		) AS date
+		FROM
+		(
+		SELECT
+		@xi :=@xi + 1 AS xc
+		FROM
+		(
+		SELECT
+		1
+		UNION
+		SELECT
+		2
+		UNION
+		SELECT
+		3
+		UNION
+		SELECT
+		4
+		UNION
+		SELECT
+		5
+		) xc1,
+		(
+		SELECT
+		1
+		UNION
+		SELECT
+		2
+		UNION
+		SELECT
+		3
+		UNION
+		SELECT
+		4
+		UNION
+		SELECT
+		5
+		UNION
+		SELECT
+		6
+		)
+		xc2,
+		(SELECT @xi :=- 1) xc0
+		) dates
+		) dateList
+		LEFT JOIN (
+		SELECT
+		COUNT(1)
+		AS
+		count,
+		"done" AS state,
+		DATE_FORMAT(createTime, "%Y%m%d") AS
+		DAY
+		FROM
+		FaultOrderProcess
+		WHERE
+		FaultOrderProcess.accessSecret = #{accessSecret}
+		AND(
+		FaultOrderProcess.processState = 6
+		or
+		FaultOrderProcess.processState = 2
+		or
+		FaultOrderProcess.processState = 0
+		)
+
+		GROUP BY
+		DAY
+		) AS temp ON
+		dateList.date =
+		temp. DAY
+		GROUP BY
+		date,num,state
+
+		UNION
+
+		SELECT
+		date,
+		IFNULL(count, 0) num,
+		IFNULL(state,
+		"notDone") state
+		FROM
+		(
+		SELECT
+		DATE_FORMAT(
+		DATE_SUB(
+		<if test="endTime == null or endTime == '' ">
+			NOW()
+		</if>
+		<if test="endTime != null and  endTime != ''">
+			#{endTime}
+		</if>
+		,INTERVAL xc DAY
+		),
+		'%Y%m%d'
+		) AS date
+		FROM
+		(
+		SELECT
+		@i :=@i + 1 AS xc
+		FROM
+		(
+		SELECT
+		1
+		UNION
+		SELECT
+		2
+		UNION
+		SELECT
+		3
+		UNION
+		SELECT
+		4
+		UNION
+		SELECT
+		5
+		) xc1,
+		(
+		SELECT
+		1
+		UNION
+		SELECT
+		2
+		UNION
+		SELECT
+		3
+		UNION
+		SELECT
+		4
+		UNION
+		SELECT
+		5
+		UNION
+		SELECT
+		6
+		) xc2,
+		(SELECT @i :=- 1) xc0
+		) dates
+		) dateList
+		LEFT JOIN (
+		SELECT
+		COUNT(1) AS
+		count,
+		"notDone" AS state,
+		DATE_FORMAT(createTime, "%Y%m%d") AS DAY
+		FROM
+		FaultOrderProcess
+		WHERE
+		FaultOrderProcess.accessSecret = #{accessSecret}
+		AND
+		(
+		FaultOrderProcess.processState = 1
+		or
+		FaultOrderProcess.processState = 4
+		or
+		FaultOrderProcess.processState = 3
+		or
+		FaultOrderProcess.processState = 5
+		)
+		GROUP BY
+		DAY
+		) AS temp ON
+		dateList.date =
+		temp. DAY
+		GROUP BY date,num,state
+
+		order by date
+		desc,state
+
+		limit 0,#{dayCount}
+	</select>
+
+
+
+	<select id="countFacAlarmCount" parameterType="String"
+		resultType="java.util.Map">
+		SELECT
+		COUNT(alarmLevel = 1 OR NULL) AS urgentAlarm,
+		COUNT(alarmLevel = 2 OR NULL) AS normalAlarm,
+		COUNT(alarmLevel is NULL
+		OR NULL) AS noAlarm
+		FROM
+
+
+		(SELECT
+		AllFAC.facilityId,
+		ALARMFAC.alarmLevel
+		FROM
+		(SELECT
+		TEMP.facilityId as facilityId
+		FROM
+		(
+		SELECT
+		f.id AS facilityId,
+		fd.deviceId AS deviceId
+		FROM
+		Facilities f
+		LEFT JOIN
+		Facility_Device fd ON f.id = fd.facilityId
+		where f.accessSecret = #{accessSecret}
+		and f.manageState != 'disable'
+		) TEMP) AllFAC
+
+		LEFT JOIN (
+		SELECT DISTINCT
+		A.facilitiesId,
+		A.alarmLevel
+		FROM
+		(
+		SELECT DISTINCT
+		ai.facilitiesId,
+		min(ai.alarmLevel)
+		alarmLevel
+		FROM
+		AlarmInfo ai
+		WHERE
+		ai.accessSecret = #{accessSecret}
+		and
+		ai.isDel in (0,1)
+		GROUP BY
+		ai.facilitiesId
+		) A
+		LEFT JOIN Facility_Device
+		fd ON A.facilitiesId = fd.facilityId
+		) ALARMFAC
+		on
+		AllFAC.facilityId = ALARMFAC.facilitiesId) THELAST
+	</select>
+
+
+	<select id="countDeviceNumByAlarmLevelInSevenDays"
+		parameterType="String" resultType="java.util.Map">
+		SELECT
+		date.date AS date,
+		IFNULL(result.count, 0) count,
+		result.alarmLevel AS alarmLevel
+		FROM
+		(
+		SELECT
+		DATE_FORMAT(
+		DATE_SUB(NOW(),
+		INTERVAL xc DAY),
+		'%Y%m%d'
+		) AS date
+		FROM
+		(
+		SELECT
+		@xi :=@xi + 1 AS xc
+		FROM
+		(SELECT 1) xc1,
+		(
+		SELECT
+		1
+		UNION
+		SELECT
+		2
+		UNION
+		SELECT
+		3
+		UNION
+		SELECT
+		4
+		UNION
+		SELECT
+		5
+		UNION
+		SELECT
+		6
+		UNION
+		SELECT
+		7
+		) xc2,
+		(SELECT @xi := 0) xc0
+		) dates
+		)
+		date
+		LEFT JOIN (
+		SELECT
+		COUNT(deviceId) AS
+		count,
+		DAY AS DAY,
+		alarmLevel
+		FROM
+		(
+		SELECT
+		DISTINCT
+		deviceAlarm.deviceId,
+		min(alarmLevel) AS
+		alarmLevel,
+		deviceAlarm. DAY AS
+		DAY
+		FROM
+		(
+		SELECT
+		ai.deviceId,
+		DATE_FORMAT(reportTime, "%Y%m%d") AS DAY,
+		ai.alarmLevel
+		FROM
+		AlarmInfo ai
+		WHERE
+		ai.accessSecret = #{accessSecret}
+		)
+		deviceAlarm
+		GROUP BY
+		DAY,
+		deviceId
+		) aaaa
+		GROUP BY
+		DAY,
+		alarmLevel
+		)
+		result ON result. DAY = date.date
+		ORDER BY
+		date,alarmLevel
+	</select>
+
+	<select id="countAlarmOrderNumByAlarmLevelAndState"
+		parameterType="String" resultType="java.util.Map">
+		SELECT
+		count(1) AS count,
+		"NotDeal" AS
+		processState,
+		IFNULL(alarmLevel, 1) AS alarmLevel
+		FROM
+		(
+		SELECT
+		ao.id,
+		ao.processState,
+		ai.id AS alarmId,
+		ai.alarmLevel
+		FROM
+		AlarmOrder ao
+		LEFT
+		JOIN AlarmInfo ai ON ao.alarmId = ai.id
+		WHERE
+		ai.id IS NOT NULL
+		AND
+		ao.accessSecret = #{accessSecret}
+		AND
+		ai.accessSecret = #{accessSecret}
+		) aa
+		WHERE
+		aa.processState = 5
+		AND aa.alarmLevel = 1
+		UNION
+		SELECT
+		count(1)
+		AS count,
+		"Dealing" AS processState,
+		IFNULL(alarmLevel, 1) AS
+		alarmLevel
+		FROM
+		(
+		SELECT
+		ao.id,
+		ao.processState,
+		ai.id AS alarmId,
+		ai.alarmLevel
+		FROM
+		AlarmOrder ao
+		LEFT JOIN AlarmInfo ai ON ao.alarmId = ai.id
+		WHERE
+		ai.id IS
+		NOT NULL
+		AND ao.accessSecret = #{accessSecret}
+		AND ai.accessSecret =
+		#{accessSecret}
+		) aa
+		WHERE
+		aa.processState IN (0, 6, 1, 2)
+		AND
+		aa.alarmLevel = 1
+		UNION
+		SELECT
+		count(1) AS count,
+		"Completed" AS
+		processState,
+		IFNULL(alarmLevel, 1) AS alarmLevel
+		FROM
+		(
+		SELECT
+		ao.id,
+		ao.processState,
+		ai.id AS alarmId,
+		ai.alarmLevel
+		FROM
+		AlarmOrder ao
+		LEFT
+		JOIN AlarmInfo ai ON ao.alarmId = ai.id
+		WHERE
+		ai.id IS NOT NULL
+		AND
+		ao.accessSecret = #{accessSecret}
+		AND ai.accessSecret = #{accessSecret}
+		) aa
+		WHERE
+		aa.processState IN (3, 4)
+		AND aa.alarmLevel = 1
+		UNION
+		SELECT
+		count(1) AS count,
+		"Total" AS processState,
+		IFNULL(alarmLevel, 1) AS
+		alarmLevel
+		FROM
+		(
+		SELECT
+		ao.id,
+		ao.processState,
+		ai.id AS alarmId,
+		ai.alarmLevel
+		FROM
+		AlarmOrder ao
+		LEFT JOIN AlarmInfo ai ON ao.alarmId =
+		ai.id
+		WHERE
+		ai.id IS NOT NULL
+		AND ao.accessSecret = #{accessSecret}
+		AND
+		ai.accessSecret = #{accessSecret}
+		) aa
+		WHERE
+		aa.alarmLevel = 1
+		UNION
+		SELECT
+		count(1) AS count,
+		"NotDeal" AS processState,
+		IFNULL(alarmLevel,
+		2) AS alarmLevel
+		FROM
+		(
+		SELECT
+		ao.id,
+		ao.processState,
+		ai.id AS alarmId,
+		ai.alarmLevel
+		FROM
+		AlarmOrder ao
+		LEFT JOIN AlarmInfo ai ON ao.alarmId =
+		ai.id
+		WHERE
+		ai.id IS NOT NULL
+		AND ao.accessSecret = #{accessSecret}
+		AND
+		ai.accessSecret = #{accessSecret}
+		) aa
+		WHERE
+		aa.alarmLevel = 2
+		AND
+		aa.processState = 5
+		UNION
+		SELECT
+		count(1) AS count,
+		"Dealing" AS
+		processState,
+		IFNULL(alarmLevel, 2) AS alarmLevel
+		FROM
+		(
+		SELECT
+		ao.id,
+		ao.processState,
+		ai.id AS alarmId,
+		ai.alarmLevel
+		FROM
+		AlarmOrder ao
+		LEFT
+		JOIN AlarmInfo ai ON ao.alarmId = ai.id
+		WHERE
+		ai.id IS NOT NULL
+		AND
+		ao.accessSecret = #{accessSecret}
+		AND ai.accessSecret = #{accessSecret}
+		) aa
+		WHERE
+		aa.alarmLevel = 2
+		AND aa.processState IN (0, 6, 1, 2)
+		UNION
+		SELECT
+		count(1) AS count,
+		"Completed" AS processState,
+		IFNULL(alarmLevel, 2) AS alarmLevel
+		FROM
+		(
+		SELECT
+		ao.id,
+		ao.processState,
+		ai.id AS alarmId,
+		ai.alarmLevel
+		FROM
+		AlarmOrder ao
+		LEFT JOIN AlarmInfo ai
+		ON ao.alarmId = ai.id
+		WHERE
+		ai.id IS NOT NULL
+		AND ao.accessSecret =
+		#{accessSecret}
+		AND ai.accessSecret = #{accessSecret}
+		) aa
+		WHERE
+		aa.alarmLevel = 2
+		AND aa.processState IN (3, 4)
+		UNION
+		SELECT
+		count(1) AS
+		count,
+		"Total" AS processState,
+		alarmLevel AS alarmLevel
+		FROM
+		(
+		SELECT
+		ao.id,
+		ao.processState,
+		ai.id AS alarmId,
+		IFNULL(alarmLevel, 2) AS
+		alarmLevel
+		FROM
+		AlarmOrder ao
+		LEFT JOIN AlarmInfo ai ON ao.alarmId =
+		ai.id
+		WHERE
+		ai.id IS NOT NULL
+		AND ao.accessSecret = #{accessSecret}
+		AND
+		ai.accessSecret = #{accessSecret}
+		) aa
+		WHERE
+		aa.alarmLevel = 2
+	</select>
+
+	<select id="getCountAlarmFacByOrg" resultType="java.util.Map"
+		parameterType="String">
+		SELECT
+		f.organizationId,
+		count(DISTINCT f.id) AS count
+		FROM
+
+		Device d
+		LEFT JOIN Facility_Device fd on fd.deviceId = d.id
+		LEFT JOIN Facilities f on f.id=fd.facilityId
+		LEFT JOIN AlarmInfo ai ON ai.facilitiesId = f.id
+		WHERE
+		f.accessSecret = #{accessSecret}
+		and ai.isDel in (0,1)
+		GROUP BY
+		f.organizationId
+		ORDER BY
+		count DESC
+		LIMIT 20
+	</select>
+
+	<select id="getCountAlarmByIdAndTime" resultType="java.util.Map"
+		parameterType="String">
+
+		SELECT
+		ad.datelist,
+		IFNULL(dataNotAll.moveAlarm1,0)moveAlarm,
+		IFNULL(dataNotAll.unnumberedAlarm1,0)unnumberedAlarm
+		from
+		AllDate ad
+		LEFT JOIN
+		(
+		SELECT
+		DATE_FORMAT(ai.alarmTime,"%Y-%m-%d")as timeu,
+		count(CASE when ai.alarmLevel='1' then 1 else null END ) moveAlarm1,
+		count(CASE when ai.alarmLevel='2' then 1 else null END )
+		unnumberedAlarm1
+		from AlarmInfo ai
+		LEFT JOIN Device d ON
+		d.id=ai.deviceId
+		LEFT JOIN Facility_Device fd ON d.id=fd.deviceId
+		LEFT
+		JOIN Facilities f ON ai.facilitiesId = f.id
+		where
+		ai.accessSecret=#{accessSecret}
+		and d.id=#{deviceId}
+
+		and ai.alarmTime
+		&gt;=#{startTime}
+		and ai.alarmTime &lt;=#{endTime}
+		GROUP BY timeu
+		)dataNotAll
+		ON ad.datelist =dataNotAll.timeu
+		where ad.datelist
+		&gt;=DATE_FORMAT(#{startTime},"%Y-%m-%d")
+		and ad.datelist
+		&lt;=DATE_FORMAT(#{endTime},"%Y-%m-%d")
+		ORDER BY ad.datelist
+
+	</select>
+
+	<select id="getCountAlarmDevByRule" resultType="java.util.Map"
+		parameterType="String">
+		SELECT
+		ar.ruleName,
+		COUNT(DISTINCT d.id) as count,
+		MIN(ar.sortField) sortField
+		from
+		Device d
+		LEFT JOIN Facility_Device fd on d.id=fd.deviceId
+		LEFT JOIN Facilities
+		f on f.id =fd.facilityId
+		LEFT JOIN AlarmInfo ai on ai.facilitiesId=f.id
+		LEFT JOIN AlarmRule ar on ai.alarmDesc=ar.ruleName
+		where
+		ar.accessSecret=#{accessSecret}
+		and ar.manageState='valid'
+		and ai.isDel
+		in (0,1)
+		and f.defenseState =1
+		GROUP BY ar.ruleName
+		ORDER BY sortField
+	</select>
+	
+	<select id="getBandingDeviceId" parameterType="String" resultType="java.util.Map">
+		SELECT
+			d.id as deviceId,
+			f.facilitiesCode,
+			f.address
+				FROM Device d
+			LEFT JOIN Facility_Device fd on fd.deviceId = d.id
+			LEFT JOIN Facilities f on f.id = fd.facilityId
+			where 
+			f.accessSecret =#{accessSecret}
+			and  fd.facilityId is not null
+			and f.defenseState = 1 
+	
+	
+	</select>
+	
+	<select id="getFacAndDevInfoById" parameterType="String" resultType="java.util.Map">
+		SELECT
+			d.id deviceId,
+			f.address,
+			f.facilitiesCode,
+			d.deviceName,
+			(
+				CASE
+				WHEN f.defenseState = 0 THEN
+					'手动维护中'
+				WHEN f.defenseState = 1 THEN
+					'正常'
+				WHEN f.defenseState = 2 THEN
+					'自动维护中'
+				END
+			) AS defenseState
+			from Device d
+			LEFT JOIN Facility_Device fd on fd.deviceId =d.id 
+			LEFT JOIN Facilities f on f.id=fd.facilityId
+			where d.id=#{deviceId}
+	</select>
+</mapper>
+

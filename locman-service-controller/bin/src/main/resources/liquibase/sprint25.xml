@@ -1,0 +1,219 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+	<property name="autoIncrement" value="true" dbms="mysql" />
+
+
+	<changeSet id="20181123_add_Device" author="张贺">
+		<comment>Device表添加硬件编码</comment>
+		<addColumn tableName="Device">
+			<column name="hardwareId" type="varchar(16)" remarks="设备硬件编码">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<!-- 基础流程类型表 -->
+	<changeSet id="20181127_create_DeviceDataStorage" author="郭飞龙">
+		<comment>工程版设备信息存储表(注解沿用工程版)</comment>
+		<createTable tableName="DeviceDataStorage">
+			<column name="id" type="varchar(32)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="deviceId" type="varchar(64)" remarks="工程版中设备ID">
+				<constraints nullable="false" />
+			</column>
+			<column name="deviceNumber" type="varchar(64)" remarks="设备硬件编号">
+				<constraints nullable="false" />
+			</column>
+			<column name="bluetooth" type="varchar(64)" remarks="设备蓝牙名称">
+				<constraints nullable="false" />
+			</column>
+			<column name="deviceAddress" type="varchar(255)" remarks="设备安装地址">
+				<constraints nullable="false" />
+			</column>
+			<column name="longitude" type="varchar(64)" remarks="设备安装经度">
+				<constraints nullable="false" />
+			</column>
+			<column name="latitude" type="varchar(64)" remarks="设备安装纬度">
+				<constraints nullable="false" />
+			</column>
+			<column name="ipPort" type="varchar(255)" remarks="设备上报地址">
+				<constraints nullable="false" />
+			</column>
+			<column name="serialNumber" type="varchar(64)" remarks="序列号（井盖序列号、井盖铭牌号）">
+				<constraints nullable="false" />
+			</column>
+			<column name="status" type="varchar(64)" remarks="设施设备状态（survey：勘测、project：安装）">
+				<constraints nullable="false" />
+			</column>
+			<column name="properties" type="text" remarks="扩展属性，JSON字符串">
+				<constraints nullable="false" />
+			</column>
+			<column name="deviceTypeId" type="varchar(64)" remarks="设备/设施类型ID">
+				<constraints nullable="false" />
+			</column>
+			<column name="synchronizationState" type="varchar(64)"
+				remarks="同步状态">
+				<constraints nullable="false" />
+			</column>
+			<column name="areaId" type="varchar(64)" remarks="区域id">
+				<constraints nullable="false" />
+			</column>
+
+		</createTable>
+	</changeSet>
+
+	<changeSet id="20181130_add_DeviceDataStorage" author="郭飞龙">
+		<comment>DeviceDataStorage表添加同步错误信息</comment>
+		<addColumn tableName="DeviceDataStorage">
+			<column name="errorInfo" type="text" remarks="同步错误信息">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="20181203_change_DeviceDataStorage" author="郭飞龙">
+		<comment>DeviceDataStorage表添加解析扩展属性字段</comment>
+		<addColumn tableName="DeviceDataStorage">
+			<column name="showExtend" type="text" remarks="解析扩展属性与locman一致">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="20181203_change_DeviceDataStorage_add_extend"
+		author="郭飞龙">
+		<comment>DeviceDataStorage表添加解析扩展属性字段</comment>
+		<addColumn tableName="DeviceDataStorage">
+			<column name="extend" type="text" remarks="解析扩展属性与locman一致">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+
+	<changeSet id="20181206_updateDevice_column" author="张贺">
+		<comment>修改表Device中hardwareId的字段长度</comment>
+		<modifyDataType tableName="Device" columnName="hardwareId"
+			newDataType="varchar(128)" />
+	</changeSet>
+
+	<changeSet id="20181212_add_device_" author="赵伟志">
+		<comment>Device表添加设备状态字段</comment>
+		<addColumn tableName="Device">
+			<column name="deviceDefendState" type="varchar(32)"
+				remarks="表示设备状态，有故障工单时，该设备故障，默认值正常（normal/fault）" defaultValue="normal">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<!-- 设备和设备部分属性实时上报状态中间表 -->
+	<changeSet id="20181213_create_Device_RealRported" author="郭飞龙">
+		<comment>设备和设备部分属性实时上报状态中间表 </comment>
+		<createTable tableName="Device_RealRported">
+			<column name="id" type="varchar(64)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="deviceId" type="varchar(64)" remarks="设备ID">
+				<constraints nullable="false" />
+			</column>
+			<column name="device_bv" type="varchar(64)" remarks="电池电压">
+				<constraints nullable="false" />
+			</column>
+			<column name="device_sig" type="varchar(64)" remarks="信号强度">
+				<constraints nullable="false" />
+			</column>
+			<column name="device_rsrp" type="varchar(64)" remarks="信号接收功率">
+				<constraints nullable="false" />
+			</column>
+			<column name="device_sinr" type="varchar(64)" remarks="信噪比">
+				<constraints nullable="false" />
+			</column>
+			<column name="device_ls" type="varchar(64)" remarks="锁状态">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	
+	<changeSet id="20181219_update_Device_RealRported" author="王胜">
+		<comment>Device_RealRported表修改字段可以为空</comment>
+		<dropNotNullConstraint tableName="Device_RealRported" columnName="device_bv" columnDataType="varchar(64)"/>
+		<dropNotNullConstraint tableName="Device_RealRported" columnName="device_sig" columnDataType="varchar(64)"/>
+		<dropNotNullConstraint tableName="Device_RealRported" columnName="device_rsrp" columnDataType="varchar(64)"/>
+		<dropNotNullConstraint tableName="Device_RealRported" columnName="device_sinr" columnDataType="varchar(64)"/>
+		<dropNotNullConstraint tableName="Device_RealRported" columnName="device_ls" columnDataType="varchar(64)"/>
+	</changeSet>
+	
+	
+	<changeSet id="20181221_change_DeviceDataStorage_add_createTime"
+		author="郭飞龙">
+		<comment>DeviceDataStorage表添加创建时间字段</comment>
+		<addColumn tableName="DeviceDataStorage">
+			<column name="createTime" type="varchar(32)" remarks="创建时间"
+				defaultValue="">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="20181221_change_DeviceDataStorage_add_updateTime"
+		author="郭飞龙">
+		<comment>DeviceDataStorage表添加修改时间字段</comment>
+		<addColumn tableName="DeviceDataStorage">
+			<column name="updateTime" type="varchar(32)" remarks="修改时间"
+				defaultValue="">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="20181221_change_DeviceDataStorage_add_synchTime"
+		author="郭飞龙">
+		<comment>DeviceDataStorage表添加同步时间字段</comment>
+		<addColumn tableName="DeviceDataStorage">
+			<column name="synchTime" type="varchar(32)" remarks="同步时间"
+				defaultValue="">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="20181221_change_DeviceDataStorage_add_updateBy"
+		author="郭飞龙">
+		<comment>DeviceDataStorage表添加修改人字段</comment>
+		<addColumn tableName="DeviceDataStorage">
+			<column name="updateBy" type="varchar(32)" remarks="修改人"
+				defaultValue="">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="20181221_change_DeviceDataStorage_add_synchBy"
+		author="郭飞龙">
+		<comment>DeviceDataStorage表添加同步人字段</comment>
+		<addColumn tableName="DeviceDataStorage">
+			<column name="synchBy" type="varchar(32)" remarks="同步人"
+				defaultValue="">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="20181221_DeviceDataStorage_add_isDelete"
+		author="郭飞龙">
+		<comment>DeviceDataStorage表添加删除状态字段</comment>
+		<addColumn tableName="DeviceDataStorage">
+			<column name="isDelete" type="varchar(32)" remarks="数据是否被删除,被删除时存删除人id ,默认为空"
+				defaultValue="">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+	
+
+</databaseChangeLog>

@@ -1,0 +1,18 @@
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+
+	<property name="autoIncrement" value="true" dbms="mysql" />
+
+	<changeSet id="2018-1-112.xml" author="査炳">
+
+		<comment>测试liquibase 添加</comment>
+		<addColumn tableName="user">
+			<column name="phonenumber" type="varchar(255)" />
+		</addColumn>
+
+	</changeSet>
+</databaseChangeLog>

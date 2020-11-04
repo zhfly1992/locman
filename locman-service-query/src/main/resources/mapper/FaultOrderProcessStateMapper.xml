@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.run.locman.api.query.repository.FaultOrderProcessStateQueryRepository">
+
+	<resultMap id="BaseResultMap" type="com.run.locman.api.entity.FaultOrderProcessState">
+		<id column="id" jdbcType="VARCHAR" property="id"/>
+		<result column="name" jdbcType="VARCHAR" property="name"/>
+		<result column="accessSecret" jdbcType="VARCHAR" property="accessSecret"/>
+		<result column="sign" jdbcType="VARCHAR" property="sign"/>
+	</resultMap>
+
+    <select id="getFaultOrderStateList" resultType="com.run.locman.api.entity.FaultOrderProcessState">
+		SELECT id,name,accessSecret,sign from FaultOrderProcessState
+	</select>
+
+	<select id="findBySign" parameterType="java.lang.String" resultMap="BaseResultMap">
+		SELECT *  from FaultOrderProcessState where sign = #{sign}
+	</select>
+
+</mapper>
+

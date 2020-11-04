@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.run.locman.api.query.repository.DeviceDataStorageQueryRepository">
+
+
+	<select id="queryDeviceDataStorageList" resultType="com.run.locman.api.dto.DeviceDataDto"
+		parameterType="com.alibaba.fastjson.JSONObject">
+		SELECT DISTINCT
+			dds.id id,
+			dds.serialNumber facilitiesCode,
+			dds.longitude longitude,
+			dds.latitude latitude,
+			dds.deviceAddress address,
+			dds.deviceNumber deviceNumber,
+			dds.synchronizationState synchronizationState,
+		
+			IF (
+				trim(dds.deviceNumber) = '',
+				'unbounding',
+				'bounding'
+			) boundState,
+			ft.facilityTypeAlias facilitiesType,
+			dds.areaId areaCode,
+			a.areaName areaName,
+			dt.deviceTypeName deviceType
+		FROM
+			DeviceDataStorage dds
+		LEFT JOIN Area a ON RIGHT (dds.areaId, 6) = a.areaCode
+		LEFT JOIN FacilitiesType ft ON dds.deviceTypeId = ft.id
+		LEFT JOIN Device d ON dds.deviceNumber = d.subDeviceId
+		AND trim(d.subDeviceId) != ''
+		LEFT JOIN DeviceType dt ON d.deviceType = dt.id
+		WHERE
+			dds.synchronizationState != 'disable'
+			AND dds.isDelete = ''
+		<if test="searchKey !=null and searchKey !='' ">
+			AND (
+				dds.serialNumber LIKE CONCAT('%',#{searchKey},'%')
+				OR dds.deviceNumber LIKE CONCAT('%',#{searchKey},'%')
+			)
+		</if>
+		<if test="address !=null and address !='' ">
+			AND dds.deviceAddress LIKE CONCAT('%',#{address},'%')
+		</if>
+		<if test="areaCode !=null and areaCode !='' ">
+			AND dds.areaId = #{areaCode}
+		</if>
+		<if test="bindingState !=null and bindingState == 'bound'">
+			AND trim(dds.deviceNumber) != ''
+		</if>
+		<if test="bindingState !=null and bindingState =='unbound'">
+			AND trim(dds.deviceNumber) = ''
+		</if>
+		<if test="synchronizationState !=null and synchronizationState !=''">
+			AND dds.synchronizationState = #{synchronizationState}
+		</if>
+	</select>
+
+	<select id="getDeviceDataStorageById" resultType="com.run.locman.api.dto.DeviceDataDto" parameterType="java.util.List">
+		SELECT
+			dds.id id,
+			dds.serialNumber facilitiesCode,
+			ft.facilityTypeAlias facilitiesType,
+			dds.deviceTypeId facilityTypeId,
+			dds.areaId areaCode,
+			CONCAT(
+				(
+					SELECT
+						a2.areaName
+					FROM
+						Area a2
+					WHERE
+						a2.areaCode = LEFT (dds.areaId, 6)
+				),
+				(
+					SELECT
+						a2.areaName
+					FROM
+						Area a2
+					WHERE
+						a2.areaCode = RIGHT (LEFT(dds.areaId, 13), 6)
+				),
+				(
+					SELECT
+						a2.areaName
+					FROM
+						Area a2
+					WHERE
+						a2.areaCode = RIGHT (dds.areaId, 6)
+				)
+			) completeAreaName,
+			a.areaName areaName,
+			dds.longitude longitude,
+			dds.latitude latitude,
+			dds.deviceAddress address,
+			dds.deviceNumber deviceNumber,
+			dds.properties properties,
+			dds.errorInfo errorInfo,
+			dds.showExtend showExtend,
+			dds.extend extend
+		FROM
+			DeviceDataStorage dds
+		LEFT JOIN FacilitiesType ft ON ft.id = dds.deviceTypeId
+		LEFT JOIN Area a ON a.areaCode = RIGHT (dds.areaId, 6)
+		WHERE
+			dds.synchronizationState != 'disable'
+			AND dds.isDelete = ''
+			AND dds.id IN
+		<foreach collection="list" index="index" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+	<select id="getAllArea" resultType="java.util.Map">
+		SELECT DISTINCT
+			dds.areaId areaCode,
+			a.areaName
+		FROM
+			DeviceDataStorage dds
+		LEFT JOIN Area a ON a.areaCode = RIGHT (dds.areaId, 6)
+		WHERE dds.synchronizationState != 'disable'
+		AND dds.isDelete = ''
+	</select>
+	
+	<select id="checkDeviceNumberExist" resultType="int" parameterType="java.lang.String">
+		SELECT
+			count(1)
+		FROM
+			DeviceDataStorage dds
+		WHERE
+			dds.deviceNumber = #{deviceNumber}
+			AND dds.isDelete = ''
+		<if test="id !=null and id !=''">
+			AND dds.id != #{id}
+		</if>
+	</select>
+	
+	<select id="checkSerialNumberExist" resultType="int" parameterType="java.lang.String">
+		SELECT
+			count(1)
+		FROM
+			DeviceDataStorage dds
+		WHERE
+			dds.serialNumber = #{serialNumber}
+			AND dds.isDelete = ''
+		<if test="id !=null and id !=''">
+			AND dds.id != #{id}
+		</if>
+	</select>
+	
+
+</mapper>

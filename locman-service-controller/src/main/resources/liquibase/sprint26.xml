@@ -1,0 +1,115 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+	<property name="autoIncrement" value="true" dbms="mysql" />
+
+
+	<changeSet id="20190102_add_SimpleOrderProcess_remindTime"
+		author="郭飞龙">
+		<comment>SimpleOrderProcess表添加硬件编码</comment>
+		<addColumn tableName="SimpleOrderProcess">
+			<column name="remindTime" type="varchar(16)" remarks="提醒工单延迟时间"
+				defaultValue="">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+
+	<changeSet id="20190103_add_SimpleOrderProcessState_addState"
+		author="张贺">
+		<comment>SimpleOrderProcessState表添加已作废状态
+	</comment>
+		<insert tableName="SimpleOrderProcessState">
+			<column name="id" value="008"></column>
+			<column name="name" value="已作废"></column>
+			<column name="sign" value="8"></column>
+			<column name="accessSecret" value="a8f5d1bb1f8b8780"></column>
+		</insert>
+	</changeSet>
+
+	<changeSet id="20190103_add_SimpleOrderProcess_remindRule"
+		author="郭飞龙">
+		<comment>SimpleOrderProcess表添加提醒方式标识</comment>
+		<addColumn tableName="SimpleOrderProcess">
+			<column name="remindRule" type="varchar(16)" remarks="default默认提醒,custom自定义提醒"
+				defaultValue="default">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+
+	<changeSet id="20180104_change_Device_RealRported_add_lastReportTime"
+		author="张贺">
+		<comment>Device_RealRported表新增lastReportTime字段</comment>
+		<addColumn tableName="Device_RealRported">
+			<column name="lastReportTime" type="varchar(32)" remarks="设备最新上报时间">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="20180104_change_Device_RealRported_add_onLineState"
+		author="张贺">
+		<comment>Device_RealRported表新增onLineState字段</comment>
+		<addColumn tableName="Device_RealRported">
+			<column name="onLineState" type="varchar(20)" remarks="设备在线离线状态">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+
+	<changeSet id="20180104_change_Device_RealRported_add_hardwareId"
+		author="张贺">
+		<comment>Device_RealRported表新增hardwareId字段</comment>
+		<addColumn tableName="Device_RealRported">
+			<column name="hardwareId" type="varchar(128)" remarks="设备硬件编码">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="20180107_change_Device_delete_lastReportTime"
+		author="张贺">
+		<comment>Device表删除最新上报时间字段</comment>
+		<dropColumn tableName="Device">
+			<column name="lastReportTime" type="varchar(32)">
+			</column>
+		</dropColumn>
+	</changeSet>
+
+	<changeSet id="20180107_change_Device_delete_onLineState"
+		author="张贺">
+		<comment>Device表删除最新上报时间字段</comment>
+		<dropColumn tableName="Device">
+			<column name="onLineState" type="varchar(20)">
+			</column>
+		</dropColumn>
+	</changeSet>
+
+	<changeSet id="20180107_change_Device_delete_hardwareId"
+		author="张贺">
+		<comment>Device表删除最新上报时间字段</comment>
+		<dropColumn tableName="Device">
+			<column name="hardwareId" type="varchar(128)">
+			</column>
+		</dropColumn>
+	</changeSet>
+
+	<changeSet id="20190107_change_SimpleOrderProcessState_addState"
+		author="张贺">
+		<comment>SimpleOrderProcessState表添加已延时待审状态
+	</comment>
+		<insert tableName="SimpleOrderProcessState">
+			<column name="id" value="009"></column>
+			<column name="name" value="延时待审"></column>
+			<column name="sign" value="9"></column>
+			<column name="accessSecret" value="a8f5d1bb1f8b8780"></column>
+		</insert>
+	</changeSet>
+
+</databaseChangeLog>

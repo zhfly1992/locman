@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.run.locman.api.crud.repository.AlarmRuleCrudRepository">
+	<sql id="Base_Column">
+		id, oderNum,
+		ruleName,deviceTypeId,userId,crateTime,updateTime,
+		remark,manageState,publishState,ruleContent,rule,accessSecret,isDelete,
+		alarmLevel,isMatchOrder,deviceCount,ruleType
+	</sql>
+	<select id="getMaxValueBySecrete" parameterType="java.util.Map"
+		resultType="long">
+		select ifnull(max(rule.oderNum),0) from AlarmRule rule
+		where
+		accessSecret=#{accessSecret}
+	</select>
+	<insert id="insertModel" parameterType="com.run.locman.api.entity.AlarmRule">
+		insert into AlarmRule(
+		<include refid="Base_Column" />
+		) values
+		(#{id},(SELECT IFNULL(MAX(t.oderNum)+1, 0) from AlarmRule t
+		WHERE t.accessSecret = #{accessSecret})
+		,#{ruleName},#{deviceTypeId},#{userId},#{crateTime},#{updateTime},#{remark},#{manageState},
+		#{publishState},#{ruleContent},#{rule},#{accessSecret},#{isDelete},#{alarmLevel},#{isMatchOrder},#{deviceCount},#{ruleType})
+	</insert>
+	<update id="updateModel" parameterType="com.run.locman.api.entity.AlarmRule">
+		update AlarmRule set
+		userId=#{userId}
+		<if test="ruleName != null and ruleName != ''">
+			,ruleName=#{ruleName}
+		</if>
+		<if test="deviceTypeId != null and deviceTypeId != ''">
+			,deviceTypeId=#{deviceTypeId}
+		</if>
+
+		<if test="updateTime != null and updateTime != ''">
+			,updateTime=#{updateTime}
+		</if>
+		<if test="ruleType != null and ruleType != ''">
+			,ruleType=#{ruleType}
+		</if>
+		<if test="remark != null">
+			,remark=#{remark}
+		</if>
+		<if test="manageState != null and manageState != ''">
+			,manageState=#{manageState}
+		</if>
+		<if test="publishState != null and ruleName != ''">
+			,publishState=#{publishState}
+		</if>
+		<if test="ruleContent != null and ruleContent != ''">
+			,ruleContent=#{ruleContent}
+		</if>
+		<if test="rule != null and rule != ''">
+			,rule=#{rule}
+		</if>
+		<if test="accessSecret != null and accessSecret != ''">
+			,accessSecret=#{accessSecret}
+		</if>
+		<if test="deviceCount != null and deviceCount != ''">
+			,deviceCount=#{deviceCount}
+		</if>
+
+		<if test="isDelete != null and isDelete != ''">
+			,isDelete=#{isDelete}
+		</if>
+
+		<if test="alarmLevel != null">
+			,alarmLevel=#{alarmLevel}
+		</if>
+
+		<if test="accessSecret != null and accessSecret != ''">
+			,accessSecret=#{accessSecret}
+		</if>
+		<if test="isMatchOrder != null">
+			,isMatchOrder=#{isMatchOrder}
+		</if>
+		where id=#{id}
+	</update>
+	<update id="updateAlarmRuleState" parameterType="com.run.locman.api.entity.AlarmRule">
+		update AlarmRule
+		set publishState=#{publishState},isDelete=#{isDelete}
+		where id=#{id}
+	</update>
+
+	<insert id="basicAlarmRuleAdd" parameterType="java.util.Map">
+		insert into AlarmRule(
+		<include refid="Base_Column" />
+		) values
+		<foreach collection="list" item="basicAlarmRule" index="index"
+			separator=",">
+			(#{basicAlarmRule.id},#{basicAlarmRule.oderNum}
+			,#{basicAlarmRule.ruleName},#{basicAlarmRule.deviceTypeId},#{basicAlarmRule.userId},#{basicAlarmRule.crateTime},#{basicAlarmRule.updateTime},#{basicAlarmRule.remark},#{basicAlarmRule.manageState},
+			#{basicAlarmRule.publishState},#{basicAlarmRule.ruleContent},#{basicAlarmRule.rule},#{basicAlarmRule.accessSecret},#{basicAlarmRule.isDelete},#{basicAlarmRule.alarmLevel},#{basicAlarmRule.isMatchOrder},#{basicAlarmRule.deviceCount},#{basicAlarmRule.ruleType})
+		</foreach>
+	</insert>
+</mapper>
+

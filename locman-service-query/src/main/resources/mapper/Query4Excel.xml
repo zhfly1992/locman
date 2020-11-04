@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.run.locman.api.query.repository.Query4ExcelRepository">
+
+
+
+	<select id="getAllDevicesRsFacilitiesInfo" parameterType="String" resultType="com.alibaba.fastjson.JSONObject">
+		SELECT DISTINCT
+			d.id idInMysql,
+			drr.lastReportTime 最新上报时间,
+			d.deviceName 蓝牙名称,
+			f.facilitiesCode,
+			f.latitude,
+			f.longitude,
+			f.address,
+			f.organizationId
+		FROM
+			Device_copy d
+		LEFT JOIN Facility_Device_copy fd ON fd.deviceId = d.id
+		LEFT JOIN Facilities_copy f ON f.id = fd.facilityId
+		LEFT JOIN Device_RealRported_copy drr ON drr.deviceId = d.id
+		WHERE d.accessSecret = #{accessSecret}
+		<if test="deviceType != null and deviceType !=''">
+			and d.deviceType = #{deviceType}
+		</if>
+		<if test="lastTime != null and lastTime !=''">
+			and #{lastTime} >= drr.lastReportTime 
+		</if>
+	</select>
+	
+	<select id="getFacilitiesRsStateInfo" resultType="com.alibaba.fastjson.JSONObject">
+		SELECT DISTINCT
+			f.facilitiesCode,
+			MAX(d.id) idInMysql,
+			GROUP_CONCAT(
+				DISTINCT ai.alarmDesc SEPARATOR '/'
+			) alarmDesc
+		FROM
+			Facilities_copy f
+		LEFT JOIN AlarmInfo_copy ai ON ai.facilitiesId = f.id
+		LEFT JOIN Facility_Device_copy fd ON f.id = fd.facilityId
+		LEFT JOIN Device_copy d ON d.id = fd.deviceId
+		WHERE
+			ai.isDel IN (0, 1)
+		AND d.id IS NOT NULL
+		GROUP BY
+			f.facilitiesCode
+		UNION ALL
+			(
+				SELECT DISTINCT
+					f.facilitiesCode,
+					d.id idInMysql,
+					"当前未告警" alarmDesc
+				FROM
+					Facilities_copy f
+				LEFT JOIN AlarmInfo_copy ai ON ai.facilitiesId = f.id
+				LEFT JOIN Facility_Device_copy fd ON f.id = fd.facilityId
+				LEFT JOIN Device_copy d ON d.id = fd.deviceId
+				WHERE
+					ai.id IS NULL
+				AND d.id IS NOT NULL
+			)
+	</select>
+	
+	
+
+	<update id="changeDeviceStateFv" >
+		update Device_RealRported
+		set
+				device_dc = #{dc}
+		where deviceId=#{deviceId}
+	</update>
+	
+	<insert id="saveFilePath" parameterType="String">
+		insert into ExcelFileUrlPath
+		(
+		id,urlPath,createTime
+		)
+		values
+		((SELECT REPLACE(UUID(),'-','') FROM DUAL),#{urlPath},NOW())
+	</insert>
+	
+
+</mapper>
+

@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.run.locman.api.crud.repository.FacilitiesCrudRepository">
+	<resultMap type="com.run.locman.api.entity.Facilities" id="FacilitiesResultMap">
+		<result column="id" property="id" javaType="String" />
+		<result column="facilitiesCode" property="facilitiesCode"
+			javaType="String" />
+		<result column="facilitiesTypeId" property="facilitiesTypeId"
+			javaType="String" />
+		<result column="areaId" property="areaId" javaType="String" />
+		<result column="longitude" property="longitude" javaType="String" />
+		<result column="version" property="version" javaType="String" />
+		<result column="latitude" property="latitude" javaType="String" />
+		<result column="address" property="address" javaType="String" />
+		<result column="manageState" property="manageState" javaType="String" />
+		<result column="accessSecret" property="accessSecret" javaType="String" />
+		<result column="extend" property="extend" javaType="String" />
+		<result column="creationUserId" property="creationUserId"
+			javaType="String" />
+		<result column="creationTime" property="creationTime" javaType="String" />
+		<result column="editorUserId" property="editorUserId" javaType="String" />
+		<result column="editorTime" property="editorTime" javaType="String" />
+		<result column="organizationId" property="organizationId"
+			javaType="String" />
+		<result column="showExtend" property="showExtend" javaType="String" />
+		<result column="completeAddress" property="completeAddress"
+			javaType="String" />
+		<result column="defenseState" property="defenseState" javaType="String" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id, facilitiesCode, facilitiesTypeId, areaId, longitude,
+		latitude, address, manageState, accessSecret, extend,
+		creationUserId,
+		creationTime, editorUserId,
+		editorTime, organizationId,
+		showExtend,
+		completeAddress,defenseState
+	</sql>
+	<sql id="Base_Condition">
+		<if test="id != null">
+			and id=#{id}
+		</if>
+		<if test="facilitiesCode != null">
+			and facilitiesCode=#{facilitiesCode}
+		</if>
+		<if test="facilitiesTypeId != null">
+			and facilitiesTypeId=#{facilitiesTypeId}
+		</if>
+		<if test="areaId != null">
+			and areaId=#{areaId}
+		</if>
+		<if test="longitude != null">
+			and longitude=#{longitude}
+		</if>
+		<if test="latitude != null">
+			and latitude=#{latitude}
+		</if>
+		<if test="address != null">
+			and address=#{address}
+		</if>
+		<if test="manageState != null">
+			and manageState=#{manageState}
+		</if>
+		<if test="accessSecret != null">
+			and accessSecret=#{accessSecret}
+		</if>
+		<if test="extend != null">
+			and extend=#{extend}
+		</if>
+		<if test="creationUserId != null">
+			and creationUserId=#{creationUserId}
+		</if>
+		<if test="creationTime != null">
+			and creationTime=#{creationTime}
+		</if>
+		<if test="editorUserId != null">
+			and editorUserId=#{editorUserId}
+		</if>
+		<if test="editorTime != null">
+			and editorTime=#{editorTime}
+		</if>
+		<if test="organizationId != null">
+			and organizationId=#{organizationId}
+		</if>
+		<if test="showExtend != null">
+			and showExtend=#{showExtend}
+		</if>
+		<if test="completeAddress != null">
+			and completeAddress=#{completeAddress}
+		</if>
+		<if test="defenseState != null">
+			and defenseState=#{defenseState}
+		</if>
+	</sql>
+	<insert id="insertModel" keyProperty="id"
+		parameterType="com.run.locman.api.entity.Facilities">
+		<selectKey keyProperty="id" resultType="String" order="BEFORE">
+			SELECT REPLACE(UUID(),'-','') FROM DUAL
+		</selectKey>
+		insert into Facilities(
+		<include refid="Base_Column" />
+		) values (#{id}, #{facilitiesCode}, #{facilitiesTypeId}, #{areaId},
+		#{longitude}, #{latitude}, #{address}, #{manageState},
+		#{accessSecret}, #{extend}, #{creationUserId},
+		#{creationTime},
+		#{editorUserId}, #{editorTime},
+		#{organizationId},#{showExtend},
+		#{completeAddress},#{defenseState})
+	</insert>
+
+	<update id="updateModel" parameterType="com.run.locman.api.entity.Facilities">
+		update Facilities set
+		id=#{id}, facilitiesCode=#{facilitiesCode},
+		facilitiesTypeId=#{facilitiesTypeId}, areaId=#{areaId},
+		longitude=#{longitude}, latitude=#{latitude}, address=#{address},
+		manageState=#{manageState},
+		accessSecret=#{accessSecret},
+		extend=#{extend},
+		creationUserId=#{creationUserId},
+		creationTime=#{creationTime},
+		editorUserId=#{editorUserId},
+		editorTime=#{editorTime},
+		organizationId=#{organizationId},
+		showExtend=#{showExtend},completeAddress=#{completeAddress} where
+		id=#{id}
+	</update>
+	<update id="updatePart" parameterType="com.run.locman.api.entity.Facilities">
+		update Facilities set
+		<if test="id != null and id != ''">
+			id=#{id}
+		</if>
+		<if test="facilitiesCode != null and facilitiesCode != ''">
+			,facilitiesCode=#{facilitiesCode}
+		</if>
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			,facilitiesTypeId=#{facilitiesTypeId}
+		</if>
+		<if test="areaId != null and areaId != ''">
+			,areaId=#{areaId}
+		</if>
+		<if test="longitude != null and longitude != ''">
+			,longitude=#{longitude}
+		</if>
+		<if test="latitude != null and latitude != ''">
+			,latitude=#{latitude}
+		</if>
+		<if test="address != null and address != ''">
+			,address=#{address}
+		</if>
+		<if test="manageState != null and manageState != ''">
+			,manageState=#{manageState}
+		</if>
+		<if test="accessSecret != null and accessSecret != ''">
+			,accessSecret=#{accessSecret}
+		</if>
+		<if test="extend != null and extend != ''">
+			,extend=#{extend}
+		</if>
+		<if test="creationUserId != null and creationUserId != ''">
+			,creationUserId=#{creationUserId}
+		</if>
+		<if test="creationTime != null and creationTime != ''">
+			,creationTime=#{creationTime}
+		</if>
+		<if test="editorUserId != null and editorUserId != ''">
+			,editorUserId=#{editorUserId}
+		</if>
+		<if test="editorTime != null and editorTime != ''">
+			,editorTime=#{editorTime}
+		</if>
+		<if test="organizationId != null and organizationId != ''">
+			,organizationId=#{organizationId}
+		</if>
+		<if test="showExtend != null and showExtend != ''">
+			,showExtend=#{showExtend}
+		</if>
+		<if test="completeAddress != null and completeAddress != ''">
+			,completeAddress=#{completeAddress}
+		</if>
+		where id=#{id}
+	</update>
+
+	<delete id="deleteById" parameterType="String">
+		delete from Facilities
+		where id=#{id}
+	</delete>
+
+
+	<insert id="addFacilitiesAndDeviceId" parameterType="java.util.List">
+		INSERT INTO Facility_Device (id,deviceId,facilityId,deviceTypeId)
+		VALUES
+		<foreach collection="list" item="device" index="index"
+			separator=",">
+			(#{device.id}, #{device.deviceId}, #{device.facilityId},
+			#{device.deviceTypeId})
+		</foreach>
+	</insert>
+
+	<!-- 根据设备id查询设施详情 -->
+	<select id="getFacByDeviceId" resultType="com.run.locman.api.entity.Facilities"
+		parameterType="java.lang.String">
+		SELECT
+		b.deviceId,
+		a.id,
+		a.facilitiesCode,
+		a.facilitiesTypeId,
+		a.areaId,
+		a.longitude,
+		a.latitude,
+		a.address,
+		a.manageState,
+		a.accessSecret,
+		a.extend,
+		a.creationUserId,
+		a.creationTime,
+		a.editorUserId,
+		a.editorTime,
+		a.organizationId,
+		a.showExtend,
+		a.completeAddress,
+		c.facilityTypeAlias,
+		a.defenseState
+		FROM
+		Facilities a
+		LEFT JOIN Facility_Device b ON a.id = b.facilityId
+		LEFT
+		JOIN
+		FacilitiesType c ON a.facilitiesTypeId = c.id
+		WHERE
+		a.manageState =
+		'enable'
+		AND b.deviceId = #{deviceId}
+	</select>
+
+	<insert id="batchInsertFacilities" parameterType="java.util.List">
+		insert into Facilities(
+		id,facilitiesCode,facilitiesTypeId,organizationId,areaId,longitude,latitude,address,manageState,accessSecret,creationUserId,completeAddress,creationTime
+		)
+		values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.id},#{item.facilitiesCode},#{item.facilitiesTypeId},#{item.organizationId},#{item.areaId},#{item.longitude},#{item.latitude},#{item.address},#{item.manageState},#{item.accessSecret},#{item.creationUserId},#{item.completeAddress},#{item.creationTime}
+			)
+		</foreach>
+	</insert>
+
+	<insert id="batchInsertFacAndDevice" parameterType="java.util.List">
+		insert into
+		Facility_Device(
+		id , deviceId ,facilityId,deviceTypeId
+		)
+		values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			<if test="item.deviceId != null and item.deviceId != ''">
+				((SELECT REPLACE(UUID(),'-','') FROM
+				DUAL),#{item.deviceId},#{item.id},(select deviceType from
+				Device
+				where
+				id =
+				#{item.deviceId}))
+			</if>
+		</foreach>
+	</insert>
+
+	<update id="updateFacilitiesDefenseState" parameterType="java.util.Map">
+
+		update
+		Facilities set defenseState = #{denfenseState}
+		where accessSecret
+		= #{accessSecret}
+		<if test="organizationId != null and organizationId.size > 0">
+			and organizationId in
+			<foreach item="item" collection="organizationId" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="facIds != null and facIds.size > 0">
+			and id in
+			<foreach item="item" collection="facIds" index="index" open="("
+				close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+	</update>
+
+	<select id="getAlarmOrderId" parameterType="java.util.Map" resultType="String">
+		SELECT
+		ao.id
+		FROM
+		AlarmOrder ao
+		LEFT JOIN AlarmInfo ai
+		on ao.alarmId =
+		ai.id
+		LEFT JOIN Facilities f
+		on ai.facilitiesId = f.id
+		WHERE
+		ao.accessSecret
+		= #{accessSecret}
+		<if test="organizationId != null and organizationId.size > 0">
+			and f.organizationId in
+			<foreach item="item" collection="organizationId" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="facIds != null and facIds.size > 0">
+			and f.id in
+			<foreach item="item" collection="facIds" index="index" open="("
+				close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		AND ao.processState NOT IN (3, 4)
+	</select>
+
+
+	<update id="updateAlarmInfoState" parameterType="java.util.Map">
+		UPDATE AlarmInfo
+		ai
+		SET ai.isDel = 3
+		WHERE
+		ai.isDel in (0,1)
+		and
+		ai.accessSecret
+		=
+		#{accessSecret}
+		and
+		ai.facilitiesId IN (
+		SELECT
+		f.id
+		FROM
+		Facilities f
+		WHERE
+		<if test="organizationId != null and organizationId.size > 0">
+			f.organizationId in
+			<foreach item="item" collection="organizationId" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="facIds != null and facIds.size > 0">
+			f.id in
+			<foreach item="item" collection="facIds" index="index" open="("
+				close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		)
+	</update>
+
+
+	<update id="updateAlarmOrderState">
+		UPDATE AlarmOrder
+		SET processState = 4,
+		userId = 'adminDefense'
+		WHERE
+		id
+		IN
+		<foreach item="item" collection="alarmOrderIdList" index="index" open="("
+			close=")" separator=",">
+			#{item}
+		</foreach>
+	</update>
+	
+	<update id="updateFacDefenseStateRenovation" >
+		update
+		Facilities set defenseState = #{defenseState},
+		presentPic = #{presentPic},
+		hiddenTroubleDesc = #{hiddenTroubleDesc}
+		where accessSecret
+		= #{accessSecret}
+		and id = #{facilityId}
+	</update>
+	
+	<update id="updateAlarmOrderPresentPic">
+		UPDATE AlarmOrder
+		SET presentPic = #{alarmOrderPresentPic},
+		userId = #{userId}
+		WHERE
+		id = #{alarmOrderId}
+	</update>
+	
+	<select id="findIdByCodeAndAcc" parameterType="java.util.Map" resultType="String">
+		select 
+		id
+		from Facilities
+		where facilitiesCode=#{facilitiesCode}
+		and accessSecret=#{accessSecret}
+	</select>
+	
+	<select id="findInfoToCache" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+			A.longitude,
+			A.latitude,
+			A.id,
+			A.alarmWorstLevel,
+			A.accessSecret,
+			CASE A.boundNum
+		WHEN 0 THEN
+			'unBound'
+		ELSE
+			'bound'
+		END boundState,
+		 CASE
+		WHEN JSON_CONTAINS (
+			A.extend,
+			'{"checkWellFuncType":"进水篦"}'
+		) THEN
+			'雨水篦子'
+		ELSE
+			A.facilityTypeAlias
+		END facilityTypeAlias,
+		 A.organizationId
+		FROM
+			(
+				SELECT
+					fa.longitude,
+					fa.latitude,
+					fa.id,
+					MIN(c.alarmLevel) alarmWorstLevel,
+					fa.accessSecret accessSecret,
+					COUNT(b.deviceId) boundNum,
+					fa.extend,
+					ft.facilityTypeAlias,
+					fa.organizationId,
+					fa.defenseState
+				FROM
+					Facilities fa
+				LEFT JOIN FacilitiesType ft ON fa.facilitiesTypeId = ft.id
+				LEFT JOIN Facility_Device b ON b.facilityId = fa.id
+				LEFT JOIN (
+					SELECT
+						deviceId,
+						min(a.alarmLevel) alarmLevel
+					FROM
+						AlarmInfo a
+					WHERE
+						a.isDel IN (0, 1)
+					AND accessSecret = #{accessSecret}
+					GROUP BY
+						a.deviceId
+				) c ON c.deviceId = b.deviceId
+				WHERE
+					fa.manageState != 'disable' 
+				and fa.id= #{id}
+				AND fa.accessSecret =  #{accessSecret}
+				AND ft.accessSecret =  #{accessSecret}
+				GROUP BY
+					fa.id
+			) A
+	</select>
+	
+	<select id="findBatchInfoToCache" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+			A.longitude,
+			A.latitude,
+			A.id,
+			A.alarmWorstLevel,
+			A.accessSecret,
+			CASE A.boundNum
+		WHEN 0 THEN
+			'unBound'
+		ELSE
+			'bound'
+		END boundState,
+		 CASE
+		WHEN JSON_CONTAINS (
+			A.extend,
+			'{"checkWellFuncType":"进水篦"}'
+		) THEN
+			'雨水篦子'
+		ELSE
+			A.facilityTypeAlias
+		END facilityTypeAlias,
+		 A.organizationId
+		FROM
+			(
+				SELECT
+					fa.longitude,
+					fa.latitude,
+					fa.id,
+					MIN(c.alarmLevel) alarmWorstLevel,
+					fa.accessSecret accessSecret,
+					COUNT(b.deviceId) boundNum,
+					fa.extend,
+					ft.facilityTypeAlias,
+					fa.organizationId,
+					fa.defenseState
+				FROM
+					Facilities fa
+				LEFT JOIN FacilitiesType ft ON fa.facilitiesTypeId = ft.id
+				LEFT JOIN Facility_Device b ON b.facilityId = fa.id
+				LEFT JOIN (
+					SELECT
+						deviceId,
+						min(a.alarmLevel) alarmLevel
+					FROM
+						AlarmInfo a
+					WHERE
+						a.isDel IN (0, 1)
+					AND accessSecret = #{accessSecret}
+					GROUP BY
+						a.deviceId
+				) c ON c.deviceId = b.deviceId
+				WHERE
+					fa.manageState != 'disable' 
+				<if test="facIds != null and facIds.size > 0">
+					and fa.id in
+				<foreach item="item" collection="facIds" index="index" open="("
+					close=")" separator=",">
+					#{item}
+				</foreach>
+				</if>
+				AND fa.accessSecret =  #{accessSecret}
+				AND ft.accessSecret =  #{accessSecret}
+				GROUP BY
+					fa.id
+			) A
+	</select>
+</mapper>
+

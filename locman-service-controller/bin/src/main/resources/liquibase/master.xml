@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+
+	 <include file="classpath:liquibase/2018-1-11.xml"
+		relativeToChangelogFile="false" />
+	<include file="classpath:liquibase/2018-1-12.xml"
+		relativeToChangelogFile="false" />
+	<include file="classpath:liquibase/sprint10.xml"
+		relativeToChangelogFile="false" />
+	<include file="classpath:liquibase/sprint11.xml"
+		relativeToChangelogFile="false" />
+	<include file="classpath:liquibase/sprint14.xml"
+		relativeToChangelogFile="false" />
+	<include file="classpath:liquibase/sprint15.xml"
+		relativeToChangelogFile="false" />
+	<include file="classpath:liquibase/sprint16.xml"
+		relativeToChangelogFile="false" />
+	<include file="classpath:liquibase/sprint18.xml"
+		relativeToChangelogFile="false" />
+	<include file="classpath:liquibase/sprint17.xml"
+		relativeToChangelogFile="false" />
+	<include file="classpath:liquibase/sprint19.xml"
+		relativeToChangelogFile="false" />
+	<include file="classpath:liquibase/sprint21.xml"
+		relativeToChangelogFile="false" />
+	<include file="classpath:liquibase/sprint23.xml"
+		relativeToChangelogFile="false" />
+	<include file="classpath:liquibase/sprint24.xml"
+		relativeToChangelogFile="false" />
+	<include file="classpath:liquibase/sprint25.xml"
+		relativeToChangelogFile="false" />
+	<include file="classpath:liquibase/sprint26.xml"
+		relativeToChangelogFile="false" />
+	<include file="classpath:liquibase/sprint27.xml"
+		relativeToChangelogFile="false" /> 
+	<include file="classpath:liquibase/sprint28.xml"
+		relativeToChangelogFile="false" />
+		
+</databaseChangeLog>

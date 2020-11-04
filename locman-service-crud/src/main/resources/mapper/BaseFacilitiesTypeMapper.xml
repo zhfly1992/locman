@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.crud.repository.BaseFacilitiesTypeCrudRepository">
+	<sql id="Base_Column_List">
+		id, facilityTypeBaseId, facilityTypeAlias, accessSecret,
+		creationUserId, creationTime, editorUserId,
+		editorTime, remark
+	</sql>
+	<insert id="synchronousFacilitiesTypeBase" parameterType="String">
+		INSERT INTO FacilitiesTypeBase( 		
+		id,
+		facilityTypeName,
+		facilityTypeIco,
+		manageState,
+		createTime,
+		createUser
+		)
+		SELECT
+		id,
+		facilityTypeName,
+		facilityTypeIco,
+		manageState,
+		NOW(),
+		#{userId}
+		FROM
+		Base_FacilitiesTypeBase;
+	</insert>
+	<insert id="synchronous" parameterType="java.util.Map">
+		INSERT INTO FacilitiesType( 		
+		id,
+		facilityTypeBaseId,
+		facilityTypeAlias,
+		accessSecret,
+		manageState,
+		creationUserId,
+		creationTime,
+		editorUserId,
+		editorTime,
+		remark
+		)
+		SELECT
+		REPLACE(UUID(),'-','') AS id,
+		facilityTypeBaseId,
+		facilityTypeAlias,
+		#{accessSecret},
+		manageState,
+		#{userId},
+		NOW(),
+		#{userId},
+		NOW(),
+		remark
+		FROM
+		Base_FacilitiesType;		
+	</insert>
+	
+	<select id="getBFSStateByAS" parameterType="String" resultType="String">
+	select id from FacilitiesType where accessSecret = #{accessSecret};
+	</select>
+	
+	
+</mapper>

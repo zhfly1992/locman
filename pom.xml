@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.run</groupId>
+	<artifactId>locman</artifactId>
+	<version>0.0.1</version>
+	<name>locman</name>
+	<description>微服务平台的哑资源服务</description>
+	<packaging>pom</packaging>
+	<url>http://devops.locman.cn</url>
+	<inceptionYear>2017</inceptionYear>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java_source_version>1.8</java_source_version>
+		<java_target_version>1.8</java_target_version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>com.run</groupId>
+			<artifactId>tool</artifactId>
+			<version>0.0.1</version>
+		</dependency>
+	</dependencies>
+	<!-- 镜像库 -->
+	<repositories>
+		<!-- 本地仓库 -->
+		<repository>
+			<id>local private</id>
+			<name>Local Maven Repository</name>
+			<url>http://193.168.0.9:8081/repository/maven-public/</url>
+			<layout>default</layout>
+		</repository>
+		<!-- 远程中央仓库 -->
+		<repository>
+			<id>spring-milestone</id>
+			<url>https://repo.spring.io/libs-release</url>
+		</repository>
+
+	</repositories>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<configuration>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<fork>true</fork>
+					<source>${java_source_version}</source>
+					<target>${java_target_version}</target>
+					<encoding>${file_encoding}</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<configuration>
+					<attach>true</attach>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>1.2.3.RELEASE</version>
+			</plugin>
+		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+	</build>
+	<modules>
+		<module>locman-api</module>
+		<module>locman-service-crud</module>
+		<module>locman-service-query</module>
+		<module>drools-service-crud</module>
+		<module>drools-service-query</module>
+		<module>scheduler-service-crud</module>
+		<module>locman-service-activemq</module>
+	</modules>
+</project>

@@ -1,0 +1,35 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+	<property name="autoIncrement" value="true" dbms="mysql" />
+
+
+	<changeSet id="20181107_add_Device" author="张贺">
+		<comment>Device表添加最新上报时间字段</comment>
+		<addColumn tableName="Device">
+			<column name="lastReportTime" type="varchar(32)" remarks="设备最新上报时间">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="20181109_add_Device" author="张贺">
+		<comment>Device表添加设备在线离线状态</comment>
+		<addColumn tableName="Device">
+			<column name="onLineState" type="varchar(20)" remarks="设备在线离线状态">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="20181112_add_SmsRecord" author="张贺">
+		<comment>告警短信发送记录表增添接入方密匙字段</comment>
+		<addColumn tableName="SmsRecord">
+			<column name="accessSecret" type="varchar(64)" remarks="接入方密匙">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+</databaseChangeLog>

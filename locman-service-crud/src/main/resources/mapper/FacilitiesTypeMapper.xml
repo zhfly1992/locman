@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.run.locman.api.crud.repository.FacilitiesTypeCudRepository">
+
+	<resultMap type="com.run.locman.api.entity.FacilitiesType" id="FacilitiesTypeResultMap">
+		<result column="id" property="id" javaType="String" />
+		<result column="facilityTypeAlias" property="facilityTypeAlias" javaType="String" />
+		<result column="accessSecret" property="accessSecret" javaType="String" />
+		<result column="manageState" property="manageState" javaType="String" />
+		<result column="creationUserId" property="creationUserId" javaType="String" />
+		<result column="creationTime" property="creationTime" javaType="String" />
+		<result column="editorUserId" property="editorUserId" javaType="String" />
+		<result column="editorTime" property="editorTime" javaType="String" />
+		<result column="remark" property="remark" javaType="String" />
+		<association property="facilitiesTypeBase" column="facilityTypeBaseId" javaType="com.run.locman.api.entity.FacilitiesTypeBase">
+			<result column="id" property="id" javaType="String" />
+			<result column="facilityTypeName" property="facilityTypeName" javaType="String" />
+			<result column="facilityTypeIco" property="facilityTypeIco" javaType="String" />
+			<result column="manageState" property="manageState" javaType="String" />
+		</association>
+	</resultMap>
+
+	<sql id="Base_Column">
+		id, facilityTypeBaseId, facilityTypeAlias, accessSecret, manageState, creationUserId, creationTime, editorUserId, editorTime,remark
+	</sql>
+	<sql id="Base_Condition">
+		<if test="id != null">
+			and id=#{id}
+		</if>
+		<if test="facilityTypeBaseId != null">
+			and facilityTypeBaseId=#{facilityTypeBaseId}
+		</if>
+		<if test="facilityTypeAlias != null">
+			and facilityTypeAlias=#{facilityTypeAlias}
+		</if>
+		<if test="accessSecret != null">
+			and accessSecret=#{accessSecret}
+		</if>
+		<if test="manageState != null">
+			and manageState=#{manageState}
+		</if>
+		<if test="creationUserId != null">
+			and creationUserId=#{creationUserId}
+		</if>
+		<if test="creationTime != null">
+			and creationTime=#{creationTime}
+		</if>
+		<if test="editorUserId != null">
+			and editorUserId=#{editorUserId}
+		</if>
+		<if test="editorTime != null">
+			and editorTime=#{editorTime}
+		</if>
+		<if test="remark != null">
+			and remark=#{remark}
+		</if>
+	</sql>
+
+	<insert id="insertModel" keyProperty="id" parameterType="com.run.locman.api.entity.FacilitiesType">
+		insert into FacilitiesType(<include refid="Base_Column" />) 
+		values (
+			#{id}, #{facilityTypeBaseId}, #{facilityTypeAlias}, #{accessSecret}, #{manageState}, #{creationUserId}, #{creationTime}, #{editorUserId}, #{editorTime},#{remark}
+		)
+	</insert>
+
+	<update id="updateModel" parameterType="com.run.locman.api.entity.FacilitiesType">
+		update FacilitiesType set 
+		    <if test="id != null">
+			id=#{id}
+		    </if>
+			<if test="facilityTypeBaseId != null">
+			,facilityTypeBaseId=#{facilityTypeBaseId}
+		    </if>
+		    <if test="facilityTypeAlias != null">
+			,facilityTypeAlias=#{facilityTypeAlias}
+		    </if>
+		    <if test="accessSecret != null">
+			,accessSecret=#{accessSecret}
+		    </if>
+		    <if test="manageState != null">
+			,manageState=#{manageState}
+		    </if>
+		    <if test="creationUserId != null">
+			,creationUserId=#{creationUserId}
+		    </if>
+		    <if test="creationTime != null">
+			,creationTime=#{creationTime}
+		    </if>
+		    <if test="editorUserId != null">
+			,editorUserId=#{editorUserId}
+		    </if>
+		    <if test="editorTime != null">
+			,editorTime=#{editorTime}
+		    </if>
+		    <if test="remark != null">
+			,remark=#{remark}
+		    </if>
+		    where id=#{id}
+	</update>
+	<update id="updatePart" parameterType="com.run.locman.api.entity.FacilitiesType">
+		update FacilitiesType set
+		    <if test="id != null">
+			id=#{id}
+		    </if>
+			<if test="facilityTypeBaseId != null">
+			,facilityTypeBaseId=#{facilityTypeBaseId}
+		    </if>
+		    <if test="facilityTypeAlias != null">
+			,facilityTypeAlias=#{facilityTypeAlias}
+		    </if>
+		    <if test="accessSecret != null">
+			,accessSecret=#{accessSecret}
+		    </if>
+		    <if test="manageState != null">
+			,manageState=#{manageState}
+		    </if>
+		    <if test="creationUserId != null">
+			,creationUserId=#{creationUserId}
+		    </if>
+		    <if test="creationTime != null">
+			,creationTime=#{creationTime}
+		    </if>
+		    <if test="editorUserId != null">
+			,editorUserId=#{editorUserId}
+		    </if>
+		    <if test="editorTime != null">
+			,editorTime=#{editorTime}
+		    </if>
+		    <if test="remark != null">
+			,remark=#{remark}
+		    </if>
+		    where id=#{id}
+	</update>
+	<insert id="insertFacilitesType" parameterType="java.util.Map">
+		insert into FacilitiesType(<include refid="Base_Column" />) 
+		values (
+			#{id}, #{facilityTypeBaseId}, #{facilityTypeAlias}, #{accessSecret}, #{manageState}, #{creationUserId}, #{creationTime}, #{editorUserId}, #{editorTime},#{remark}
+		)
+	</insert>
+
+	<delete id="deleteById" parameterType="java.lang.String">
+		delete from FacilitiesType where id=#{id}
+	</delete>
+</mapper>

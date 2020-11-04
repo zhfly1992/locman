@@ -1,0 +1,29 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+	<property name="autoIncrement" value="true" dbms="mysql" />
+
+
+	<changeSet id="20190116_add_Device_subDeviceId" author="郭飞龙">
+		<comment>Device表添加硬件编码</comment>
+		<addColumn tableName="Device">
+			<column name="subDeviceId" type="varchar(32)" remarks="子设备id"
+				defaultValue="">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+
+	<changeSet id="20180124_change_Device_RealRported_delete_hardwareId"
+		author="张贺">
+		<comment>Device_RealRported表删除hardwareId字段</comment>
+		<dropColumn tableName="Device_RealRported">
+			<column name="hardwareId" type="varchar(128)">
+			</column>
+		</dropColumn>
+	</changeSet>
+
+</databaseChangeLog>

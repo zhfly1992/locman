@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.run.locman.api.query.repository.FaultOrderDeviceQueryRepository">
+
+	<resultMap id="BaseResultMap" type="com.run.locman.api.entity.FaultOrderDevice">
+		<id column="id" jdbcType="VARCHAR" property="id"/>
+		<result column="deviceId" jdbcType="VARCHAR" property="deviceId"/>
+		<result column="facilitiesId" jdbcType="VARCHAR" property="facilitiesId"/>
+		<result column="faultOrderId" jdbcType="VARCHAR" property="faultOrderId"/>
+	</resultMap>
+
+
+</mapper>
+

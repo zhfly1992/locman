@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.run.locman.api.crud.repository.DefinedAlarmRuleDeviceCudRepository">
+    <sql id="Base_Column">
+		id, deviceId,
+		alarmRuleId
+	</sql>
+    <resultMap id="BaseResultMap" type="com.run.locman.api.entity.DefinedAlarmRuleDevice">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="deviceId" jdbcType="VARCHAR" property="deviceId"/>
+        <result column="alarmRuleId" jdbcType="VARCHAR" property="alarmRuleId"/>
+    </resultMap>
+
+    <insert id="addBindDevices" parameterType="com.run.locman.api.entity.DefinedAlarmRuleDevice">
+        insert into DefinedAlarmRule_Device(
+        <include refid="Base_Column"/>
+        ) values
+        (#{id},#{deviceId},#{alarmRuleId})
+    </insert>
+
+    <delete id="delBindDevices" parameterType="java.util.Map">
+		delete from DefinedAlarmRule_Device
+		where deviceId=#{deviceId} and alarmRuleId = #{alarmRuleId}
+	</delete>
+
+</mapper>
+

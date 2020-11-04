@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.crud.repository.BalanceSwitchPowersCrudRepository">
+
+	<resultMap type="com.run.locman.api.entity.BalanceSwitchPowers"
+		id="BalanceSwitchPowersResultMap">
+		<result column="id" property="id" javaType="String" />
+		<result column="facilityTypeId" property="facilityTypeId"
+			javaType="String" />
+		<result column="organizationId" property="organizationId"
+			javaType="String" />
+		<result column="postId" property="postId" javaType="String" />
+		<result column="staffType" property="staffType" javaType="String" />
+		<result column="startTime" property="startTime" javaType="String" />
+		<result column="endTime" property="endTime" javaType="String" />
+		<result column="remark" property="remark" javaType="String" />
+		<result column="accessSecret" property="accessSecret" javaType="String" />
+		<result column="manageState" property="manageState" javaType="String" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id, facilityTypeId, organizationId, postId, staffType,
+		startTime, endTime, remark, accessSecret, manageState
+	</sql>
+	<sql id="Base_Condition">
+		<if test="facilityTypeId != null and id != ''">
+			,facilityTypeId=#{facilityTypeId}
+		</if>
+		<if test="organizationId != null and id != ''">
+			,organizationId=#{organizationId}
+		</if>
+		<if test="postId != null and id != ''">
+			,postId=#{postId}
+		</if>
+		<if test="staffType != null and id != ''">
+			,staffType=#{staffType}
+		</if>
+		<if test="startTime != null and id != ''">
+			,startTime=#{startTime}
+		</if>
+		<if test="endTime != null and id != ''">
+			,endTime=#{endTime}
+		</if>
+		<if test="remark != null and id != ''">
+			,remark=#{remark}
+		</if>
+		<if test="manageState != null and id != ''">
+			,manageState=#{manageState}
+		</if>
+		<if test="accessSecret != null and id != ''">
+			,accessSecret=#{accessSecret}
+		</if>
+	</sql>
+
+	<insert id="balanceSwitchPowersSave" parameterType="com.run.locman.api.entity.BalanceSwitchPowers">
+		INSERT INTO BalanceSwitchPowers(
+		<include refid="Base_Column" />
+		)
+		VALUES(
+		#{id}, #{facilityTypeId}, #{organizationId}, #{postId},
+		#{staffType},
+		#{startTime}, #{endTime}, #{remark}, #{accessSecret},
+		#{manageState}
+		)
+	</insert>
+
+	<update id="balanceSwitchPowersUpdate" parameterType="com.run.locman.api.entity.BalanceSwitchPowers">
+		update BalanceSwitchPowers set id = #{id}
+		<include refid="Base_Condition" />
+		where id = #{id}
+	</update>
+
+	<delete id="balanceSwitchPowersDel" parameterType="String">
+		DELETE FROM
+		BalanceSwitchPowers WHERE id=#{id}
+	</delete>
+</mapper>
+

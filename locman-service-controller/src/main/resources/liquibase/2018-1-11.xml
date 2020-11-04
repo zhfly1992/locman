@@ -1,0 +1,64 @@
+    <databaseChangeLog
+            xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+            
+            
+        <property name="autoIncrement" value="true" dbms="mysql"/>
+        
+        
+        <!-- 创建表 -->
+        <changeSet id="20180111-01" author="査炳" >
+                <comment>测试liquibase创建表</comment>
+            <createTable tableName="user">
+                <column name="id" type="bigint" autoIncrement="${autoIncrement}">
+                    <constraints primaryKey="true" nullable="false"/>
+                </column>
+                <column name="nick_name" type="varchar(255)">
+                    <constraints  nullable="false"/>
+                </column>
+                <column name="email" type="varchar(255)">
+                    <constraints  nullable="false"/>
+                </column>
+                <column name="register_time" type="timestamp"  defaultValueComputed="CURRENT_TIMESTAMP">
+                    <constraints nullable="false"/>
+                </column>
+            </createTable>
+        </changeSet>
+        
+        <!-- 添加表列 -->
+     <changeSet id="20180111-02" author="査炳">
+		  <comment>测试liquibase 添加列</comment>
+		  <addColumn tableName="user">
+			<column name="phonenumber" type="varchar(255)" />
+		  </addColumn>
+	 </changeSet>
+	 
+	 <!-- 删除列 -->
+	 <changeSet id="20180111-03" author="査炳">
+	   <comment>测试liquibase 删除列</comment>
+	   <dropColumn tableName="user">
+	    <column name="phonenumber" type="varchar(255)"/>
+	   </dropColumn>
+	 </changeSet>
+	 
+	 <!-- 插入默认的值 -->
+	 <changeSet id="20180111-04" author="査炳">
+	   <comment>测试liquibase 插入</comment>
+	   <insert tableName="user">
+	    <column name="nick_name" value="测试nickName默认值"></column>
+	    <column name="email" value="645474979@qq.com"></column>
+	    <column name="register_time" value="2017-05-06"></column>
+	   </insert>
+	   
+	   <insert tableName="user">  
+         <column name="nick_name" value="测试nickName默认值1"></column>
+	     <column name="email" value="6454749791@qq.com"></column>
+	     <column name="register_time" value="2017-05-16"></column>
+        </insert>  
+	 </changeSet>
+	 
+        
+        
+    </databaseChangeLog>

@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.run.locman.api.crud.repository.AlarmInfoCrudRepository">
+	<resultMap id="BaseResultMap" type="com.run.locman.api.entity.AlarmInfo">
+		<id column="id" property="id" javaType="String" />
+		<result column="facilitiesId" property="facilitiesId" javaType="String" />
+		<result column="deviceId" jdbcType="VARCHAR" property="deviceId"
+			javaType="String" />
+		<result column="alarmTime" jdbcType="VARCHAR" property="alarmTime"
+			javaType="String" />
+		<result column="alarmLevel" jdbcType="INTEGER" property="alarmLevel"
+			javaType="Integer" />
+		<result column="alarmDesc" jdbcType="VARCHAR" property="alarmDesc"
+			javaType="String" />
+		<result column="facilitiesTypeId" jdbcType="VARCHAR" property="facilityTypeId"
+			javaType="String" />
+		<result column="serialNum" jdbcType="VARCHAR" property="serialNum"
+			javaType="String" />
+		<result column="reportTime" jdbcType="VARCHAR" property="reportTime"
+			javaType="String" />
+		<result column="rule" jdbcType="VARCHAR" property="rule"
+			javaType="String" />
+		<result column="isMatchOrder" jdbcType="VARCHAR" property="isMatchOrder"
+			javaType="Boolean" />
+		<result column="accessSecret" jdbcType="VARCHAR" property="accessSecret"
+			javaType="String" />
+	</resultMap>
+	<sql id="Base_Column">
+		id, facilitiesId, deviceId, alarmTime, alarmItem,
+		alarmLevel, alarmDesc, facilitiesTypeId, serialNum, reportTime, rule,
+		isMatchOrder, accessSecret,isDel
+	</sql>
+	<delete id="deleteById" parameterType="java.lang.String">
+		delete from AlarmInfo
+		where id = #{id}
+	</delete>
+	<insert id="insertModel" parameterType="com.run.locman.api.entity.AlarmInfo">
+		insert into AlarmInfo (
+		<include refid="Base_Column" />
+		)
+		values (#{id}, #{facilitiesId}, #{deviceId}, #{alarmTime},
+		#{alarmItem}, #{alarmLevel}, #{alarmDesc}, #{facilitiesTypeId},
+		UUID_SHORT(),
+		#{reportTime}, #{rule},
+		#{isMatchOrder}, #{accessSecret},
+		#{isDel})
+	</insert>
+	<update id="updatePart" parameterType="com.run.locman.api.entity.AlarmInfo">
+	</update>
+	<update id="updateModel" parameterType="com.run.locman.api.entity.AlarmInfo">
+	</update>
+	<update id="updateTheDel" parameterType="Map">
+		update AlarmInfo set
+		isDel = #{isDel} where id = #{id}
+	</update>
+
+	<update id="updateTheDelByCondition" parameterType="Map">
+		update AlarmInfo set isDel = #{isDel} where
+		alarmDesc in
+		<foreach item="item" open="(" separator="," close=")"
+			collection="alarmDesc">
+			#{item}
+		</foreach>
+		and deviceId = #{deviceId} and isDel != 2
+	</update>
+
+	<update id="disposeAlarmInfo" parameterType="java.util.Map">
+		UPDATE AlarmInfo AI
+		INNER JOIN (
+		SELECT
+		AIx.id id
+		FROM
+		AlarmInfo AS AIx
+		WHERE
+		AIx.deviceId =
+		#{deviceId}
+		AND AIx.alarmDesc = #{alarmDesc}
+		AND AIx.rule = #{rule}
+		AND
+		STR_TO_DATE(#{alarmTime},'%Y-%m-%d %T') >= AIx.alarmTime
+		) AS x
+		ON AI.id
+		= x.id
+		SET AI.isDel = 0 where AI.isDel = 1
+	</update>
+
+	<select id="getSerialNumBySecrete" parameterType="java.lang.String"
+		resultType="long">
+		select
+		ifnull(max(AI.serialNum),10000) from AlarmInfo AI
+		where
+		accessSecret=#{accessSecret}
+	</select>
+
+	<select id="getAlarmInfoById" parameterType="java.lang.String"
+		resultType="com.run.locman.api.entity.AlarmInfo">
+		select
+		*
+		from
+		AlarmInfo
+		where
+		id = #{alarmId}
+	</select>
+
+	<update id="updateTheDelByAlarmIds" parameterType="java.util.List">
+		update AlarmInfo set isDel = 0 where
+		id in
+		<foreach item="item" open="(" separator="," close=")"
+			collection="list">
+			#{item}
+		</foreach>
+
+	</update>
+
+	<select id="getAlarmOrderInfoByAlarmId" parameterType="String"
+		resultType="java.util.Map">
+		SELECT
+		a.id as alarmOrderId,
+		a.serialNum,
+		aos.name AS
+		alarmOrderState
+		FROM
+		AlarmOrder a
+		LEFT JOIN Alarm_Order ao ON
+		ao.alarmOrderId = a.id
+		LEFT JOIN AlarmOrderStateType aos ON
+		a.processState = aos.sign
+		WHERE
+		ao.alarmId = #{alarmId}
+		AND aos.type = 1
+	</select>
+
+
+	<select id="getAlarmOrderId" parameterType="java.util.Map"
+		resultType="String">
+		SELECT
+		DISTINCT ao.id
+		FROM
+		AlarmOrder ao
+		LEFT JOIN Alarm_Order
+		aiao on
+		aiao.alarmOrderId = ao.id
+		LEFT JOIN AlarmInfo ai on aiao.alarmId
+		=
+		ai.id
+		WHERE
+		ai.deviceId = #{deviceId}
+		and
+		ao.processState in (0,5)
+		and
+		ai.alarmLevel = 1
+	</select>
+
+	<update id="dealAlarmInfoState" parameterType="java.util.Map">
+		update AlarmInfo
+		set isDel = 2
+		where deviceId = #{deviceId}
+		and alarmLevel = 1
+		and isDel
+		in (0,1)
+	</update>
+
+	<update id="dealAlarmOrder" parameterType="java.util.Map">
+		UPDATE AlarmOrder
+		SET processState = 4,
+		userId = 'autoDeal'
+		WHERE
+		id = #{alarmOrderId}
+	</update>
+
+	<update id="updateSmsRecordState" parameterType="java.util.Map">
+		UPDATE SmsRecord
+		SET state = 2
+		WHERE
+		alarmSerialNum IN
+		<foreach item="item" collection="serialNum" index="index"
+			open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+		and state = 0
+	</update>
+
+
+	<select id="getAlarmSerialNumForCancelSend" resultType="String">
+		SELECT
+		serialNum
+		FROM
+		AlarmInfo
+		WHERE
+		deviceId = #{deviceId}
+		and isDel in (0,1)
+		and alarmLevel = 1
+	</select>
+
+
+
+	<select id="getAlarmIdByAlarmOrderId" resultType="String">
+		SELECT
+		ai.*
+		FROM
+		AlarmInfo ai
+		LEFT JOIN Alarm_Order aiao ON aiao.alarmId = ai.id
+		LEFT JOIN AlarmOrder ao on ao.id = aiao.alarmOrderId
+		WHERE
+		ao.id = #{alarmOrderId}
+		and ai.alarmLevel = 2
+	</select>
+	
+	<select id="getFacInfoByAlarmOrderId" resultType="java.util.Map">
+	SELECT
+		f.organizationId,
+		f.facilitiesCode,
+		ao.serialNum,
+		f.address
+		from 
+		AlarmOrder ao 
+		LEFT JOIN Alarm_Order a on a.alarmOrderId =ao.id
+		LEFT JOIN AlarmInfo ai on ai.id =a.alarmId
+		LEFT JOIN Facilities f on f.id=ai.facilitiesId
+		WHERE
+		ao.id=#{alarmOrderId}
+		LIMIT 1
+	
+	</select>
+	
+	
+	
+	<select id="getDistinctAlarmDescByDeviceId" resultType="String">
+		SELECT
+		DISTINCT a.alarmDesc
+		FROM
+			AlarmInfo a
+		WHERE
+			a.accessSecret = #{accessSecret}
+		AND a.deviceId = #{deviceId}
+		AND a.isDel in ("0","1")
+	</select>
+	
+	
+	
+	<select id="getPersonInCharge" resultType="java.util.Map">
+		SELECT
+			fs.personTel personTel,
+			fs.personName personName
+		FROM
+			Facilities f
+		LEFT JOIN Facilities_FocusSecurity ffs ON f.id = ffs.facilityId
+		LEFT JOIN FocusSecurity fs ON fs.id = ffs.securityId
+		WHERE
+			f.facilitiesCode = #{facilitiesCode}
+		AND fs.`status` = "enable"
+		AND f.accessSecret = #{accessSecret}
+		AND NOW() > date_sub(fs.startTime, interval fs.previewTime DAY_HOUR)
+		AND fs.endTime > NOW()
+	</select>
+	
+</mapper>

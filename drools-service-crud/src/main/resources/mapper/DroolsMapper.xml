@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.run.locman.api.crud.repository.DroolsRepository">
+
+	<insert id="addDrools" parameterType="com.alibaba.fastjson.JSONObject">
+		insert into Drools
+		(id,
+		rule, ruleName, isDelete, remark, state)
+		values (
+		#{id}, #{rule},
+		#{ruleName}, 'valid', #{remark}, 'valid'
+		)
+	</insert>
+
+
+
+	<update id="updateDrools" parameterType="com.alibaba.fastjson.JSONObject">
+		update Drools
+		<trim prefix="set" suffixOverrides=",">
+			<if test="rule!=null">
+				rule=#{rule},
+			</if>
+			<if test="ruleName!=null">
+				ruleName=#{ruleName},
+			</if>
+			<if test="isDelete!=null">
+				isDelete=#{isDelete},
+			</if>
+			<if test="remark!=null">
+				remark=#{remark},
+			</if>
+			<if test="state!=null">
+				state=#{state},
+			</if>
+		</trim>
+		where id=#{id}
+	</update>
+
+</mapper>

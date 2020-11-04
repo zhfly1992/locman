@@ -1,0 +1,640 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.query.repository.DeviceQueryRepository">
+	<resultMap id="BaseResultMap"
+		type="com.run.locman.api.entity.Device">
+		<id column="id" property="id" javaType="String" />
+		<result column="deviceName" property="deviceName"
+			javaType="String" />
+		<result column="deviceKey" property="deviceKey"
+			javaType="String" />
+		<result column="protocolType" property="protocolType"
+			javaType="String" />
+		<result column="openProtocols" property="openProtocols"
+			javaType="String" />
+		<result column="deviceType" property="deviceType"
+			javaType="String" />
+		<result column="appTag" property="appTag" javaType="String" />
+		<result column="manageState" property="manageState"
+			javaType="String" />
+		<result column="accessSecret" property="accessSecret"
+			javaType="String" />
+	</resultMap>
+	<sql id="Base_Column">
+		id, deviceName, deviceKey, protocolType, openProtocols,
+		deviceType,appTag,manageState,accessSecret,deviceDefendState
+	</sql>
+
+	<select id="queryDeviceInfoForCondition"
+		parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+		de.id as deviceId,
+		de.deviceName,
+		de.appTag,
+		de.deviceKey,
+		de.manageState,
+		de.deviceType as deviceTypeId,
+		de.openProtocols,
+		de.protocolType,
+		drr.lastReportTime,
+		drr.onLineState as
+		deviceOnlineStatus,
+		CASE
+		WHEN (
+		SELECT
+		fp.id
+		FROM
+		FaultOrderProcess fp
+		LEFT
+		JOIN FaultOrder_Device fd ON fp.id = fd.faultOrderId
+		WHERE
+		fd.deviceId =
+		de.id
+		AND fp.processState NOT IN (0, 6, 2, 1)
+		) IS NOT NULL THEN
+		'fault'
+		ELSE
+		'normal'
+		END AS deviceDefendState,
+		de.subDeviceId as hardwareId,
+		dt.deviceTypeName,
+		ff.accessSecret,
+		fd.facilityId,
+		f.facilitiesCode as
+		facilitiesCode,
+		ff.factoryName as
+		factoryName,
+		(case
+		when fd.facilityId is
+		null then
+		"unbound"
+		when
+		fd.facilityId
+		is not null then
+		"bound"
+		end) as
+		bingStatus,
+
+		<!-- 校验设备是否配置了数据点 -->
+		IF((SELECT
+		COUNT(*)
+		FROM
+		DeviceType_Template dt
+		LEFT JOIN
+		DeviceProperties_Template dpt ON
+		dt.devicePropertyTemplateId =
+		dpt.id
+		LEFT JOIN DeviceProperties dp ON
+		dpt.id = dp.templateId
+		WHERE
+		dt.deviceTypePropertyConfigId =
+		fd.deviceTypeId
+		AND dpt.accessSecret =
+		#{accessSecret}) >
+		0,TRUE,FALSE) as deviceState
+
+		FROM
+		Device de
+		LEFT JOIN
+		Device_RealRported drr on
+		de.id =
+		drr.deviceId
+		LEFT
+		JOIN
+		DeviceType
+		dt ON
+		dt.id =
+		de.deviceType
+		LEFT JOIN
+		Factory_AppTag fa
+		ON
+		fa.appTag =
+		de.appTag
+		LEFT
+		JOIN Factory
+		ff ON
+		ff.id =
+		fa.factoryId
+		LEFT
+		JOIN
+		Facility_Device fd on
+		fd.deviceId =
+		de.id
+		LEFT JOIN
+		Facilities f ON
+		fd.facilityId = f.id
+		<where>
+			de.accessSecret = #{accessSecret} AND de.manageState = 'enabled'
+			<if
+				test="bingStatus != null and bingStatus !='' and bingStatus == 'bound'">
+				AND fd.facilityId IS NOT null
+			</if>
+			<if
+				test="bingStatus != null and bingStatus !='' and bingStatus == 'unbound'">
+				AND fd.facilityId IS null
+			</if>
+			<if test="deviceTypeId != null and deviceTypeId !=''">
+				AND dt.id = #{deviceTypeId}
+			</if>
+			<if test="deviceId != null and deviceId !='' and whole == 'false'">
+				AND (de.id = #{deviceId} OR f.facilitiesCode LIKE CONCAT
+				('%',#{deviceId},'%') OR de.subDeviceId = #{deviceId} OR
+				de.deviceName like concat ('%',#{deviceId},'%'))
+			</if>
+			<if test="deviceId != null and deviceId !='' and whole == 'true'">
+				AND f.facilitiesCode = #{deviceId}
+			</if>
+			<if test="factoryId !=null and factoryId !=''">
+				And ff.id = #{factoryId}
+			</if>
+			<if test="startTime !=null and startTime !=''">
+				and TO_DAYS(drr.lastReportTime)
+				&gt;=TO_DAYS(#{startTime})
+			</if>
+			<if test="endTime !=null and endTime !=''">
+				and TO_DAYS(drr.lastReportTime) &lt;=TO_DAYS(#{endTime})
+			</if>
+			<if
+				test="onLineState !=null and onLineState !='' and onLineState !='unknown'">
+				and drr.onLineState = #{onLineState}
+			</if>
+			<if test="onLineState =='unknown'">
+				and drr.onLineState is null
+			</if>
+		</where>
+		order by drr.lastReportTime desc
+		<if test="SizePage != 0 ">
+			limit #{NumberPage},#{SizePage}
+		</if>
+
+	</select>
+
+	<select id="queryDeviceBindingState"
+		parameterType="java.lang.String" resultType="java.util.Map">
+		SELECT
+		d.id as deviceId,
+		d.subDeviceId AS hardwareId,
+		d.accessSecret,
+		dt.deviceTypeName,
+		fy.factoryName,
+		dr.lastReportTime,
+
+		d.deviceName,
+		d.deviceType as
+		deviceTypeId
+		FROM
+		Device d
+		LEFT JOIN DeviceType dt ON d.deviceType =
+		dt.id
+		LEFT JOIN Device_RealRported dr ON d.id = dr.deviceId
+		LEFT JOIN
+		Factory_AppTag fa ON d.appTag = fa.appTag
+		LEFT JOIN Factory fy ON fy.id
+		= fa.factoryId
+		WHERE
+		d.id = #{deviceId}
+	</select>
+
+	<select id="queryBatchDeviceInfoForDeviceIds"
+		parameterType="java.util.List" resultType="java.util.Map">
+		SELECT
+		de.id as deviceId,
+		de.deviceName,
+		de.appTag,
+		de.deviceKey,
+		de.manageState,
+		de.deviceType as deviceTypeId,
+		de.openProtocols,
+		de.protocolType,
+		dt.deviceTypeName,
+		ff.accessSecret,
+		de.subDeviceId as
+		hardwareId,
+
+		ff.factoryName,
+		dr.lastReportTime
+		FROM
+		Device de
+		LEFT
+		JOIN
+		DeviceType dt ON dt.id =
+		de.deviceType
+		LEFT JOIN Factory_AppTag fa
+		ON
+		fa.appTag = de.appTag
+		LEFT
+		JOIN Factory ff ON ff.id = fa.factoryId
+
+		LEFT
+		JOIN Device_RealRported dr ON de.id=dr.deviceId
+		WHERE de.id in
+		<foreach item="item" open="(" separator="," close=")"
+			collection="list">
+			#{item}
+		</foreach>
+	</select>
+
+	<select id="queryDeviceByDeviceId" resultMap="BaseResultMap">
+		SELECT
+		*
+		FROM Device
+		d left join DeviceType dt on d.deviceType = dt.id where d.id
+		=
+		#{deviceId} and dt.typeSign = '2'
+	</select>
+
+	<select id="queryDeviceInfoById" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column" />
+		FROM Device where id = #{deviceId}
+	</select>
+
+	<select id="queryDeviceIds" resultType="java.lang.String">
+		SELECT d.id FROM Device d
+	</select>
+	<select id="getInfoForFaultOrderById"
+		parameterType="java.util.List" resultType="java.util.Map">
+		SELECT
+		a.*, f.contactsPhone as phone
+		FROM
+		(
+		SELECT
+		d.id,
+		d.accessSecret,
+		fa.factoryId,
+		fd.facilityId
+		FROM
+		Device d
+		LEFT JOIN Factory_AppTag fa ON
+		d.appTag = fa.appTag
+		LEFT JOIN Facility_Device fd ON d.id = fd.deviceId
+		WHERE
+		d.id in
+		<foreach item="item" open="(" separator="," close=")"
+			collection="list">
+			#{item}
+		</foreach>
+		) a
+		LEFT JOIN Factory f ON a.factoryId = f.id
+	</select>
+	<select id="getAllAccessSecret" resultType="java.lang.String">
+		SELECT DISTINCT
+		d.accessSecret FROM Device d;
+	</select>
+
+
+	<select id="getDeviceListNum" parameterType="java.util.Map"
+		resultType="int">
+		select COUNT(*)
+		FROM
+		Device de
+		LEFT JOIN Device_RealRported drr on de.id
+		= drr.deviceId
+		LEFT JOIN DeviceType dt ON dt.id =
+		de.deviceType
+		LEFT JOIN
+		Facility_Device fd on fd.deviceId =de.id
+		LEFT
+		JOIN Facilities f ON
+		fd.facilityId = f.id
+		LEFT JOIN
+		Factory_AppTag fa ON
+		fa.appTag =
+		de.appTag
+		LEFT JOIN Factory
+		ff ON
+		ff.id =
+		fa.factoryId
+
+		WHERE
+		de.accessSecret
+		=#{accessSecret}
+		AND
+		de.manageState = 'enabled'
+
+		<if
+			test="bingStatus != null and bingStatus !='' and bingStatus == 'bound'">
+			AND fd.facilityId IS NOT null
+		</if>
+		<if
+			test="bingStatus != null and bingStatus !='' and bingStatus == 'unbound'">
+			AND fd.facilityId IS null
+		</if>
+		<if test="deviceTypeId != null and deviceTypeId !=''">
+			AND dt.id = #{deviceTypeId}
+		</if>
+		<if test="deviceId != null and deviceId !='' and whole == 'false'">
+
+			AND (de.id = #{deviceId} OR f.facilitiesCode LIKE CONCAT
+			('%',#{deviceId},'%') OR de.subDeviceId = #{deviceId} OR
+			de.deviceName like concat ('%',#{deviceId},'%'))
+		</if>
+		<if test="deviceId != null and deviceId !='' and whole == 'true'">
+			AND f.facilitiesCode = #{deviceId}
+		</if>
+		<if test="factoryId !=null and factoryId !=''">
+			And ff.id = #{factoryId}
+		</if>
+		<if test="startTime !=null and startTime !=''">
+
+			and TO_DAYS(drr.lastReportTime)
+			&gt;=TO_DAYS(#{startTime})
+		</if>
+		<if test="endTime !=null and endTime !=''">
+
+			and TO_DAYS(drr.lastReportTime)
+			&lt;=TO_DAYS(#{startTime})
+		</if>
+		<if
+			test="onLineState !=null and onLineState !='' and onLineState !='unknown'">
+			and drr.onLineState = #{onLineState}
+		</if>
+		<if test="onLineState =='unknown'">
+			and drr.onLineState is null
+		</if>
+	</select>
+
+	<select id="getDeviceInfoForControl"
+		parameterType="java.lang.String" resultType="java.util.Map">
+		SELECT
+		de.id as deviceId,
+		de.gatewayId,
+		de.subDeviceId,
+		fa.appId,
+		fa.appKey
+		FROM
+		Device de
+		LEFT JOIN
+		Factory_AppTag
+		fa ON de.appTag
+		= fa.appTag
+		WHERE
+		de.id = #{deviceId}
+	</select>
+
+	<select id="queryDeviceByhardwareIdAndAS"
+		parameterType="java.lang.String"
+		resultType="com.run.locman.api.entity.Device">
+		SELECT
+		d.id,
+		d.deviceType,
+		d.subDeviceId,
+		d.accessSecret
+		FROM
+		Device d
+		WHERE
+		d.subDeviceId = #{hardwareId}
+		AND d.accessSecret =
+		#{accessSecret}
+		AND d.id not in
+		(SELECT fd.deviceId FROM Facility_Device
+		fd)
+	</select>
+
+
+	<select id="getCountDeviceRealState"
+		parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+		d.id AS deviceId,
+		d.deviceType,
+		dt.deviceTypeName,
+		f.facilitiesCode,
+		f.completeAddress,
+		f.address,
+		drr.device_bv,
+		drr.device_sig,
+		drr.device_ls,
+		drr.device_rsrp,
+		drr.device_sinr,
+		drr.device_fv,
+		f.id as facilityId,
+		drr.lastReportTime
+		FROM
+		Device_RealRported drr
+		LEFT JOIN Device d ON drr.deviceId = d.id
+		LEFT
+		JOIN DeviceType dt ON
+		d.deviceType =
+		dt.id
+		LEFT JOIN Facility_Device
+		fd ON
+		d.id = fd.deviceId
+		LEFT JOIN
+		Facilities f ON fd.facilityId = f.id
+		WHERE
+		d.accessSecret =#{accessSecret}
+		and d.id is not null
+		<if test="deviceId != null and deviceId !=''">
+			AND (
+			d.id = #{deviceId} OR
+			f.facilitiesCode LIKE CONCAT
+			('%',#{deviceId},'%')
+			)
+		</if>
+		<if test="deviceType != null and deviceType !=''">
+			AND d.deviceType = #{deviceType}
+		</if>
+
+		<if test="startTime !=null and startTime !=''">
+			and drr.lastReportTime
+			&gt;=#{startTime}
+		</if>
+		<if test="endTime !=null and endTime !=''">
+			and drr.lastReportTime &lt;=#{endTime}
+		</if>
+
+		<if test="searchKey != null and searchKey !=''">
+			AND (
+			f.completeAddress LIKE CONCAT ('%',#{searchKey},'%')
+			OR f.address
+			LIKE CONCAT ('%',#{searchKey},'%')
+			)
+		</if>
+		<if test="device_ls != null and device_ls !=''">
+			AND drr.device_ls = #{device_ls}
+		</if>
+		<if test="device_bvMin != null and device_bvMin !=''">
+			AND drr.device_bv &gt;= #{device_bvMin}
+		</if>
+		<if test="device_bvMax != null and device_bvMax !=''">
+			AND drr.device_bv &lt;= #{device_bvMax}
+		</if>
+		<if test="device_sigMin != null and device_sigMin !=''">
+			AND drr.device_sig &gt;= #{device_sigMin}
+		</if>
+		<if test="device_sigMax != null and device_sigMax !=''">
+			AND drr.device_sig &lt;= #{device_sigMax}
+		</if>
+		<if test="device_rsrpMin != null and device_rsrpMin !=''">
+			AND drr.device_rsrp &gt;= #{device_rsrpMin}
+		</if>
+		<if test="device_rsrpMax != null and device_rsrpMax !=''">
+			AND drr.device_rsrp &lt;= #{device_rsrpMax}
+		</if>
+		<if test="device_sinrMin != null and device_sinrMin !=''">
+			AND drr.device_sinr &gt;= #{device_sinrMin}
+		</if>
+		<if test="device_sinrMax != null and device_sinrMax !=''">
+			AND drr.device_sinr &lt;= #{device_sinrMax}
+		</if>
+		order by drr.lastReportTime desc
+	</select>
+
+	<select id="findFaultOrderByDeviceId" resultType="String"
+		parameterType="String">
+		SELECT
+		DISTINCT fp.id
+		FROM
+		FaultOrderProcess fp
+		LEFT JOIN
+		FaultOrder_Device fd ON fp.id = fd.faultOrderId
+		WHERE
+		fd.deviceId =
+		#{deviceId}
+		AND fp.processState NOT IN (0, 6, 2, 1)
+	</select>
+
+	<select id="findDeviceId" resultType="java.lang.String"
+		parameterType="java.lang.String">
+		SELECT
+		d.id
+		FROM
+		Device d
+		WHERE
+		d.gatewayId = #{gatewayId}
+		AND d.subDeviceId = #{subDeviceId}
+	</select>
+	<select id="getQueryDeviceByRule" parameterType="java.util.Map" resultType="java.util.Map"> 
+		SELECT 
+		de.id AS deviceId,
+		de.deviceName,
+		de.deviceType AS deviceTypeId,
+		CASE
+		WHEN (
+		SELECT
+		fp.id
+		FROM
+		FaultOrderProcess fp
+		LEFT JOIN FaultOrder_Device fd ON fp.id = fd.faultOrderId
+		WHERE
+		fd.deviceId = de.id
+		AND fp.processState NOT IN (0, 6, 2, 1)
+		) IS NOT NULL THEN
+		'fault'
+		ELSE
+		'normal'
+		END AS deviceDefendState,
+		de.subDeviceId AS hardwareId,
+		dt.deviceTypeName,
+		ff.accessSecret,
+		fd.facilityId,
+		f.facilitiesCode AS facilitiesCode,
+		A.alarmDesc,
+		A.alarmTime,
+		f.address
+		FROM
+		(
+		SELECT
+		ai.alarmDesc,
+		ai.deviceId,
+		Max(ai.alarmTime) as alarmTime
+		from AlarmInfo ai
+		LEFT JOIN AlarmRule ar ON ai.alarmDesc = ar.ruleName
+		where ai.alarmDesc=#{alarmDesc}
+		AND ar.accessSecret = #{accessSecret}
+		and ai.isDel in(0,1)
+		GROUP BY ai.deviceId
+		)A LEFT JOIN Device de on A.deviceId =de.id
+		LEFT JOIN Device_RealRported drr ON de.id = drr.deviceId
+		LEFT JOIN DeviceType dt ON dt.id = de.deviceType
+		LEFT JOIN Factory_AppTag fa ON fa.appTag = de.appTag
+		LEFT JOIN Factory ff ON ff.id = fa.factoryId
+		LEFT JOIN Facility_Device fd ON fd.deviceId = de.id
+		LEFT JOIN Facilities f ON fd.facilityId = f.id
+		WHERE de.manageState = 'enabled'
+		and f.defenseState =1
+		ORDER BY A.alarmTime DESC
+		<if test="pageSize != 0">
+			limit #{NumberPage},#{pageSize}
+		</if>
+	</select>
+
+	<select id="getCountDeviceTimingTrigger" resultType="java.util.Map" parameterType="java.util.Map">
+	SELECT
+	ct.deviceId,
+	ct.dateNum,
+	ct.countTiming,
+	ct.countTrigger,
+	drr.device_fv,
+	f.address,
+	f.id facilityId,
+	f.facilitiesCode,
+	d.deviceName,
+	0+cast(a.countSum as char) as countSum
+	from CountTimeTrigger ct
+	LEFT JOIN(
+	SELECT
+	ctt.deviceId deviceId,
+	SUM(ctt.countAll) countSum
+	from CountTimeTrigger ctt
+	LEFT JOIN Facility_Device fd on fd.deviceId =ctt.deviceId
+	LEFT JOIN Facilities f ON f.id =fd.facilityId
+	left join Device d on d.id=ctt.deviceId
+	WHERE ctt.dateNum &gt;= #{dateNum}
+	and f.defenseState = 1
+	and f.accessSecret=#{accessSecret}
+	<if test="searchKey != null and searchKey !=''">
+			AND (ctt.deviceId = #{searchKey} OR
+			 f.facilitiesCode LIKE CONCAT
+			('%',#{searchKey},'%') OR 
+			d.deviceName like concat ('%',#{searchKey},'%'))
+		</if>
+	GROUP BY ctt.deviceId
+	ORDER BY countSum DESC
+	<if test="start >=0 and size !=0">
+	LIMIT #{start},#{size}
+	</if>
+	)a on a.deviceId = ct.deviceId
+	LEFT JOIN Device_RealRported drr on drr.deviceId =a.deviceId
+	LEFT JOIN Facility_Device fd on fd.deviceId =a.deviceId 
+	LEFT JOIN Facilities f on f.id =fd.facilityId
+	LEFT JOIN Device d on d.id =fd.deviceId 
+	WHERE a.countSum is not null
+	and ct.dateNum &gt;= #{dateNum}
+	and f.accessSecret=#{accessSecret}
+	ORDER BY a.countSum desc  
+		
+	</select>
+	
+	<select id="getAllCountDeviceTimingTrigger" parameterType="java.util.Map" resultType="int">
+	SELECT
+	COUNT(DISTINCT ct.deviceId)
+	from 
+	CountTimeTrigger ct
+	LEFT JOIN(
+	SELECT
+	ctt.deviceId deviceId,
+	SUM(ctt.countAll) countSum
+	from CountTimeTrigger ctt
+	WHERE ctt.dateNum &gt;=#{dateNum}
+	GROUP BY ctt.deviceId
+	ORDER BY countSum DESC
+	
+	)a on a.deviceId = ct.deviceId
+	
+	LEFT JOIN Facility_Device fd on fd.deviceId =ct.deviceId
+	LEFT JOIN Facilities f on f.id=fd.facilityId
+	left join Device d on d.id= fd.deviceId
+	WHERE 
+	f.defenseState=1
+	and f.accessSecret=#{accessSecret}
+	<if test="searchKey != null and searchKey !=''">
+			AND (d.id = #{searchKey} OR
+			 f.facilitiesCode LIKE CONCAT
+			('%',#{searchKey},'%') OR 
+			d.deviceName like concat ('%',#{searchKey},'%'))
+		</if>
+	
+	</select>
+</mapper>

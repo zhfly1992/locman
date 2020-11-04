@@ -1,0 +1,156 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+
+	<property name="autoIncrement" value="true" dbms="mysql" />
+
+	<changeSet id="20180619_addFaultOrderProcessType" author="郭飞龙">
+		<comment>添加故障工单类型</comment>
+		<insert tableName="FaultOrderProcessType">
+			<column name="id" value="9" />
+			<column name="name" value="超时未上报" />
+			<column name="accessSecret" value="a8f5d1bb1f8b8780" />
+		</insert>
+	</changeSet>
+
+	<changeSet id="20180620_addProcessType" author="郭飞龙">
+		<comment>添加超时故障流程类型</comment>
+		<insert tableName="process_type_base">
+			<column name="id" value="457a9230742f11e891b9002324deca66" />
+			<column name="processType" value="超时故障工单流程" />
+			<column name="processSign" value="manualFailureProcess" />
+		</insert>
+	</changeSet>
+	<changeSet id="20180622_area" author="王胜">
+		<comment>添加缺失的行政区域</comment>
+		<insert tableName="Area">
+			<column name="id" value="9999" />
+			<column name="areaCode" value="510108" />
+			<column name="areaName" value="成华区" />
+		</insert>
+		<insert tableName="Area">
+			<column name="id" value="10000" />
+			<column name="areaCode" value="510185" />
+			<column name="areaName" value="天府新区" />
+		</insert>
+		<insert tableName="Area">
+			<column name="id" value="10001" />
+			<column name="areaCode" value="510186" />
+			<column name="areaName" value="高新南区" />
+		</insert>
+		<insert tableName="Area">
+			<column name="id" value="10002" />
+			<column name="areaCode" value="510187" />
+			<column name="areaName" value="高新西区" />
+		</insert>
+		<insert tableName="Area">
+			<column name="id" value="10003" />
+			<column name="areaCode" value="500121" />
+			<column name="areaName" value="两江新区" />
+		</insert>
+	</changeSet>
+
+	<changeSet id="20180620_updateArea" author="王胜">
+		<comment>修改行政区域名称</comment>
+		<sql>update Area set areaName = '双流区' where areaCode = '510122'</sql>
+		<sql>update Area set areaName = '郫都区' where areaCode = '510124'</sql>
+	</changeSet>
+
+
+	<changeSet id="20180622_createTimeoutReportConfig" author="郭飞龙">
+		<comment>超时上报时间设置表</comment>
+		<createTable tableName="TimeoutReportConfig">
+			<column name="id" type="varchar(64)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="name" type="varchar(64)" remarks="配置名称">
+				<constraints nullable="false" />
+			</column>
+			<column name="createTime" type="varchar(32)" remarks="创建时间">
+				<constraints nullable="true" />
+			</column>
+			<column name="createUserId" type="varchar(64)" remarks="创建人">
+				<constraints nullable="false" />
+			</column>
+			<column name="updateTime" type="varchar(32)" remarks="更新时间">
+				<constraints nullable="true" />
+			</column>
+			<column name="updateUserId" type="varchar(64)" remarks="修改人">
+				<constraints nullable="true" />
+			</column>
+			<column name="timeoutReportTime" type="integer(4)" remarks="时间,单位:小时">
+				<constraints nullable="false" />
+			</column>
+			<column name="accessSecret" type="varchar(64)" remarks="接入方密钥">
+				<constraints nullable="false" />
+			</column>
+			<column name="managerState" type="varchar(64)" remarks="管理状态">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="20180706_createFacility_TimeoutReportConfig"
+		author="郭飞龙">
+		<comment>设施与超时未上报时间关系表</comment>
+		<createTable tableName="Facility_TimeoutReportConfig">
+			<column name="id" type="varchar(64)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="facilityId" type="varchar(64)" remarks="设施id">
+				<constraints nullable="false" />
+			</column>
+			<column name="timeoutReportConfigId" type="varchar(64)"
+				remarks="超时未上报配置id">
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="20180622_SmsInfo" author="张贺">
+		<comment>各接入方短信发送地址存储表</comment>
+		<createTable tableName="SmsInfo">
+			<column name="id" type="varchar(32)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="accessSecret" type="varchar(120)" remarks="接入方密匙">
+				<constraints nullable="false" />
+			</column>
+			<column name="gatewayUrl" type="varchar(255)" remarks="短信发送地址">
+
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+
+	<changeSet id="20180628-add_realOrgId" author="赵伟志">
+		<comment>添加列_真实组织Id</comment>
+		<addColumn tableName="process_node_person">
+			<column name="realOrganizeId" type="varchar(255)" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="20180703_Device_Job" author="王胜">
+		<comment>设备同定时器关系表</comment>
+		<createTable tableName="Device_Job">
+			<column name="id" type="varchar(32)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="deviceId" type="varchar(64)" remarks="设备id">
+				<constraints nullable="false" />
+			</column>
+			<column name="jobId" type="varchar(64)" remarks="定时器id">
+				<constraints nullable="false" />
+			</column>
+			<column name="item" type="varchar(64)" remarks="下发命令开启的key">
+				<constraints nullable="false" />
+			</column>
+			<column name="openTime" type="varchar(64)" remarks="下发命令开启时间">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+</databaseChangeLog>

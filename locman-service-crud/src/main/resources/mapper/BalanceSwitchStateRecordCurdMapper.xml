@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.crud.repository.BalanceSwitchStateRecordCurdRepository">
+
+	<resultMap type="com.run.locman.api.entity.BalanceSwitchStateRecord"
+		id="BalanceSwitchStateRecordMap">
+		<result column="id" property="id" javaType="String" />
+		<result column="deviceId" property="deviceId" javaType="String" />
+		<result column="facilityId" property="facilityId" javaType="String" />
+		<result column="deviceTypeId" property="deviceTypeId" javaType="String" />
+		<result column="operationTime" property="openTime" javaType="String" />
+		<result column="accessSecret" property="accessSecret" javaType="String" />
+		<result column="state" property="state" javaType="String" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id, deviceId, facilityId, deviceTypeId, operationTime,
+		accessSecret, state
+	</sql>
+	<insert id="openOrClose" parameterType="java.util.Map">
+		INSERT INTO BalanceSwitchStateRecord(
+		<include refid="Base_Column" />
+		)
+		VALUES(
+		#{id}, #{deviceId}, #{facilityId}, #{deviceTypeId},
+		#{operationTime}, #{accessSecret}, #{state}
+		)
+	</insert>
+
+
+	<select id="getBancanceStateByDevId" parameterType="java.util.Map"
+		resultType="java.lang.String">
+		SELECT state from BalanceSwitchStateRecord where
+		deviceId=#{deviceId}
+		AND facilityId=#{facilityId}
+		AND accessSecret=#{accessSecret}
+		ORDER BY operationTime DESC LIMIT 1
+	</select>
+</mapper>
+

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.run.locman.api.crud.repository.FaultOrderDeviceCudRepository">
+	<sql id="Base_Column">
+		id, deviceId,
+		faultOrderId
+	</sql>
+	<resultMap id="BaseResultMap" type="com.run.locman.api.entity.FaultOrderDevice">
+		<id column="id" jdbcType="VARCHAR" property="id"/>
+		<result column="deviceId" jdbcType="VARCHAR" property="deviceId"/>
+		<result column="faultOrderId" jdbcType="VARCHAR" property="faultOrderId"/>
+	</resultMap>
+
+	<insert id="addBindDevices" parameterType="com.run.locman.api.entity.FaultOrderDevice">
+		insert into FaultOrder_Device(
+		<include refid="Base_Column" />
+		) values
+		(#{id},#{deviceId},#{faultOrderId})
+	</insert>
+
+	<delete id="delBindDevices" parameterType="java.util.Map">
+		delete from FaultOrder_Device
+		where deviceId=#{deviceId}
+		and faultOrderId=#{faultOrderId}
+	</delete>
+
+</mapper>
+

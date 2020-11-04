@@ -1,0 +1,112 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+	<property name="autoIncrement" value="true" dbms="mysql" />
+	<changeSet id="20190130_Change_DeviceType_add_typeSign"
+		author="张贺">
+		<comment>因为devicetypeId随机生成，deviceTypeName可编辑，所以DeviceType表新增typeSign字段，用于区分该设备类型是否属于一体化智能监控终端或者智能监测终端（II型） </comment>
+		<addColumn tableName="DeviceType">
+			<column name="typeSign" type="varchar(64)" remarks="设备类型标记">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<!-- <changeSet id="20190610_add_AlarmOrder_presentPic" author="钟滨远"> <comment>告警工单需要一个告警时的到场照片</comment> 
+		<addColumn tableName="AlarmOrder"> <column name="presentPic" type="varchar(255)" 
+		remarks="到场图片"> <constraints nullable="false" /> </column> </addColumn> </changeSet> 
+		<changeSet id="20190610_add_AlarmOrder_endPic" author="钟滨远"> <comment>工单处理完成之后会有一个处理完成的照片</comment> 
+		<addColumn tableName="AlarmOrder"> <column name="endPic" type="varchar(255)" 
+		remarks="完成处理图片" defaultValue=""> <constraints nullable="false" /> </column> 
+		</addColumn> </changeSet> -->
+
+	<changeSet id="20190703_update_AlarmOrder_endPic" author="钟滨远">
+		<comment>修改表AlarmOrder的字段属性</comment>
+		<modifyDataType tableName="AlarmOrder" columnName="endPic"
+			newDataType="text" />
+	</changeSet>
+
+	<changeSet author="张贺" id="2019_07_24_insert_alarmOrder_state">
+		<comment>新增alarmOrderState</comment>
+		<sql>
+			INSERT INTO AlarmOrderStateType (id, sign, NAME, type)
+			VALUES
+			(
+			REPLACE (UUID(), "-", ""),
+			6,
+			"完成审核中",
+			1
+			)
+		</sql>
+	</changeSet>
+
+	<changeSet id="20190829_update_Device_RealRported" author="郭飞龙">
+		<comment>Device_RealRported表添加固件版本</comment>
+		<addColumn tableName="Device_RealRported">
+			<column name="device_fv" type="varchar(32)" remarks="固件版本"
+				defaultValue="">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="20190901_createExcelFileUrlPath" author="郭飞龙">
+		<comment>文件路径存储表</comment>
+		<createTable tableName="ExcelFileUrlPath">
+			<column name="id" type="varchar(64)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="urlPath" type="text" remarks="路径">
+				<constraints nullable="false" />
+			</column>
+			<column name="createTime" type="varchar(64)" remarks="创建时间">
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="20190906_update_Facilites" author="张贺">
+		<comment>设施列表新增defenseState字段</comment>
+		<addColumn tableName="Facilities">
+			<column name="defenseState" type="varchar(16)" remarks="屏蔽状态，0为屏蔽，1为未屏蔽"
+				defaultValue="1">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="20190914_createDataCache" author="郭飞龙">
+		<comment>上报数据缓存表</comment>
+		<createTable tableName="DataCache">
+			<column name="id" type="varchar(64)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="dataCache" type="text" remarks="缓存数据">
+				<constraints nullable="false" />
+			</column>
+			<column name="retryCount" type="varchar(64)" remarks="尝试次数" defaultValue="0">
+			</column>
+			<column name="createTime" type="varchar(64)" remarks="创建时间">
+			</column>
+			<column name="updateTime" type="varchar(64)" remarks="修改时间">
+			</column>
+		</createTable>
+	</changeSet>
+	
+	
+	<changeSet id="20190914_greatNumThis" author="钟滨远">
+		<comment>日历创建中间表</comment>
+		<createTable tableName="NumThis">
+			<column name="iii" type="int" remarks="数字" >
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet id="20190914_greatAllDate" author="钟滨远">
+		<comment>日历时间表</comment>
+		<createTable tableName="AllDate">
+			<column name="datelist" type="varchar(64)" remarks="日期" >
+			</column>
+		</createTable>
+	</changeSet>
+</databaseChangeLog>

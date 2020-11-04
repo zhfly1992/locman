@@ -1,0 +1,43 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+
+	<property name="autoIncrement" value="true" dbms="mysql" />
+	
+	<!-- 删除无用列 -->
+	<changeSet
+		id="20180717_dropColumn_DistributionPowers" author="王胜">
+		<comment>删除无用列</comment>
+		<dropColumn tableName="DistributionPowers">
+			<column name="organizationId" type="tinyint(1)" />
+		</dropColumn>
+		<dropColumn tableName="DistributionPowers">
+			<column name="postId" type="tinyint(1)" />
+		</dropColumn>
+		<dropColumn tableName="DistributionPowers">
+			<column name="staffType" type="tinyint(1)" />
+		</dropColumn>
+	</changeSet>
+	
+	<changeSet id="20180717_addColumn_DistributionPowers" author="王胜">
+		<comment>DistributionPowers表添加字段</comment>
+		<addColumn tableName="DistributionPowers">
+			<column name="powerName" type="varchar(32)" remarks="分权分域名称">
+				<constraints nullable="true" />
+			</column>
+			<column name="userInfo" type="longtext" remarks="分权分域所配权限人员信息">
+				<constraints nullable="true" />
+			</column>
+			<column name="orgName" type="text" remarks="前台展示组织名称">
+				<constraints nullable="true" />
+			</column>
+			<column name="userName" type="text" remarks="前台展示人员名称">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+
+</databaseChangeLog>

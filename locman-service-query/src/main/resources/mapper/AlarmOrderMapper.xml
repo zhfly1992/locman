@@ -1,0 +1,1432 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.run.locman.api.query.repository.AlarmOrderQueryRepository">
+	<sql id="returnField">
+		MIN(alaIn.alarmLevel) alarmLevel,
+		MAX(ao.serialNum)
+		serialNum,
+		ao.id
+		orderId,
+		MAX(ao.processState)
+		processState,
+		MAX(ao.processId) processId,
+		MAX(ao.userName) userName,
+		MAX(ao.phone)
+		phone,
+		MAX(ao.userId) userId,
+		MAX(ao.faultOrderId)
+		faultOrderId ,
+		MAX(fTy.facilityTypeAlias)
+		facilityTypeAlias,
+		MAX(fTyB.facilityTypeName)
+		facilityTypeName,
+		MAX(fa.facilitiesCode)
+		facilitiesCode,
+		MAX(fa.id) facilitiesId,
+		MAX(fa.longitude)
+		longitude,
+		MAX(fa.latitude)
+		latitude,
+		MAX(fa.completeAddress)
+		completeAddress,
+		MAX(alaIn.deviceId)
+		deviceId,
+		MAX(alaIn.alarmTime)
+		alarmTime,
+		MAX(fa.organizationId) organizationId,
+		MAX(fa.address)
+		address,
+		GROUP_CONCAT(
+		DISTINCT alaIn.alarmDesc SEPARATOR '/'
+		)
+		alarmDesc,
+		MAX(alaIn.serialNum)
+		alarmSerialNum,
+		ao.receiveTime,
+		ao.presentPic,
+		ao.endPic
+	</sql>
+	<select id="getAlarmOrderByAccessSercret" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT
+		<include refid="returnField" />
+		,
+		IF (
+		ao.receiveTime >= date_sub(now(), INTERVAL 1 DAY)
+		AND
+		(ao.processState = 0 or
+		ao.processState = 2),
+		"true",
+		"false"
+		) as
+		commandFlag
+		<if test="userId !=null and userId !=''">
+		,IF (
+		MIN(fa.defenseState) = 1,
+		"1",
+		"2" 
+		) as defenseState
+		</if>
+		FROM
+		AlarmOrder ao
+		LEFT JOIN Alarm_Order aio ON
+		ao.id =
+		aio.alarmOrderId
+		LEFT JOIN AlarmInfo
+		alaIn ON aio.alarmId =
+		alaIn.id
+		LEFT
+		JOIN Facilities
+		fa ON
+		alaIn.facilitiesId = fa.id
+		LEFT JOIN
+		FacilitiesType
+		fTy ON
+		fa.facilitiesTypeId = fTy.id
+		LEFT JOIN
+		FacilitiesTypeBase fTyB ON
+		fTy.facilityTypeBaseId = fTyB.id
+		where
+		ao.accessSecret=#{accessSecret}
+		<if test="address !=null and address !=''">
+			and fa.address like CONCAT('%',#{address},'%')
+		</if>
+		<if test="orgId != null and orgId.toString() != '' and orgId.size > 0">
+			AND fa.organizationId in
+			<foreach collection="orgId" index="index" item="item" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+
+		<if test="alarmLevel !=null and alarmLevel !='' and alarmLevel !='999'">
+			and alaIn.alarmLevel=#{alarmLevel}
+		</if>
+		<if test="alarmLevel == '999'">
+			and alaIn.alarmLevel is null
+		</if>
+
+		<if test="facTypeId !=null and facTypeId !=''">
+			and fa.facilitiesTypeId=#{facTypeId}
+		</if>
+		<if test="orderState !=null and orderState !=''">
+			and ao.processState=#{orderState}
+		</if>
+		<if test="userId !=null and userId !=''">
+			and ao.userId = #{userId}
+		</if>
+		<if test="beginTime !=null and beginTime !=''">
+			AND TO_DAYS(alaIn.alarmTime) &gt;= TO_DAYS(#{beginTime})
+		</if>
+		<if test="endTime !=null and endTime !=''">
+			AND TO_DAYS(alaIn.alarmTime) &lt;= TO_DAYS(#{endTime})
+		</if>
+		<if test="num !=null and num !=''">
+			and(
+			ao.serialNum like CONCAT('%',#{num},'%')
+			or
+			fa.facilitiesCode like CONCAT('%',#{num},'%')
+			or alaIn.deviceId like
+			CONCAT('%',#{num},'%')
+			or
+			alaIn.serialNum like CONCAT('%',#{num},'%'))
+		</if>
+		<if test="alarmOrderId !=null and alarmOrderId !=''">
+			AND ao.id = #{alarmOrderId}
+		</if>
+		GROUP BY ao.id
+		ORDER BY
+		<if test="userId !=null and userId !=''">
+		defenseState,
+		</if>
+		( CASE
+		WHEN ao.processState = 5 THEN
+		0
+		WHEN
+		ao.processState !=5
+		THEN ao.processState+1
+		END),ao.createTime DESC
+	</select>
+	<select id="getSelectState" parameterType="java.lang.Integer"
+		resultType="java.util.Map">
+		SELECT
+		t.sign sign,
+		t.name name,
+		t.id tId
+		FROM
+		AlarmOrderStateType t
+		WHERE
+		t.type=#{type}
+		ORDER BY t.sign desc
+	</select>
+	<select id="getAlarmOrderInfoById" parameterType="String"
+		resultType="java.util.Map">
+		SELECT
+		t.serialNum,
+		t.processId,
+		t.alarmId,
+		t.id,
+		t.processState,
+		t.userId,
+		ala.alarmLevel,
+		t.receiveTime,
+		t.faultOrderId,
+		t.presentPic,
+		IF (
+		t.receiveTime >= date_sub(now(), INTERVAL 1 DAY)
+		AND
+		(t.processState = 0 or
+		t.processState = 2)
+		,
+		"true",
+		"false"
+		)
+		AS
+		commandFlag,
+		(SELECT
+		GROUP_CONCAT(temp.alarmDesc
+		SEPARATOR
+		'/') e
+		FROM(
+		SELECT DISTINCT
+		ai.alarmDesc AS alarmDesc
+		FROM
+		AlarmOrder a
+		LEFT
+		JOIN
+		Alarm_Order ao ON
+		a.id = ao.alarmOrderId
+		LEFT JOIN
+		AlarmInfo ai
+		ON
+		ao.alarmId = ai.id
+		WHERE
+		a.id = #{orderId}
+		) temp)
+		alarmDesc,
+		ala.alarmTime,
+		ala.facilitiesId,
+		ala.deviceId,
+		ala.rule,
+		ala.serialNum as
+		alarmSerialNum
+		FROM
+		AlarmOrder t
+		LEFT JOIN AlarmInfo ala
+		on
+		t.alarmId=ala.id
+		WHERE
+		t.id=#{orderId}
+	</select>
+	<select id="getAlarmOrderInfoByFaultOrderId" parameterType="String"
+		resultType="java.util.Map">
+		SELECT
+		*
+		FROM
+		AlarmOrder t
+		LEFT JOIN
+		AlarmInfo ala on
+		t.alarmId=ala.id
+		WHERE
+		t.faultOrderId=#{faultOrderId}
+	</select>
+
+	<select id="getAlarmOrderById" resultType="java.util.Map">
+		SELECT
+		<include refid="returnField" />
+		,
+		IF (
+		ao.receiveTime >= date_sub(now(), INTERVAL 1 DAY)
+		AND
+		(ao.processState = 0 or
+		ao.processState = 2)
+		,
+		"true",
+		"false"
+		) as
+		commandFlag
+		FROM
+		AlarmOrder ao
+		LEFT JOIN Alarm_Order aio ON
+		ao.id =
+		aio.alarmOrderId
+		LEFT JOIN AlarmInfo
+		alaIn ON aio.alarmId =
+		alaIn.id
+		LEFT
+		JOIN Facilities
+		fa ON
+		alaIn.facilitiesId = fa.id
+		LEFT JOIN
+		FacilitiesType
+		fTy ON
+		fa.facilitiesTypeId = fTy.id
+		LEFT JOIN
+		FacilitiesTypeBase fTyB ON
+		fTy.facilityTypeBaseId = fTyB.id
+		where
+		ao.id
+		in
+		<foreach collection="list" index="index" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+		<if test="appOrderId != null and appOrderId != ''">
+			and ao.id = #{appOrderId}
+		</if>
+		<if test="address !=null and address !=''">
+			and fa.address like CONCAT('%',#{address},'%')
+		</if>
+		<if test="orgId !=null and orgId.toString() !='' and orgId.size>0">
+			AND fa.organizationId in
+			<foreach collection="orgId" index="index" item="item" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+
+		<if test="alarmLevel !=null and alarmLevel !='' and alarmLevel !='999'">
+			and alaIn.alarmLevel=#{alarmLevel}
+		</if>
+		<if test="alarmLevel == '999'">
+			and alaIn.alarmLevel is null
+		</if>
+
+		<if test="facTypeId !=null and facTypeId !=''">
+			and fa.facilitiesTypeId=#{facTypeId}
+		</if>
+		<if test="orderState !=null">
+			and ao.processState
+			in
+			<foreach collection="orderState" index="index" item="item"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="beginTime !=null and beginTime !=''">
+			AND TO_DAYS(alaIn.alarmTime) &gt;= TO_DAYS(#{beginTime})
+		</if>
+		<if test="endTime !=null and endTime !=''">
+			AND TO_DAYS(alaIn.alarmTime) &lt;= TO_DAYS(#{endTime})
+		</if>
+		<if test="num !=null and num !=''">
+			and( alaIn.serialNum like CONCAT('%',#{num},'%')
+			or
+			fa.facilitiesCode like CONCAT('%',#{num},'%')
+			or alaIn.deviceId like
+			CONCAT('%',#{num},'%')
+			or ao.serialNum like CONCAT('%',#{num},'%'))
+		</if>
+		GROUP BY ao.id
+		order by ao.serialNum desc
+	</select>
+
+	<select id="getalarmOrderCount" resultType="Integer">
+		SELECT
+		count(1)
+		FROM
+		AlarmOrder ao
+		where ao.id
+		in
+		<foreach collection="list" index="index" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+	<select id="getNotClaimAlarmOrderTotal" parameterType="java.util.Map"
+		resultType="int">
+		SELECT
+		COUNT(*)
+		FROM
+		(
+		SELECT
+		ao.id
+		FROM
+		AlarmOrder ao
+		LEFT JOIN Alarm_Order
+		aio ON ao.id = aio.alarmOrderId
+		LEFT JOIN AlarmInfo alaIn ON
+		aio.alarmId = alaIn.id
+		LEFT JOIN Facilities fa ON alaIn.facilitiesId =
+		fa.id
+		WHERE
+		(
+		ao.userId IS NULL
+		OR ao.userId = ''
+		)
+		AND ao.accessSecret =
+		#{accessSecret}
+		<if test="address !=null and address !=''">
+			and fa.address like CONCAT('%',#{address},'%')
+		</if>
+		<if test="orgId !=null and orgId.toString() !='' and orgId.size>0">
+			AND fa.organizationId in
+			<foreach collection="orgId" index="index" item="item" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+
+		<if test="alarmLevel !=null and alarmLevel !='' and alarmLevel !='999'">
+			and alaIn.alarmLevel=#{alarmLevel}
+		</if>
+		<if test="alarmLevel == '999'">
+			and alaIn.alarmLevel is null
+		</if>
+
+		<if test="facTypeId !=null and facTypeId !=''">
+			and fa.facilitiesTypeId=#{facTypeId}
+		</if>
+		<if test="beginTime !=null and beginTime !=''">
+			AND TO_DAYS(alaIn.alarmTime) &gt;= TO_DAYS(#{beginTime})
+		</if>
+		<if test="endTime !=null and endTime !=''">
+			AND TO_DAYS(alaIn.alarmTime) &lt;= TO_DAYS(#{endTime})
+		</if>
+		<if test="num !=null and num !=''">
+			and(
+			ao.serialNum like CONCAT('%',#{num},'%')
+			or
+			fa.facilitiesCode like CONCAT('%',#{num},'%')
+			or alaIn.deviceId like
+			CONCAT('%',#{num},'%')
+			or
+			alaIn.serialNum like CONCAT('%',#{num},'%'))
+		</if>
+		<if test="alarmOrderId !=null and alarmOrderId !=''">
+			AND ao.id = #{alarmOrderId}
+		</if>
+		GROUP BY
+		ao.id
+		) a
+	</select>
+
+	<select id="notClaimAlarmOrder" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT
+		a.alarmLevel alarmLevel,
+		a.serialNum serialNum,
+		a.id orderId,
+		a.processState processState,
+		fTy.facilityTypeAlias facilityTypeAlias,
+		fTyB.facilityTypeName facilityTypeName,
+		a.facilitiesCode
+		facilitiesCode,
+		a.facilitiesId facilitiesId,
+		a.deviceId deviceId,
+		a.alarmTime alarmTime,
+		a.organizationId organizationId,
+		a.address
+		address,
+		a.alarmDesc alarmDesc,
+		a.alarmSerialNum alarmSerialNum
+		FROM
+		(
+		SELECT
+		MAX(ao.serialNum) serialNum,
+		MAX(ao.processState) processState,
+		ao.id,
+		MAX(alaIn.deviceId) deviceId,
+		MIN(alaIn.alarmLevel) alarmLevel,
+		MAX(alaIn.alarmTime) alarmTime,
+		GROUP_CONCAT(
+		DISTINCT alaIn.alarmDesc
+		SEPARATOR '/'
+		) alarmDesc,
+		MAX(alaIn.serialNum) alarmSerialNum,
+		MAX(fa.facilitiesCode) facilitiesCode,
+		MAX(fa.id) facilitiesId,
+		MAX(fa.organizationId) organizationId,
+		MAX(fa.address) address,
+		MAX(fa.facilitiesTypeId) facilitiesTypeId
+		FROM
+		AlarmOrder ao
+		LEFT JOIN
+		Alarm_Order aio ON ao.id = aio.alarmOrderId
+		LEFT JOIN AlarmInfo alaIn
+		ON aio.alarmId = alaIn.id
+		LEFT JOIN Facilities fa ON alaIn.facilitiesId
+		= fa.id
+		WHERE
+		ao.accessSecret = #{accessSecret}
+		AND (
+		ao.userId IS NULL
+		OR
+		ao.userId = ''
+		)
+		<if test="address !=null and address !=''">
+			and fa.address like CONCAT('%',#{address},'%')
+		</if>
+
+		<if test="alarmLevel !=null and alarmLevel !='' and alarmLevel !='999'">
+			and alaIn.alarmLevel=#{alarmLevel}
+		</if>
+		<if test="alarmLevel == '999'">
+			and alaIn.alarmLevel is null
+		</if>
+
+		<if test="orgId !=null and orgId.toString() !='' and orgId.size>0">
+			AND fa.organizationId in
+			<foreach collection="orgId" index="index" item="item" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="facTypeId !=null and facTypeId !=''">
+			and fa.facilitiesTypeId=#{facTypeId}
+		</if>
+		<if test="beginTime !=null and beginTime !=''">
+			AND TO_DAYS(alaIn.alarmTime) &gt;= TO_DAYS(#{beginTime})
+		</if>
+		<if test="endTime !=null and endTime !=''">
+			AND TO_DAYS(alaIn.alarmTime) &lt;= TO_DAYS(#{endTime})
+		</if>
+		<if test="num !=null and num !=''">
+			and(
+			ao.serialNum like CONCAT('%',#{num},'%')
+			or
+			fa.facilitiesCode like CONCAT('%',#{num},'%')
+			or alaIn.deviceId like
+			CONCAT('%',#{num},'%')
+			or
+			alaIn.serialNum like CONCAT('%',#{num},'%'))
+		</if>
+		<if test="alarmOrderId !=null and alarmOrderId !=''">
+			AND ao.id = #{alarmOrderId}
+		</if>
+		GROUP BY
+		ao.id
+		ORDER BY ao.createTime DESC
+		LIMIT #{start},#{size}
+		) a
+		LEFT
+		JOIN FacilitiesType fTy ON a.facilitiesTypeId = fTy.id
+		LEFT JOIN
+		FacilitiesTypeBase fTyB ON fTy.facilityTypeBaseId = fTyB.id
+	</select>
+
+	<select id="notClaimAlarmOrder0" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT
+		MAX(alaIn.alarmLevel) alarmLevel,
+		MAX(ao.serialNum) serialNum,
+		ao.id
+		orderId,
+		MAX(ao.processState)
+		processState,
+		MAX(fTy.facilityTypeAlias) facilityTypeAlias,
+		MAX(fTyB.facilityTypeName) facilityTypeName,
+		MAX(fa.facilitiesCode)
+		facilitiesCode,
+		MAX(fa.id) facilitiesId,
+		MAX(fa.completeAddress)
+		completeAddress,
+		MAX(alaIn.deviceId) deviceId,
+		MAX(alaIn.alarmTime)
+		alarmTime,
+		MAX(fa.organizationId) organizationId,
+		MAX(fa.address)
+		address,
+		GROUP_CONCAT(
+		DISTINCT alaIn.alarmDesc SEPARATOR '/'
+		)
+		alarmDesc,
+		MAX(alaIn.serialNum)
+		alarmSerialNum
+		FROM
+		AlarmOrder ao
+		LEFT JOIN
+		Alarm_Order aio ON ao.id = aio.alarmOrderId
+		LEFT JOIN AlarmInfo alaIn
+		ON aio.alarmId = alaIn.id
+		LEFT JOIN Facilities fa ON alaIn.facilitiesId
+		= fa.id
+		LEFT JOIN FacilitiesType fTy ON fa.facilitiesTypeId = fTy.id
+		LEFT JOIN FacilitiesTypeBase fTyB ON fTy.facilityTypeBaseId = fTyB.id
+		where
+		ao.accessSecret=#{accessSecret}
+		and (ao.userId is null
+		or ao.userId
+		= ''
+		)
+		<if test="address !=null and address !=''">
+			and fa.address like CONCAT('%',#{address},'%')
+		</if>
+		<if test="orgId !=null and orgId.toString() !='' and orgId.size>0">
+			AND fa.organizationId in
+			<foreach collection="orgId" index="index" item="item" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="facTypeId !=null and facTypeId !=''">
+			and fa.facilitiesTypeId=#{facTypeId}
+		</if>
+		<if test="beginTime !=null and beginTime !=''">
+			AND TO_DAYS(alaIn.alarmTime) &gt;= TO_DAYS(#{beginTime})
+		</if>
+		<if test="endTime !=null and endTime !=''">
+			AND TO_DAYS(alaIn.alarmTime) &lt;= TO_DAYS(#{endTime})
+		</if>
+		<if test="num !=null and num !=''">
+			and(
+			ao.serialNum like CONCAT('%',#{num},'%')
+			or
+			fa.facilitiesCode like CONCAT('%',#{num},'%')
+			or alaIn.deviceId like
+			CONCAT('%',#{num},'%')
+			or
+			alaIn.serialNum like CONCAT('%',#{num},'%'))
+		</if>
+		<if test="alarmOrderId !=null and alarmOrderId !=''">
+			AND ao.id = #{alarmOrderId}
+		</if>
+		GROUP BY ao.id
+		ORDER BY
+		ao.createTime DESC
+	</select>
+
+
+	<select id="alarmOrderCountInfo" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT DISTINCT a.areaName as rAddress,f.areaId fareaId,
+		(
+		SELECT
+		count(ao.id)
+		FROM
+		AlarmOrder ao
+		LEFT JOIN
+		AlarmInfo ai
+		ON ao.alarmId =
+		ai.id
+		LEFT JOIN
+		AlarmOrderStateType ast ON
+		ao.alarmOrderStateTypeId =
+		ast.id
+		LEFT JOIN
+		Facilities ff ON
+		ai.facilitiesId = ff.id
+		WHERE
+		ast.sign =
+		0
+		AND
+		ff.areaId = fareaId
+		AND ao.processState
+		= 4
+		AND ao.accessSecret =
+		#{accessSecret}
+		<if test="endTime != null and endTime != ''">
+			AND ao.createTime &lt;= #{endTime}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND ao.createTime &gt;= #{startTime}
+		</if>
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			AND ff.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+
+		) AS other,
+		(
+		SELECT
+		count(ao.id)
+		FROM
+		AlarmOrder ao
+		LEFT JOIN AlarmInfo ai
+		ON ao.alarmId = ai.id
+		LEFT JOIN
+		AlarmOrderStateType ast ON
+		ao.alarmOrderStateTypeId = ast.id
+		LEFT JOIN
+		Facilities ff ON
+		ai.facilitiesId = ff.id
+		WHERE
+		ast.sign = 1
+		AND ff.areaId = fareaId
+		AND
+		ao.processState = 4
+		AND ao.accessSecret =
+		#{accessSecret}
+		<if test="endTime != null and endTime != ''">
+			AND ao.createTime &lt;= #{endTime}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND ao.createTime &gt;= #{startTime}
+		</if>
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			AND ff.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		) AS vehicleAlarm,
+		(
+		SELECT
+		count(ao.id)
+		FROM
+		AlarmOrder ao
+		LEFT JOIN
+		AlarmInfo ai ON ao.alarmId = ai.id
+		LEFT JOIN
+		AlarmOrderStateType ast ON
+		ao.alarmOrderStateTypeId = ast.id
+		LEFT JOIN
+		Facilities ff ON
+		ai.facilitiesId = ff.id
+		WHERE
+		ast.sign = 2
+		AND ff.areaId = fareaId
+		AND
+		ao.processState = 4
+		AND ao.accessSecret =
+		#{accessSecret}
+		<if test="endTime != null and endTime != ''">
+			AND ao.createTime &lt;= #{endTime}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND ao.createTime &gt;= #{startTime}
+		</if>
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			AND ff.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		) AS equipmentAlarm,
+		(
+		SELECT
+		count(ao.id)
+		FROM
+		AlarmOrder ao
+		LEFT JOIN
+		AlarmInfo ai ON ao.alarmId = ai.id
+		LEFT JOIN
+		AlarmOrderStateType ast ON
+		ao.alarmOrderStateTypeId = ast.id
+		LEFT JOIN
+		Facilities ff ON
+		ai.facilitiesId = ff.id
+		WHERE
+		ast.sign = 3
+		AND ff.areaId = fareaId
+		AND
+		ao.processState = 4
+		AND ao.accessSecret =
+		#{accessSecret}
+		<if test="endTime != null and endTime != ''">
+			AND ao.createTime &lt;= #{endTime}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND ao.createTime &gt;= #{startTime}
+		</if>
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			AND ff.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		) AS constructionPutLAN,
+		(
+		SELECT
+		count(ao.id)
+		FROM
+		AlarmOrder ao
+		LEFT JOIN
+		AlarmInfo ai ON ao.alarmId = ai.id
+		LEFT JOIN
+		AlarmOrderStateType ast ON
+		ao.alarmOrderStateTypeId = ast.id
+		LEFT JOIN
+		Facilities ff ON
+		ai.facilitiesId = ff.id
+		WHERE
+		ast.sign = 4
+		AND ff.areaId = fareaId
+		AND
+		ao.processState = 4
+		AND ao.accessSecret =
+		#{accessSecret}
+		<if test="endTime != null and endTime != ''">
+			AND ao.createTime &lt;= #{endTime}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND ao.createTime &gt;= #{startTime}
+		</if>
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			AND ff.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		) AS deviceMaintenance,
+		(
+		SELECT
+		count(ao.id)
+		FROM
+		AlarmOrder ao
+		LEFT JOIN
+		AlarmInfo ai ON ao.alarmId = ai.id
+		LEFT JOIN
+		AlarmOrderStateType ast ON
+		ao.alarmOrderStateTypeId = ast.id
+		LEFT JOIN
+		Facilities ff ON
+		ai.facilitiesId = ff.id
+		WHERE
+		ast.sign = 5
+		AND ff.areaId = fareaId
+		AND
+		ao.processState = 4
+		AND ao.accessSecret =
+		#{accessSecret}
+		<if test="endTime != null and endTime != ''">
+			AND ao.createTime &lt;= #{endTime}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND ao.createTime &gt;= #{startTime}
+		</if>
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			AND ff.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		) AS emergencyRepair,
+		(
+		SELECT
+		count(ao.id)
+		FROM
+		AlarmOrder ao
+		LEFT JOIN
+		AlarmInfo ai ON ao.alarmId = ai.id
+		LEFT JOIN
+		AlarmOrderStateType ast ON
+		ao.alarmOrderStateTypeId = ast.id
+		LEFT JOIN
+		Facilities ff ON
+		ai.facilitiesId = ff.id
+		WHERE
+		ff.areaId = fareaId
+		AND ao.processState = 3
+		AND
+		ao.accessSecret =
+		#{accessSecret}
+		<if test="endTime != null and endTime != ''">
+			AND ao.createTime &lt;= #{endTime}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND ao.createTime &gt;= #{startTime}
+		</if>
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			AND ff.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		) cantRepair
+		FROM
+		(
+		SELECT DISTINCT
+		areaId
+		FROM
+		Facilities
+		WHERE
+		accessSecret
+		= #{accessSecret}
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			AND facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		) f
+		LEFT JOIN Area a ON RIGHT (f.areaId, 6) =
+		a.areaCode
+	</select>
+
+	<select id="alarmOrderDetailsInfo" parameterType="com.run.locman.api.entity.AlarmCountDetails"
+		resultType="java.util.Map">
+		SELECT
+		f.completeAddress,
+		f.address,
+		f.facilitiesCode,
+		ao.phone,
+		ft.facilityTypeAlias,
+		IF (
+		ai.alarmLevel = 1,
+		'异常挪动',
+		'响动告警'
+		)
+		alarmLevel ,
+		ai.alarmDesc,
+		aost.
+		NAME
+		orderType,
+		ai.alarmTime,
+		ao.userName
+		FROM
+		AlarmOrder ao
+		LEFT JOIN
+		AlarmInfo
+		ai ON ao.alarmId = ai.id
+		LEFT JOIN
+		Facilities f ON
+		ai.facilitiesId =
+		f.id
+		LEFT JOIN FacilitiesType ft ON
+		f.facilitiesTypeId
+		= ft.id
+		LEFT JOIN
+		AlarmOrderStateType aost ON
+		ao.alarmOrderStateTypeId =
+		aost.id
+		WHERE
+		ao.accessSecret =
+		#{accessSecret}
+		AND
+		ao.processState = #{processState}
+		and
+		f.completeAddress LIKE
+		CONCAT('%',#{completeAddress},'%')
+		<if test="aostName != null and aostName != ''">
+			AND aost.name = #{aostName}
+		</if>
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			AND f.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+	</select>
+	<select id="getAllOrgIds" parameterType="String" resultType="String">
+		SELECT DISTINCT f.organizationId FROM Facilities f WHERE
+		f.accessSecret = #{accessSecret}
+	</select>
+	<select id="countAllAlarmOrder" parameterType="String"
+		resultType="com.run.locman.api.dto.CountAlarmOrderDto">
+		SELECT
+		ao.accessSecret accessSecret,
+		ao.id id,
+		IF (
+		alaIn.alarmLevel = 1,
+		'井盖位移',
+		'噪音告警'
+		) alarmLevel,
+		ao.serialNum
+		orderNumber,
+		CASE aost. NAME
+		WHEN
+		'转故障已完成' THEN
+		'已完成'
+		WHEN '转故障被拒绝' THEN
+		'处理中'
+		WHEN '转故障审批中' THEN
+		'处理中'
+		WHEN '待处理' THEN
+		'未接收工单'
+		ELSE
+		aost. NAME
+		END orderState,
+		ao.userName
+		personName,
+		ao.receiveTime
+		receiveTime,
+		fTy.facilityTypeAlias
+		facilityTypeAlias,
+		fa.facilitiesCode
+		facilitiesCode,
+
+		ao.createTime as
+		alarmTime,
+		fa.organizationId
+		organizationId,
+		alaIn.serialNum
+		alarmSerialNumber,
+		a.areaName area,
+		'' AS
+		organizationName
+		FROM
+		AlarmOrder
+		ao
+		LEFT JOIN AlarmInfo alaIn ON
+		ao.alarmId = alaIn.id
+		LEFT
+		JOIN
+		AlarmOrderStateType aost ON aost.sign =
+		ao.processState
+		LEFT JOIN
+		Facilities fa ON alaIn.facilitiesId = fa.id
+		LEFT JOIN FacilitiesType
+		fTy ON fa.facilitiesTypeId = fTy.id
+		LEFT JOIN
+		Area a ON RIGHT
+		(fa.areaId, 6) = a.areaCode
+		WHERE
+		aost.type = 1
+		AND
+		ao.accessSecret =
+		#{accessSecret}
+		AND ao.id NOT IN (
+			SELECT
+				aor.id
+			FROM
+				AlarmOrder aor
+			where 
+			(
+				aor.userId IN ('adminDefense', 'autoDeal')
+				OR aor.userId LIKE 'admin%'
+			)
+			)
+		<if
+			test="organizationId != null and organizationId.toString() != '' and organizationId.size > 0">
+			AND fa.organizationId in
+			<foreach collection="organizationId" index="index" item="item"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+
+		</if>
+		<if
+			test="processState != null and processState != '' and processState == '0'.toString() ">
+			AND ao.processState = 5
+		</if>
+		<if
+			test="processState != null and processState != '' and processState == '2'.toString() ">
+			AND ao.processState in (3,4)
+			
+		</if>
+		<if
+			test="processState != null and processState != '' and processState == '1'.toString() ">
+			AND ao.processState in (0,1,2)
+			
+		</if>
+		<if test="facilitiesCode !=null and facilitiesCode !=''">
+			AND fa.facilitiesCode like
+			CONCAT('%',#{facilitiesCode},'%')
+		</if>
+		<if test="userName !=null and userName !=''">
+			AND ao.userName like CONCAT('%',#{userName},'%')
+		</if>
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			AND fTy.id = #{facilitiesTypeId}
+		</if>
+		ORDER BY
+		ao.createTime DESC
+	</select>
+
+
+	<select id="getAlarmOrderAndAllAlarmInfo" parameterType="String"
+		resultType="java.util.Map">
+		SELECT
+		max(a.serialNum) serialNum,
+		max(a.processId)
+		processId,
+		max(a.alarmId) alarmId,
+		max(a.id) id,
+		max(a.processState)
+		processState,
+		max(a.userId) userId,
+		max(ai.alarmLevel) alarmLevel,
+		max(ai.alarmDesc) alarmDesc,
+		max(ai.alarmTime) alarmTime,
+		max(ai.facilitiesId) facilitiesId,
+		max(ai.deviceId) deviceId,
+		ai.rule
+		rule,
+		max(ai.serialNum) alarmSerialNum
+		FROM AlarmOrder a
+		LEFT JOIN
+		Alarm_Order ao ON a.id = ao.alarmOrderId
+		LEFT JOIN AlarmInfo ai
+		ON
+		ao.alarmId = ai.id
+		WHERE a.id = #{orderId}
+		AND ai.isDel NOT in(2,3)
+		GROUP BY ai.rule
+		ORDER BY max(alarmTime) DESC;
+	</select>
+
+	<select id="getAlarmOrderInfoByAlarmId" parameterType="String"
+		resultType="java.util.Map">
+		SELECT
+		a.id as alarmOrderId,
+		a.serialNum,
+		aos.name AS
+		processState
+		FROM
+		AlarmOrder a
+		LEFT JOIN Alarm_Order ao ON
+		ao.alarmOrderId = a.id
+		LEFT JOIN AlarmOrderStateType aos ON
+		a.processState = aos.sign
+		WHERE
+		ao.alarmId = #{alarmId}
+		AND aos.type = 1
+	</select>
+
+	<select id="getChangedAlarmOrderInfoByOrderId" parameterType="String"
+		resultType="java.util.Map">
+		SELECT DISTINCT
+		alo.id,
+		alo.serialNum,
+		ai.deviceId,
+		ai.facilitiesId,
+		CASE
+		alo.processState
+		WHEN '0' THEN
+		'处理中'
+		WHEN '1' THEN
+		'转故障审批中'
+		WHEN '2' THEN
+		'转故障被拒绝'
+		WHEN '3' THEN
+		'转故障已完成'
+		WHEN '4' THEN
+		'已完成'
+		WHEN '5' THEN
+		'待处理'
+		ELSE
+		alo.processState
+		END orderState,
+		alo.accessSecret
+		FROM
+		AlarmOrder alo
+		LEFT
+		JOIN Alarm_Order ao ON alo.id = ao.alarmOrderId
+		LEFT JOIN
+		AlarmInfo ai
+		ON ao.alarmId = ai.id
+		WHERE
+		alo.id =
+		#{alarmOrderId}
+	</select>
+
+	<select id="countAlarmOrderByOrg" resultType="java.util.Map">
+		SELECT
+		a.organizationId,
+		sum(
+		CASE a.reason
+		WHEN 1 THEN
+		a.countNum
+		ELSE
+		0
+		END
+		) AS vehicleAlarm,
+		sum(
+		CASE a.reason
+		WHEN 2 THEN
+		a.countNum
+		ELSE
+		0
+		END
+		) AS
+		equipmentAlarm,
+		sum(
+		CASE a.reason
+		WHEN 3 THEN
+		a.countNum
+		ELSE
+		0
+		END
+		) AS
+		constructionPutLAN,
+		sum(
+		CASE a.reason
+		WHEN 4 THEN
+		a.countNum
+		ELSE
+		0
+		END
+		) AS
+		deviceMaintenance,
+		sum(
+		CASE a.reason
+		WHEN 5 THEN
+		a.countNum
+		ELSE
+		0
+		END
+		) AS
+		emergencyRepair,
+		sum(
+		CASE a.reason
+		WHEN '0' THEN
+		a.countNum
+		ELSE
+		0
+		END
+		) AS
+		other,
+		<!-- IFNULL(max(b.countNum), 0) AS cantRepair, IFNULL(max(c.countNum), 
+			0) AS handled, IFNULL(max(d.countNum), 0) AS notHandled, -->
+		sum(
+		CASE a.reason
+		WHEN 'cantRepair' THEN
+		a.countNum
+		ELSE
+		0
+		END
+		) AS
+		cantRepair,
+		sum(
+		CASE a.reason
+		WHEN 'handled' THEN
+		a.countNum
+		ELSE
+		0
+		END
+		) AS
+		handled,
+		sum(
+		CASE a.reason
+		WHEN 'notHandled' THEN
+		a.countNum
+		ELSE
+		0
+		END
+		) AS
+		notHandled,
+		'' AS organizationName
+		FROM
+		(
+		SELECT
+		f.organizationId
+		organizationId,
+		COUNT(DISTINCT ao.id) countNum,
+		aost.sign reason
+		FROM
+		AlarmOrder ao
+		LEFT JOIN Alarm_Order aro ON ao.id = aro.alarmOrderId
+		LEFT JOIN AlarmOrderStateType aost ON ao.alarmOrderStateTypeId =
+		aost.id
+		LEFT JOIN AlarmInfo ai ON aro.alarmId = ai.id
+		LEFT JOIN
+		Facilities f ON ai.facilitiesId = f.id
+		WHERE
+		ao.alarmOrderStateTypeId IS
+		NOT NULL
+		AND ao.accessSecret = #{accessSecret}
+		AND f.manageState =
+		'enable'
+		AND f.organizationId IS NOT NULL
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			AND f.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		<if
+			test="organizationId != null and organizationId.toString() != '' and organizationId.size > 0">
+			AND f.organizationId in
+			<foreach collection="organizationId" index="index" item="item"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND ao.createTime >= #{startTime}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			AND #{endTime} >= ao.createTime
+		</if>
+		GROUP BY
+		f.organizationId,
+		aost.id
+
+		UNION ALL
+
+		SELECT
+		f1.organizationId
+		organizationId,
+		COUNT(DISTINCT ao1.id) countNum,
+		'cantRepair' AS reason
+		FROM
+		AlarmOrder ao1
+		LEFT JOIN Alarm_Order aro1 ON
+		ao1.id =
+		aro1.alarmOrderId
+		LEFT JOIN AlarmOrderStateType aost1 ON
+		ao1.alarmOrderStateTypeId =
+		aost1.id
+		LEFT JOIN AlarmInfo ai1 ON
+		aro1.alarmId = ai1.id
+		LEFT JOIN Facilities f1 ON ai1.facilitiesId =
+		f1.id
+		WHERE
+		ao1.alarmOrderStateTypeId IS NULL
+		AND ao1.accessSecret =
+		#{accessSecret}
+		AND f1.manageState = 'enable'
+		AND f1.organizationId IS
+		NOT NULL
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			AND f1.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		<if
+			test="organizationId != null and organizationId.toString() != '' and organizationId.size > 0">
+			AND f1.organizationId in
+			<foreach collection="organizationId" index="index" item="item"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND ao1.createTime >= #{startTime}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			AND #{endTime} >= ao1.createTime
+		</if>
+		AND ao1.faultOrderId IS NOT NULL
+		GROUP BY
+		f1.organizationId,
+		aost1.id
+
+		UNION ALL
+
+		SELECT
+		f2.organizationId organizationId,
+		COUNT(DISTINCT ao2.id)
+		countNum,
+		'handled' AS reason
+		FROM
+		AlarmOrder ao2
+		LEFT JOIN Alarm_Order
+		aro2 ON
+		ao2.id = aro2.alarmOrderId
+		LEFT JOIN AlarmOrderStateType aost2
+		ON
+		ao2.alarmOrderStateTypeId =
+		aost2.id
+		LEFT JOIN AlarmInfo ai2 ON
+		aro2.alarmId = ai2.id
+		LEFT JOIN Facilities f2 ON ai2.facilitiesId =
+		f2.id
+		WHERE
+		(
+		ao2.alarmOrderStateTypeId IS NOT NULL
+		OR ao2.faultOrderId IS
+		NOT NULL
+		)
+		AND ao2.processState IN (3, 4)
+		AND ao2.accessSecret =
+		#{accessSecret}
+		AND f2.manageState = 'enable'
+		AND f2.organizationId IS
+		NOT NULL
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			AND f2.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		<if
+			test="organizationId != null and organizationId.toString() != '' and organizationId.size > 0">
+			AND f2.organizationId in
+			<foreach collection="organizationId" index="index" item="item"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND ao2.createTime >= #{startTime}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			AND #{endTime} >= ao2.createTime
+		</if>
+		GROUP BY
+		f2.organizationId
+
+		UNION ALL
+
+		SELECT
+		f3.organizationId
+		organizationId,
+		COUNT(DISTINCT ao3.id) countNum,
+		'notHandled' AS reason
+		FROM
+		AlarmOrder ao3
+		LEFT JOIN Alarm_Order aro3 ON
+		ao3.id =
+		aro3.alarmOrderId
+		LEFT JOIN AlarmOrderStateType aost3 ON
+		ao3.alarmOrderStateTypeId =
+		aost3.id
+		LEFT JOIN AlarmInfo ai3 ON
+		aro3.alarmId = ai3.id
+		LEFT JOIN Facilities f3 ON ai3.facilitiesId =
+		f3.id
+		WHERE
+		ao3.processState IN (0, 1, 2, 5,6)
+		AND ao3.accessSecret =
+		#{accessSecret}
+		AND f3.manageState = 'enable'
+		AND f3.organizationId IS
+		NOT NULL
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			AND f3.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		<if
+			test="organizationId != null and organizationId.toString() != '' and organizationId.size > 0">
+			AND f3.organizationId in
+			<foreach collection="organizationId" index="index" item="item"
+				open="(" separator="," close=")">
+				#{item}
+			</foreach>
+
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND ao3.createTime >= #{startTime}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			AND #{endTime} >= ao3.createTime
+		</if>
+		GROUP BY
+		f3.organizationId
+
+		) a
+		<!-- LEFT JOIN ( ) b ON a.organizationId = b.organizationId LEFT JOIN ( 
+			) c ON c.organizationId = a.organizationId LEFT JOIN ( ) d ON d.organizationId 
+			= a.organizationId -->
+		GROUP BY
+		a.organizationId
+
+	</select>
+
+	<select id="getAlarmOrderAndFacInfo" parameterType="String"
+		resultType="java.util.Map">
+		SELECT
+		t.serialNum,
+		t.processId,
+		t.alarmId,
+		t.id,
+		t.processState,
+		aost.name,
+		t.userName,
+		ala.alarmLevel,
+		t.presentPic,
+		(
+		SELECT
+		GROUP_CONCAT(temp.alarmDesc SEPARATOR '/') e
+		FROM
+		(
+		SELECT DISTINCT
+		ai.alarmDesc AS alarmDesc
+		FROM
+		AlarmOrder a
+		LEFT JOIN Alarm_Order ao ON
+		a.id = ao.alarmOrderId
+		LEFT JOIN AlarmInfo ai ON ao.alarmId = ai.id
+		WHERE
+		a.id = #{alarmOrderId}
+		) temp
+		) alarmDesc,
+		ala.alarmTime,
+		ala.facilitiesId,
+		f.address,
+		f.facilitiesCode,
+		ft.facilityTypeAlias,
+		ala.deviceId
+		FROM
+		AlarmOrder t
+		LEFT JOIN AlarmInfo ala ON t.alarmId =
+		ala.id
+		LEFT JOIN
+		AlarmOrderStateType aost ON aost.sign = t.processState
+		AND aost.type =
+		'1'
+		LEFT JOIN Facilities f ON f.id = ala.facilitiesId
+		LEFT JOIN
+		FacilitiesType ft ON f.facilitiesTypeId = ft.id
+		WHERE
+		t.id =
+		#{alarmOrderId}
+	</select>
+
+
+	<select id="getAlarmIdByAlarmOrderId" parameterType="String"
+		resultType="java.util.Map">
+
+		SELECT alarmId from Alarm_Order where alarmOrderId =
+		#{alarmOrderId}
+	</select>
+
+	<select id="getHiddenTroubleType" resultType="java.util.Map">
+		SELECT name,typeForApp from
+		HiddenTroubleType
+	</select>
+</mapper>
+

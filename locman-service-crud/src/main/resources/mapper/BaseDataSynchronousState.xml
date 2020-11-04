@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.crud.repository.BaseDataSynchronousStateCrudRepository">
+	<resultMap type="com.run.locman.api.entity.BaseDataSynchronousState"
+		id="baseDataSynchronousState">
+		<result column="id" property="id" javaType="String" />
+		<result column="baseAlarmRule" property="baseAlarmRule"
+			javaType="Boolean" />
+		<result column="baseDeviceInfoConvert" property="baseDeviceInfoConvert"
+			javaType="Boolean" />
+		<result column="baseDeviceTypeTemplate" property="baseDeviceTypeTemplate"
+			javaType="Boolean" />
+		<result column="baseFacilitiesType" property="baseFacilitiesType"
+			javaType="Boolean" />
+		<result column="accessSecret" property="accessSecret" javaType="String" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id,baseAlarmRule,baseDeviceInfoConvert,baseDeviceTypeTemplate,baseFacilitiesType,accessSecret
+	</sql>
+
+	<select id="getSynchronousStateByAS" resultMap="baseDataSynchronousState">
+		SELECT
+		*
+		FROM
+		BaseDateSynchronizationState
+		where
+		accessSecret = #{accessSecret}
+	</select>
+
+	<insert id="addSynchronousStateinfo" parameterType="com.run.locman.api.entity.BaseDataSynchronousState">
+		insert into BaseDateSynchronizationState(
+		<include refid="Base_Column_List" />
+		) values
+		(#{id},#{baseAlarmRule},#{baseDeviceInfoConvert},#{baseDeviceTypeTemplate},#{baseFacilitiesType},#{accessSecret})
+	</insert>
+
+	<update id="updatePart" parameterType="com.run.locman.api.entity.BaseDataSynchronousState">
+		update BaseDateSynchronizationState set
+			accessSecret=#{accessSecret}
+		<if test="baseAlarmRule != null ">
+			,baseAlarmRule=#{baseAlarmRule}
+		</if>
+		<if test="baseDeviceInfoConvert != null ">
+			,baseDeviceInfoConvert=#{baseDeviceInfoConvert}
+		</if>
+		<if test="baseDeviceTypeTemplate != null ">
+			,baseDeviceTypeTemplate=#{baseDeviceTypeTemplate}
+		</if>
+		<if test="baseFacilitiesType != null ">
+			,baseFacilitiesType=#{baseFacilitiesType}
+		</if>
+		where accessSecret=#{accessSecret}
+	</update>
+
+</mapper>

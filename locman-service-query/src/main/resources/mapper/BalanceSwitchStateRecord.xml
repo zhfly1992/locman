@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.query.repository.BalanceSwitchStateRecordQueryRepository">
+
+	<resultMap type="com.run.locman.api.entity.BalanceSwitchStateRecord"
+		id="BalanceSwitchStateRecordResultMap">
+		<result column="id" property="id" javaType="String" />
+		<result column="deviceId" property="deviceId" javaType="String" />
+		<result column="facilityId" property="facilityId" javaType="String" />
+		<result column="deviceTypeId" property="deviceTypeId" javaType="String" />
+		<result column="operationTime" property="operationTime"
+			javaType="String" />
+		<result column="accessSecret" property="accessSecret" javaType="String" />
+		<result column="state" property="state" javaType="String" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id, deviceId, facilityId, deviceTypeId, operationTime,
+		accessSecret, state
+	</sql>
+	<sql id="Base_Condition">
+		<if test="id != null and id != ''">
+			and id=#{id}
+		</if>
+		<if test="deviceId != null and deviceId != ''">
+			and deviceId=#{deviceId}
+		</if>
+		<if test="facilityId != null and facilityId != ''">
+			and facilityId=#{facilityId}
+		</if>
+		<if test="deviceTypeId != null and deviceTypeId != ''">
+			and deviceTypeId=#{deviceTypeId}
+		</if>
+		<if test="operationTime != null and operationTime != ''">
+			and operationTime=#{operationTime}
+		</if>
+		<if test="accessSecret != null and accessSecret != ''">
+			and accessSecret=#{accessSecret}
+		</if>
+		<if test="state != null and state != ''">
+			and state=#{state}
+		</if>
+	</sql>
+
+	<select id="getState" parameterType="java.util.Map"
+		resultMap="BalanceSwitchStateRecordResultMap">
+		SELECT
+		<include refid="Base_Column" />
+		FROM BalanceSwitchStateRecord bs
+		WHERE 1=1
+		<if test="deviceId != null and deviceId != ''">
+			AND bs.deviceId=#{deviceId}
+		</if>
+		<if test="facilityId != null and facilityId != ''">
+			AND bs.facilityId=#{facilityId}
+		</if>
+		<if test="accessSecret != null and accessSecret != ''">
+			AND bs.accessSecret=#{accessSecret}
+		</if>
+		ORDER BY operationTime DESC LIMIT 1
+	</select>
+
+	<select id="getLatestCloseOperationTime" parameterType="java.util.Map" resultType="String">
+		SELECT
+		operationTime from BalanceSwitchStateRecord where state = 'close' and
+		deviceId = #{deviceId} and accessSecret=#{accessSecret}
+		ORDER BY
+		operationTime DESC limit 1
+	</select>
+</mapper>

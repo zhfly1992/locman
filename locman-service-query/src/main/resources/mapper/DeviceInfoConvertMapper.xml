@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.query.repository.DeviceInfoConvertQueryRepository">
+	
+	<resultMap type="com.run.locman.api.entity.DeviceInfoConvert" id="deviceInfoConvertMap">
+		<result column="id" property="id" javaType="String" />
+		<result column="dicKey" property="dicKey" javaType="String" />
+		<result column="dicValue" property="dicValue" javaType="String" />
+		<result column="createTime" property="createTime" javaType="String" />
+		<result column="updateTime" property="updateTime" javaType="String" />
+		<result column="accessSecret" property="accessSecret" javaType="String" />
+	</resultMap>	
+	<select id="dataConvert" resultType="String" parameterType="java.util.Map">
+		select dicValue from DeviceInfoConvert
+		where
+		dicKey = #{dicKey}
+		and
+		accessSecret = #{accessSecret}
+	</select>
+
+	<select id="findPageList" parameterType="com.run.locman.api.model.DeviceInfoConvertModel"
+		resultType="com.run.locman.api.entity.DeviceInfoConvert">
+		select * from
+		DeviceInfoConvert where accessSecret = #{accessSecret}
+		<if test="id !=null and id !=''">
+			and id = #{id}
+		</if>
+		<if test="dicKey !=null and dicKey !=''">
+			and dicKey = #{dicKey}
+		</if>
+		<if test="dicValue !=null and dicValue !=''">
+			and dicValue = #{dicValue}
+		</if>
+		<if test="serchKey != null and serchKey != ''">
+			and (
+			dicKey like CONCAT('%',#{serchKey},'%')
+			or dicValue
+			like CONCAT('%',#{serchKey},'%')
+			)
+		</if>
+		ORDER BY updateTime desc
+	</select>
+
+	<select id="findConvertById" parameterType="com.run.locman.api.model.DeviceInfoConvertModel"
+		resultType="com.run.locman.api.entity.DeviceInfoConvert">
+		select * from
+		DeviceInfoConvert where id = #{id} and
+		accessSecret = #{accessSecret}
+	</select>
+
+
+	<select id="existConvertInfo" parameterType="com.run.locman.api.model.DeviceInfoConvertModel"
+		resultType="String">
+		select id from
+		DeviceInfoConvert where
+		dicKey=#{dicKey} and
+		accessSecret =
+		#{accessSecret} limit 1;
+	</select>
+    
+   <select id="getDevieInfoConvert" parameterType="java.lang.String"
+		resultMap="deviceInfoConvertMap">
+		select * from
+		DeviceInfoConvert where 
+		accessSecret = #{accessSecret}
+	</select>
+
+</mapper>

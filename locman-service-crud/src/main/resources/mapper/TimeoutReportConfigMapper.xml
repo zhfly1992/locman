@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.run.locman.api.crud.repository.TimeoutReportConfigCrudRepository">
+	<sql id="Base_Column">
+		id,name,createTime,createUserId,updateTime,updateUserId,timeoutReportTime,accessSecret,managerState
+	</sql>
+	<insert id="insertModel" parameterType="com.run.locman.api.entity.TimeoutReportConfig">
+		insert into TimeoutReportConfig(
+		<include refid="Base_Column" />
+		
+		) values
+		(#{id},#{name},#{createTime},#{createUserId},#{updateTime},#{updateUserId},#{timeoutReportTime},#{accessSecret},#{managerState})
+	</insert>
+	<update id="updatePart" parameterType="com.run.locman.api.entity.TimeoutReportConfig">
+		update TimeoutReportConfig set
+			id=#{id}
+		<if test="name != null and name != ''">
+			,name=#{name}
+		</if>
+		<if test="updateTime != null and updateTime != ''">
+			,updateTime=#{updateTime}
+		</if>
+		<if test="updateUserId != null and updateUserId != ''">
+			,updateUserId=#{updateUserId}
+		</if>
+		<if test="timeoutReportTime != null and timeoutReportTime != ''">
+			,timeoutReportTime=#{timeoutReportTime}
+		</if>
+		<if test="accessSecret != null and accessSecret != ''">
+			,accessSecret=#{accessSecret}
+		</if>
+		where id=#{id}
+	</update>
+	
+	<delete id="deleteByIds" parameterType="java.util.List">
+		DELETE FROM
+		TimeoutReportConfig WHERE id in
+		<foreach item="item" collection="list" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+		</foreach>
+	</delete>
+</mapper>
+

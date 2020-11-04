@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.timer.crud.repository.FaultOrderDeviceCudRepository">
+
+	<sql id="Base_Column">
+		id, deviceId,
+		faultOrderId
+	</sql>
+	<resultMap id="BaseResultMap" type="com.run.locman.api.entity.FaultOrderDevice">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="deviceId" jdbcType="VARCHAR" property="deviceId" />
+		<result column="faultOrderId" jdbcType="VARCHAR" property="faultOrderId" />
+	</resultMap>
+
+	<insert id="addBindDevices" parameterType="com.run.locman.api.entity.FaultOrderDevice">
+		insert into FaultOrder_Device(
+		<include refid="Base_Column" />
+		) values
+		(#{id},#{deviceId},#{faultOrderId})
+	</insert>
+
+	<select id="getOrderInfo" parameterType="java.util.List" resultType="com.run.locman.api.dto.FaultOrderDetetionDto">
+		SELECT fop.id , fop.processId , fop.userId ,
+		fop.accessSecret FROM FaultOrder_Device fd
+		LEFT JOIN FaultOrderProcess fop ON fd.faultOrderId = fop.id
+		WHERE fop.faultType = '9'
+		AND fop.processState = '1'
+		AND fd.deviceId in
+		<foreach item="item" collection="list" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+		</foreach>
+		
+	</select>
+
+</mapper>

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.run.locman.api.query.repository.AlarmRuleQueryRepository">
+
+	<resultMap type="com.run.locman.api.entity.AlarmRule" id="alarmRuleResultMap">
+		<result column="id" property="id" javaType="String" />
+		<result column="oderNum" property="oderNum" javaType="Integer" />
+		<result column="ruleName" property="ruleName" javaType="String" />
+		<result column="deviceTypeId" property="deviceTypeId" javaType="String" />
+		<result column="userId" property="userId" javaType="String" />
+		<result column="crateTime" property="crateTime" javaType="String" />
+		<result column="updateTime" property="updateTime" javaType="String" />
+		<result column="remark" property="remark" javaType="String" />
+		<result column="manageState" property="manageState" javaType="String" />
+		<result column="publishState" property="publishState" javaType="String" />
+		<result column="ruleContent" property="ruleContent" javaType="String" />
+		<result column="rule" property="rule" javaType="String" />
+		<result column="accessSecret" property="accessSecret" javaType="String" />
+		<result column="isDelete" property="isDelete" javaType="String" />
+		<result column="alarmLevel" property="alarmLevel" javaType="Integer" />
+		<result column="isMatchOrder" property="isMatchOrder" javaType="Boolean" />
+		<result column="deviceCount" property="deviceCount" javaType="Integer" />
+		<result column="ruleType" property="ruleType" javaType="String" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id, oderNum,
+		ruleName,deviceTypeId,userId,crateTime,updateTime,
+		remark,manageState,publishState,ruleContent,rule,accessSecret,isDelete,
+		alarmLevel,isMatchOrder,deviceCount,ruleType
+	</sql>
+
+	<select id="findDataPointByDeviceTypeId" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT
+		dp.*
+		FROM
+		DeviceProperties dp
+		WHERE
+		dp.templateId IN (
+		SELECT
+		ddt.id
+		FROM
+		DeviceProperties_Template ddt
+		WHERE
+		ddt.id IN (
+		SELECT
+		dt.devicePropertyTemplateId
+		FROM
+		DeviceType_Template dt
+		WHERE
+		dt.deviceTypePropertyConfigId = #{deviceTypeId}
+		)
+		AND ddt.manageState =
+		'enabled'
+		AND ddt.accessSecret =#{accessSecret}
+		)
+	</select>
+
+	<select id="getByDeviceTypeId" parameterType="java.lang.String"
+		resultMap="alarmRuleResultMap">
+		SELECT
+		<include refid="Base_Column" />
+		FROM AlarmRule AR WHERE AR.deviceTypeId=#{deviceTypeId}
+		AND
+		AR.accessSecret = #{accessSecret}
+		AND AR.manageState = 'valid'
+		AND NOT
+		EXISTS (
+		SELECT DA.alarmRuleId FROM DefinedAlarmRule_Device DA WHERE
+		DA.alarmRuleId =
+		AR.id
+		)
+	</select>
+
+
+	<select id="findAlarmRuleListByNameAndDeviceTypeId"
+		parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT a.*, dt.deviceTypeName from AlarmRule a
+		LEFT JOIN DeviceType dt ON a.deviceTypeId = dt.id
+		 where 1=1
+		<if test="deviceTypeId != null and deviceTypeId != ''">
+			AND a.deviceTypeId = #{deviceTypeId}
+		</if>
+		<if test="ruleName != null and ruleName != ''">
+			AND a.ruleName LIKE CONCAT
+			('%',#{ruleName},'%')
+		</if>
+		<if test="accessSecret != null and accessSecret != ''">
+			AND a.accessSecret = #{accessSecret}
+		</if>
+		<if test="ruleType != null and ruleType != ''">
+			AND a.ruleType = #{ruleType}
+		</if>
+		ORDER BY a.manageState DESC,a.oderNum DESC
+	</select>
+
+	<select id="findByRuleId" parameterType="java.lang.String"
+		resultMap="alarmRuleResultMap">
+		SELECT * from AlarmRule where id = #{id}
+	</select>
+
+	<select id="queryAlarmRuleByDeviceId" parameterType="java.lang.String"
+		resultMap="alarmRuleResultMap">
+		SELECT
+		ar.*
+		FROM
+		DefinedAlarmRule_Device dd
+		LEFT JOIN AlarmRule ar ON
+		dd.alarmRuleId = ar.id
+		WHERE
+		1 = 1
+		AND ar.manageState = 'valid'
+		<if test="accessSecret != null and accessSecret != ''">
+			AND accessSecret = #{accessSecret}
+		</if>
+		<if test="deviceId != null and deviceId != ''">
+			AND deviceId = #{deviceId}
+		</if>
+	</select>
+
+
+	<select id="getAllAlarmRule" parameterType="java.lang.String"
+		resultMap="alarmRuleResultMap">
+		select * from
+		AlarmRule where accessSecret = #{accessSecret}
+	</select>
+
+	<select id="getAllBasicAlarmRule" resultType="java.util.Map">
+		select * from
+		Base_AlarmRule
+	</select>
+</mapper>
+

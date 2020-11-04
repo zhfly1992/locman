@@ -1,0 +1,29 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+
+	<property name="autoIncrement" value="true" dbms="mysql" />
+
+	<changeSet id="20180911_add_alarmOder" author="赵伟志">
+		<comment>AlarmOrder表添加字段</comment>
+		<addColumn tableName="AlarmOrder">
+			<column name="receiveTime" type="varchar(32)" remarks="接受工单时间">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="20180927_add_SmsInfo" author="张贺">
+		<comment>SmsInfo表添加创建时间字段</comment>
+		<addColumn tableName="SmsInfo">
+			<column name="creatTime" type="varchar(32)" remarks="授权创建时间">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+
+
+</databaseChangeLog>

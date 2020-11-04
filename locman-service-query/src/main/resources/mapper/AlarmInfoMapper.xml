@@ -1,0 +1,572 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.run.locman.api.query.repository.AlarmInfoQueryRepository">
+	<resultMap type="java.util.LinkedHashMap" id="statisticAlarmInfo">
+		<result column="facilitiesCode" property="facilitiesCode"
+			javaType="String" />
+		<result column="alarmLevel" property="alarmLevel" javaType="Integer" />
+		<result column="serialNum" property="serialNum" javaType="Integer" />
+		<result column="areaName" property="areaName" javaType="String" />
+		<result column="facilityTypeAlias" property="facilityTypeAlias"
+			javaType="String" />
+		<result column="organizationName" property="organizationName"
+			javaType="String" />
+		<result column="alarmTime" property="alarmTime" javaType="String" />
+		<result column="alarmDesc" property="alarmDesc" javaType="String" />
+		<result column="organizationId" property="organizationId"
+			javaType="String" />
+	</resultMap>
+
+	<select id="getAlarmInfoByAccessSercret" parameterType="java.util.Map"
+		resultType="java.util.LinkedHashMap">
+		SELECT distinct (d.facilityId) id,
+		min(d.deviceId) deviceId,
+		a.facilitiesCode,
+		a.address,
+		a.latitude,
+		a.longitude,
+		a.organizationId,
+		dr.lastReportTime reportTime,
+		a.completeAddress,
+		b.facilityTypeAlias,
+		IFNULL(min(distinct
+		E.alarmLevel), 999)
+		alarmLevel,
+		a.areaId,
+		b.id,
+		facilitiesTypeId,
+		f.facilityTypeName,
+		E.alarmTime
+		FROM Facility_Device d
+		LEFT JOIN
+		Facilities a
+		on a.id =
+		d.facilityId
+		LEFT JOIN FacilitiesType b
+		ON
+		a.facilitiesTypeId = b.id
+		LEFT JOIN FacilitiesTypeBase f
+		ON
+		b.facilityTypeBaseId = f.id
+		LEFT JOIN Device_RealRported dr
+		ON
+		d.deviceId = dr.deviceId
+		LEFT JOIN
+		(
+		SELECT
+		A.facilitiesId
+		facilitiesId,
+		MAX(A.alarmTime) alarmTime,
+		MIN(A.alarmLevel) alarmLevel
+		FROM
+		(
+		SELECT
+		a.facilitiesId,
+		a.alarmTime,
+		a.alarmLevel
+		FROM
+		AlarmInfo a
+		LEFT
+		JOIN
+		Facility_Device fd ON a.deviceId = fd.deviceId
+		WHERE
+		a.isDel NOT IN
+		(2,
+		3, 4)
+		) A
+		GROUP BY
+		A.facilitiesId) E
+		on d.facilityId = E.facilitiesId
+		WHERE
+		a.accessSecret=#{accessSecret}
+		and a.manageState = "enable"
+		<if test="facilitiesTypeId !=null and facilitiesTypeId !=''">
+			and b.id=#{facilitiesTypeId}
+		</if>
+		<if test="alarmLevel !=null and alarmLevel !='' and alarmLevel !='999'">
+			and E.alarmLevel=#{alarmLevel}
+		</if>
+		<if test="alarmLevel == '999'">
+			and E.alarmLevel is null
+		</if>
+		<if test="facilitiesCode !=null and facilitiesCode !=''">
+			and a.facilitiesCode like
+			CONCAT('%',#{facilitiesCode},'%')
+		</if>
+		<if test="addressKey !=null and addressKey !=''">
+			and a.address like CONCAT('%',#{addressKey},'%')
+		</if>
+		<if test="organizationId != null and organizationId.size > 0">
+			AND a.organizationId in
+			<foreach item="item" collection="organizationId" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		GROUP BY
+		a.facilitiesCode,
+		a.address,
+		a.latitude,
+		a.longitude,
+		a.completeAddress,
+		b.facilityTypeAlias,
+		a.areaId,
+		b.id,
+		d.facilityId,
+		f.facilityTypeName,
+		E.alarmTime,
+		reportTime
+		ORDER BY alarmLevel,
+		reportTime
+		DESC
+		<if test="start >=0 and size !=0">
+			LIMIT #{start},#{size}
+		</if>
+
+	</select>
+
+	<select id="countTotaleOfStateList" parameterType="java.util.Map"
+		resultType="int">
+		SELECT
+		count(DISTINCT(d.facilityId))
+		FROM
+		Facility_Device d
+		LEFT JOIN
+		Facilities a ON a.id = d.facilityId
+		LEFT JOIN
+		FacilitiesType b ON
+		a.facilitiesTypeId = b.id
+		LEFT JOIN (
+		SELECT
+		A.facilitiesId facilitiesId,
+		MIN(A.alarmLevel) alarmLevel
+		FROM
+		(
+		SELECT
+		a.facilitiesId,
+		MIN(a.alarmLevel) alarmLevel
+		FROM
+		AlarmInfo a
+		WHERE
+		a.isDel not in (2,3,4)
+		GROUP BY
+		a.facilitiesId
+		) A
+		GROUP BY
+		A.facilitiesId
+		) f ON d.facilityId =
+		f.facilitiesId
+		WHERE
+		a.accessSecret=#{accessSecret}
+		and a.manageState =
+		"enable"
+		<!-- AND a.organizationId IN ( SELECT DISTINCT f.organizationId FROM Facilities 
+			f ) -->
+		<if test="facilitiesTypeId !=null and facilitiesTypeId !=''">
+			and b.id=#{facilitiesTypeId}
+		</if>
+		<if test="alarmLevel !=null and alarmLevel !='' and alarmLevel !='999'">
+			and f.alarmLevel=#{alarmLevel}
+		</if>
+		<if test="alarmLevel == '999'">
+			and f.alarmLevel is null
+		</if>
+		<if test="facilitiesCode !=null and facilitiesCode !=''">
+			and a.facilitiesCode like
+			CONCAT('%',#{facilitiesCode},'%')
+		</if>
+		<if test="addressKey !=null and addressKey !=''">
+			and a.address like CONCAT('%',#{addressKey},'%')
+		</if>
+		<if test="organizationId != null and organizationId.size > 0">
+			AND a.organizationId in
+			<foreach item="item" collection="organizationId" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+
+	<select id="getAlarmInfoByFacId" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT * from AlarmInfo ala WHERE
+		ala.facilitiesId=#{facilitiesId}
+		and ala.accessSecret=#{accessSecret}
+		ORDER BY ala.alarmTime DESC
+	</select>
+	<select id="getAlarmInfoByDeviceId" parameterType="String"
+		resultType="java.util.Map">
+		SELECT * from AlarmInfo ala where
+		ala.deviceId=#{deviceId}
+		and ala.isDel not in(2,3,4)
+		ORDER BY ala.alarmLevel is null
+		,ala.alarmLevel LIMIT
+		1
+	</select>
+
+	<select id="getNearlyAlarmInfo" resultType="java.util.Map">
+		SELECT AI.id, AI.alarmLevel, AI.serialNum, AI.alarmTime, AI.alarmDesc,
+		FA.FacilitiesCode
+		FROM
+		AlarmInfo AI
+		LEFT JOIN Facilities FA ON
+		AI.facilitiesId = FA.id
+		WHERE AI.isDel = 1
+		<if test="organizationId == null or organizationId == ''">	<!-- 没有组织即管理员，则查询该接入方下的数据 -->
+			AND
+			AI.accessSecret = #{accessSecret}
+			<!-- LIMIT 10 -->
+		</if>
+		<if test="organizationId != null and organizationId != ''">		<!-- 有组织，则查询该组织下的数据 -->
+			AND
+			FA.organizationId = #{organizationId}
+		</if>
+		AND AI.alarmTime &gt; date_sub(NOW() ,interval 3 day)		<!-- 当前时间之前三天的告警数据 -->
+		ORDER BY AI.alarmTime DESC
+	</select>
+
+	<select id="getNearlyTenAlarmInfo" resultType="java.util.Map">
+		SELECT AI.id, AI.alarmLevel, AI.serialNum, AI.alarmTime, AI.alarmDesc,
+		FA.FacilitiesCode
+		FROM
+		AlarmInfo AI
+		LEFT JOIN Facilities FA ON
+		AI.facilitiesId = FA.id
+		WHERE
+		AI.accessSecret = #{accessSecret}		<!-- 防止出现该接入方下没有数据的时候，查出其他接入方数据的情况 -->
+		AND AI.isDel = 1
+		<if test="organizationId != null and organizationId != ''">
+			AND
+			FA.organizationId = #{organizationId}
+		</if>
+		ORDER BY AI.alarmTime DESC LIMIT 10		<!-- 当前时间之前三天的告警数据不存在，取最新十条 -->
+	</select>
+	<select id="getAlarmInfoList" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT
+		a.id,
+		a.facilitiesId,
+		a.deviceId,
+		a.alarmTime,
+		a.serialNum,
+		a.reportTime,
+		a.facilitiesTypeId,
+		a.alarmDesc,
+		a.alarmLevel,
+		a.isMatchOrder,
+		a.accessSecret,
+		a.isDel,
+		a.facilitiesCode,
+		a.organizationId,
+		a.address,
+		a.facilityTypeAlias,
+		a.alarmOrderId,
+		a.userName,
+		a.processState,
+		aost. NAME processStateName,
+		a.userId
+		FROM
+		(
+		SELECT
+		DISTINCT ai.id,
+		ai.alarmDesc,
+		ai.alarmItem,
+		ai.alarmLevel,
+		ai.alarmTime,
+		ai.deviceId,
+		ai.facilitiesId,
+		ai.serialNum,
+		ai.reportTime,
+		ai.facilitiesTypeId,
+		ai.isMatchOrder,
+		ai.accessSecret,
+		ai.isDel,
+		f.facilitiesCode,
+		f.organizationId,
+		f.address,
+		ft.facilityTypeAlias,
+		ao.alarmOrderId,
+		aod.userName,
+		aod.processState,
+		aod.userId
+		FROM
+		AlarmInfo ai
+		LEFT JOIN
+		Facilities f ON ai.facilitiesId =
+		f.id
+		
+		LEFT JOIN Facility_Device fd on f.id =fd.facilityId
+		LEFT JOIN Device d on d.id =fd.deviceId
+		
+		LEFT JOIN FacilitiesType ft ON
+		ai.facilitiesTypeId = ft.id
+		LEFT JOIN
+		Alarm_Order ao ON ai.id =
+		ao.alarmId
+		LEFT JOIN AlarmOrder aod ON
+		ao.alarmOrderId = aod.id
+		WHERE
+		ft.manageState = 'enabled'
+		AND
+		f.manageState = 'enable'
+		AND
+		ai.accessSecret = #{accessSecret}
+		AND
+		ai.isDel BETWEEN 0 AND 1
+		<if test="facilityCodeOrId !=null and facilityCodeOrId !=''">
+			and (f.facilitiesCode like
+			CONCAT('%',#{facilityCodeOrId},'%')
+			OR ai.serialNum LIKE
+			CONCAT('%',#{facilityCodeOrId},'%')
+			OR 
+			f.address like CONCAT('%',#{facilityCodeOrId},'%')
+			OR 
+			d.deviceName like CONCAT('%',#{facilityCodeOrId},'%')
+			)
+		</if>
+		<if test="_address !=null and _address !=''">
+			AND ai.alarmDesc=#{_address}
+		</if>
+		<if test="alarmLevel !=null and alarmLevel !=''">
+			AND ai.alarmLevel = #{alarmLevel}
+		</if>
+
+		<if test="organizationId != null and organizationId.size > 0">
+			AND f.organizationId in
+			<foreach item="item" collection="organizationId" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+
+		<if test="facilitiesTypeId !=null and facilitiesTypeId !=''">
+			AND ai.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		<if test="alarmTimeStart !=null and alarmTimeStart !=''">
+			AND TO_DAYS(ai.alarmTime) &gt;= TO_DAYS(#{alarmTimeStart})
+		</if>
+		<if test="alarmTimeEnd !=null and alarmTimeEnd !=''">
+			AND TO_DAYS(ai.alarmTime) &lt;= TO_DAYS(#{alarmTimeEnd})
+		</if>
+		ORDER BY
+		ai.alarmTime DESC
+		<if test="start >=0 and size !=0">
+			LIMIT #{start},#{size}
+		</if>
+		) a
+		LEFT JOIN (
+		SELECT
+		*
+		FROM
+		AlarmOrderStateType
+		WHERE
+		type = 1
+		) aost ON
+		aost.sign = a.processState
+		ORDER BY
+		a.alarmTime DESC
+	</select>
+
+	<select id="getAlarmInfoListNum" parameterType="java.util.Map"
+		resultType="int">
+		SELECT
+		COUNT(a.id)
+		FROM
+		AlarmInfo
+		a
+		LEFT JOIN Facilities f ON
+		a.facilitiesId = f.id
+		LEFT JOIN FacilitiesType ft ON a.facilitiesTypeId
+		= ft.id
+		LEFT JOIN Facility_Device fd on f.id =fd.facilityId
+		LEFT JOIN Device d on d.id =fd.deviceId
+		WHERE ft.manageState ='enabled'
+		and f.manageState ='enable'
+		<if test="facilityCodeOrId !=null and facilityCodeOrId !=''">
+			and (f.facilitiesCode like
+			CONCAT('%',#{facilityCodeOrId},'%')
+			OR a.serialNum LIKE
+			CONCAT('%',#{facilityCodeOrId},'%')
+			OR 
+			f.address like CONCAT('%',#{facilityCodeOrId},'%')
+			OR
+			d.deviceName like CONCAT('%',#{facilityCodeOrId},'%')
+			)
+		</if>
+		<if test="_address !=null and _address !=''">
+			AND a.alarmDesc=#{_address}
+			
+		</if>
+		<if test="alarmLevel !=null and alarmLevel !=''">
+			AND a.alarmLevel = #{alarmLevel}
+		</if>
+
+		<if test="organizationId != null and organizationId.size > 0">
+			AND f.organizationId in
+			<foreach item="item" collection="organizationId" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+
+		<if test="facilitiesTypeId !=null and facilitiesTypeId !=''">
+			AND a.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		<if test="alarmTimeStart !=null and alarmTimeStart !=''">
+			AND TO_DAYS(a.alarmTime) &gt;= TO_DAYS(#{alarmTimeStart})
+		</if>
+		<if test="alarmTimeEnd !=null and alarmTimeEnd !=''">
+			AND TO_DAYS(a.alarmTime) &lt;= TO_DAYS(#{alarmTimeEnd})
+		</if>
+		AND a.accessSecret = #{accessSecret}
+		and a.isDel BETWEEN 0 AND 1
+	</select>
+
+	<select id="findById" resultType="com.run.locman.api.entity.AlarmInfo"
+		parameterType="java.lang.String">
+		SELECT
+		a.id,
+		a.facilitiesId,
+		a.deviceId,
+		a.alarmTime,
+		a.serialNum,
+		a.reportTime,
+		a.facilitiesTypeId,
+		a.alarmDesc,
+		a.rule,
+		a.alarmLevel,
+		a.isMatchOrder,
+		a.accessSecret,
+		a.isDel
+		FROM AlarmInfo a
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="statisticsAlarmInfo" parameterType="java.util.Map"
+		resultMap="statisticAlarmInfo">
+		select
+		ai.id,
+		f.facilitiesCode,
+		ai.alarmLevel,
+		f.address,
+		ft.facilityTypeAlias,
+		null as organizationName,
+		ai.alarmTime,
+		ai.alarmDesc,
+		f.organizationId
+		from
+		AlarmInfo ai LEFT JOIN Facilities f
+		on
+		ai.facilitiesId = f.id
+		LEFT JOIN
+		FacilitiesType ft on
+		ai.facilitiesTypeId = ft.id
+		LEFT JOIN Area ar on
+		ar.areaCode =
+		RIGHT(f.areaId,6)
+		where ai.accessSecret = #{accessSecret}
+		<if test="organizationId != null and organizationId.size > 0">
+			And f.organizationId in
+			<foreach item="item" collection="organizationId" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<!-- 时间搜索条件添加 -->
+		<if test="alarmTimeStart !=null and alarmTimeStart !=''">
+			AND ai.alarmTime &gt;= #{alarmTimeStart}
+		</if>
+		<if test="alarmTimeEnd !=null and alarmTimeEnd !=''">
+			AND ai.alarmTime &lt;= #{alarmTimeEnd}
+		</if>
+
+
+		<if test="searchKey != null and searchKey != ''">
+			And
+			f.facilitiesCode like CONCAT('%',#{searchKey},'%')
+			<!-- 去掉对 区域 关键字搜索 or ar.areaName like CONCAT('%',#{searchKey},'%') ) -->
+		</if>
+		order by ai.alarmTime desc
+	</select>
+
+	<select id="alarmInfoRoll" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT
+		ai.alarmDesc,
+		ai.serialNum,
+		ai.facilitiesCode,
+		ai.address,
+		ai.alarmTime,
+		ai.alarmLevel,
+		ft.facilityTypeAlias
+		FROM
+		(
+		SELECT
+		a.serialNum,
+		a.alarmDesc,
+		f.facilitiesTypeId,
+		f.facilitiesCode,
+		f.address,
+		a.alarmLevel,
+		a.alarmTime
+		FROM
+		AlarmInfo a
+		LEFT JOIN Facilities
+		f ON a.facilitiesId = f.id
+		WHERE
+		a.accessSecret = #{accessSecret}
+		AND
+		(a.isDel = 1 OR a.isDel = 0)
+		<if test="organizationId != null and organizationId.size > 0">
+			And f.organizationId in
+			<foreach item="item" collection="organizationId" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		ORDER BY
+		a.alarmTime DESC,
+		a.serialNum DESC
+		LIMIT 10
+		) ai
+		LEFT JOIN
+		FacilitiesType ft ON ai.facilitiesTypeId = ft.id
+	</select>
+
+	<select id="getTimeStampByAlarmId" parameterType="String"
+		resultType="java.util.Map">
+		SELECT
+		UNIX_TIMESTAMP(DATE_FORMAT(reportTime,"%Y-%m-%d
+		%H:%i:%s")) timestamp,
+		accessSecret
+		FROM
+		AlarmInfo
+		WHERE
+		id =
+		#{alarmInfoId}
+	</select>
+
+	<select id="getDeviceTypeByDeviceId" parameterType="String"
+		resultType="String">
+		select deviceType from Device where id = #{deviceId}
+	</select>
+	<select id="queryAlarmItemList" parameterType="String"
+		resultType="String">
+		SELECT DISTINCT
+		alarmItem
+		FROM
+		AlarmInfo
+		WHERE
+		accessSecret =
+		#{accessSecret}
+		AND deviceId = #{deviceId}
+		AND isDel IN ("0", "1")
+		AND
+		alarmLevel IS NOT NULL
+		GROUP BY
+		alarmItem
+	</select>
+
+</mapper>
+

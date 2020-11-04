@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.query.repository.DeviceTypeTemplateQueryRepository">
+	<resultMap id="DeviceTypeTemplateResultMap" type="com.run.locman.api.entity.DeviceTypeTemplate">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="deviceTypePropertyConfigId" jdbcType="VARCHAR"
+			property="devicePropertiesName" />
+		<result column="devicePropertyTemplateId" jdbcType="VARCHAR"
+			property="devicePropertiesSign" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, deviceTypePropertyConfigId, devicePropertyTemplateId
+	</sql>
+	<select id="selectByPrimaryKey" parameterType="java.lang.String"
+		resultMap="DeviceTypeTemplateResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from DeviceType_Template
+		where id = #{id,jdbcType=VARCHAR}
+	</select>
+
+	<select id="queryDeviceTypePropertyConfigList" parameterType="string"
+		resultType="java.util.Map">
+		SELECT
+		dpt.templateName as deivcePropertyTemplateName,
+		dpt.id,
+		dtt.deviceTypePropertyConfigId
+		FROM
+		DeviceProperties_Template dpt
+		LEFT JOIN DeviceType_Template dtt ON dtt.devicePropertyTemplateId =
+		dpt.id
+		WHERE
+		dpt.manageState = 'enabled' AND
+		dpt.accessSecret=#{accessSecret}
+	</select>
+
+	<select id="queryDeviceTypeListForTempId" parameterType="java.lang.String"
+		resultType="java.lang.String">
+		select
+		dt.deviceTypePropertyConfigId
+		from DeviceType_Template dt
+		<where>
+			dt.devicePropertyTemplateId = #{devicePropertyTemplateId}
+		</where>
+	</select>
+
+	<select id="queryTempIdForDeviceTypeId" parameterType="java.lang.String"
+		resultType="java.lang.String">
+		select
+		dt.devicePropertyTemplateId
+		from DeviceType_Template dt
+		<where>
+			dt.deviceTypePropertyConfigId = #{deviceTypeId}
+		</where>
+	</select>
+
+	<select id="queryDeviceProperties" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT
+		dp.*
+		FROM
+		DeviceType_Template dt
+		LEFT JOIN DeviceProperties_Template dpt ON dt.devicePropertyTemplateId =
+		dpt.id
+		LEFT JOIN DeviceProperties dp ON dpt.id = dp.templateId
+		WHERE
+		dt.deviceTypePropertyConfigId = #{deviceTypeId}
+		AND dpt.accessSecret = #{accessSecret}
+	</select>
+</mapper>

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.timer.crud.repository.ScheduledTasksCudRepository">
+
+	
+
+	<insert id="insertScheduledTasks" parameterType="com.run.locman.api.entity.ScheduledTasks">
+		insert into ScheduledTasks(
+		id,status,trrigerName,trrigerGroup,performTime,dataMap,jobDescribe
+		) values
+		(#{id},#{status},#{trrigerName},#{trrigerGroup},#{performTime},#{dataMap},#{jobDescribe})
+	</insert>
+	
+	<update id="updateScheduledTasks" parameterType="java.util.Map">
+	update ScheduledTasks set status=#{status}
+	where id in(
+	select a.id from(
+		select id from 	ScheduledTasks
+		where status in (1,4)
+		<if test="null !=securityId and securityId.size > 0">
+		and trrigerName in 
+		<foreach item="item" collection="securityId" index="index" open="(" close=")" separator=",">
+		#{item}
+		</foreach>
+		</if>
+	)as a
+	)
+	
+	
+	</update>
+	
+	<select id="findScheduledTasksInfo"  resultType="java.util.Map">
+		
+		SELECT
+			*
+			from 
+			ScheduledTasks st 
+			where st.`status`in (1,4) 
+	</select>
+	
+	<select id="facilityId4Access"  resultType="java.lang.String" >
+		
+		SELECT f.accessSecret FROM Facilities f WHERE f.id = #{facilityId}
+	</select>
+	
+	<select id="queryOrderProcessList"  resultType="com.run.locman.api.dto.ProcessInfoListDto">
+		SELECT
+		pi.id,
+		pi.fileId,
+		pi.processType,
+		ptb.processType as processTypeName,
+		createBy,
+		createTime,
+		manageState,
+		updateBy,
+		updateTime,
+		accessSecret,
+		pi.mark mark
+		FROM
+		process_info pi
+		LEFT JOIN process_type_base ptb on pi.processType =
+		ptb.id
+		WHERE 
+		<!-- ptb.processType = '告警工单流程'
+		and  -->
+		accessSecret=#{accessSecret}
+		order by manageState desc,updateTime
+		desc
+	</select>
+	
+	<select id="querystatusByTrrigerName" parameterType="java.util.Map" resultType="String">
+	SELECT
+		id
+		from ScheduledTasks st 
+		WHERE st.trrigerName=#{focusSecurityId}
+		and 
+		st.`status`in (1,4)
+	</select>
+	
+	
+	<update id="updatePart" parameterType="com.run.locman.api.entity.ProcessInfo">
+		update process_info set
+		<if test="id != null and id != ''">
+			id=#{id}
+		</if>
+		<if test="fileId != null and fileId != ''">
+			,fileId=#{fileId}
+		</if>
+		<if test="updateBy != null and updateBy != ''">
+			,updateBy=#{updateBy}
+		</if>
+		<if test="processType != null and processType != ''">
+			,processType=#{processType}
+		</if>
+		<if test="updateTime != null and updateTime != ''">
+			,updateTime=#{updateTime}
+		</if>
+		<if test="createTime != null and createTime != ''">
+			,createTime=#{createTime}
+		</if>
+		<if test="createBy != null and createBy != ''">
+			,createBy=#{createBy}
+		</if>
+		<if test="manageState != null and manageState != ''">
+			,manageState=#{manageState}
+		</if>
+		<if test="accessSecret != null and accessSecret != ''">
+			,accessSecret=#{accessSecret}
+		</if>
+		where id=#{id}
+	</update>
+	
+	<update id="updateSimpleOrderProcessVoid" >
+		UPDATE SimpleOrderProcess sop
+		SET sop.processState = '8'
+		WHERE
+			sop.processStartTime > NOW()
+		AND sop.processState IN ('1', '0', '4', '9')
+		AND sop.accessSecret = #{accessSecret}
+		AND sop.id IN (
+			SELECT DISTINCT
+				sf.simpleOrderId
+			FROM
+				SimpleOrder_Facilities sf
+			WHERE
+				1 = 1
+				and sf.facilitiesId IN
+				<foreach item="item" collection="facilityIds" index="index" open="(" close=")" separator=",">
+				#{item}
+				</foreach>
+		)
+	</update>
+	
+	<select id="getSimpleOrderByFac" parameterType="java.util.Map" resultType="String">
+	SELECT
+		id
+		from ScheduledTasks st 
+		WHERE st.trrigerName=#{focusSecurityId}
+		and 
+		st.`status`in (1,4)
+	</select>
+	
+	<update id="updateAlarmOrderVoid" >
+		UPDATE AlarmOrder ao
+		LEFT JOIN Alarm_Order aor ON ao.id = aor.alarmOrderId
+		LEFT JOIN AlarmInfo ai ON ai.id = aor.alarmId
+		SET userId = 'adminZDBZ',
+		 processState = 4
+		WHERE
+			ao.userId IS NULL
+		AND ao.processState in ('0', '1', '5')
+		AND ao.accessSecret = #{accessSecret}
+		AND ai.facilitiesId in 
+			<foreach item="item" collection="facilityIds" index="index" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+	</update>
+	
+	<update id="updateAlarmInfoVoid" >
+		UPDATE AlarmInfo a
+		SET a.isDel = 2
+		WHERE
+			(a.isDel = 0 OR a.isDel = 1)
+		AND a.accessSecret = ''
+		AND a.facilitiesId in 
+			<foreach item="item" collection="facilityIds" index="index" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+	</update>
+
+	
+
+</mapper>

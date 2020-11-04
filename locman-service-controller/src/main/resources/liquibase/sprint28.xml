@@ -1,0 +1,328 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+	<property name="autoIncrement" value="true" dbms="mysql" />
+	<changeSet id="20190130_Change_DeviceType_add_typeSign"
+		author="张贺">
+		<comment>因为devicetypeId随机生成，deviceTypeName可编辑，所以DeviceType表新增typeSign字段，用于区分该设备类型是否属于一体化智能监控终端或者智能监测终端（II型）
+		</comment>
+		<addColumn tableName="DeviceType">
+			<column name="typeSign" type="varchar(64)" remarks="设备类型标记">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<!-- <changeSet id="20190610_add_AlarmOrder_presentPic" author="钟滨远"> <comment>告警工单需要一个告警时的到场照片</comment> 
+		<addColumn tableName="AlarmOrder"> <column name="presentPic" type="varchar(255)" 
+		remarks="到场图片"> <constraints nullable="false" /> </column> </addColumn> </changeSet> 
+		<changeSet id="20190610_add_AlarmOrder_endPic" author="钟滨远"> <comment>工单处理完成之后会有一个处理完成的照片</comment> 
+		<addColumn tableName="AlarmOrder"> <column name="endPic" type="varchar(255)" 
+		remarks="完成处理图片" defaultValue=""> <constraints nullable="false" /> </column> 
+		</addColumn> </changeSet> -->
+
+	<changeSet id="20190703_update_AlarmOrder_endPic" author="钟滨远">
+		<comment>修改表AlarmOrder的字段属性</comment>
+		<modifyDataType tableName="AlarmOrder" columnName="endPic"
+			newDataType="text" />
+	</changeSet>
+
+	<changeSet author="张贺" id="2019_07_24_insert_alarmOrder_state">
+		<comment>新增alarmOrderState</comment>
+		<sql>
+			INSERT INTO AlarmOrderStateType (id, sign, NAME, type)
+			VALUES
+			(
+			REPLACE (UUID(), "-", ""),
+			6,
+			"完成审核中",
+			1
+			)
+		</sql>
+	</changeSet>
+
+	<changeSet id="20190829_update_Device_RealRported" author="郭飞龙">
+		<comment>Device_RealRported表添加固件版本</comment>
+		<addColumn tableName="Device_RealRported">
+			<column name="device_fv" type="varchar(32)" remarks="固件版本"
+				defaultValue="">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="20190901_createExcelFileUrlPath" author="郭飞龙">
+		<comment>文件路径存储表</comment>
+		<createTable tableName="ExcelFileUrlPath">
+			<column name="id" type="varchar(64)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="urlPath" type="text" remarks="路径">
+				<constraints nullable="false" />
+			</column>
+			<column name="createTime" type="varchar(64)" remarks="创建时间">
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="20190906_update_Facilites" author="张贺">
+		<comment>设施列表新增defenseState字段</comment>
+		<addColumn tableName="Facilities">
+			<column name="defenseState" type="varchar(16)" remarks="屏蔽状态，0为屏蔽，1为未屏蔽"
+				defaultValue="1">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="20190914_createDataCache" author="郭飞龙">
+		<comment>上报数据缓存表</comment>
+		<createTable tableName="DataCache">
+			<column name="id" type="varchar(64)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="dataCache" type="text" remarks="缓存数据">
+				<constraints nullable="false" />
+			</column>
+			<column name="retryCount" type="varchar(64)" remarks="尝试次数"
+				defaultValue="0">
+			</column>
+			<column name="createTime" type="varchar(64)" remarks="创建时间">
+			</column>
+			<column name="updateTime" type="varchar(64)" remarks="修改时间">
+			</column>
+		</createTable>
+	</changeSet>
+
+
+	<changeSet id="20190914_greatNumThis" author="钟滨远">
+		<comment>日历创建中间表</comment>
+		<createTable tableName="NumThis">
+			<column name="iii" type="int" remarks="数字">
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet id="20190914_greatAllDate" author="钟滨远">
+		<comment>日历时间表</comment>
+		<createTable tableName="AllDate">
+			<column name="datelist" type="varchar(64)" remarks="日期">
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="20191011_createCountTimeTrigger" author="钟滨远">
+		<comment>上报次数timing,trigger统计</comment>
+		<createTable tableName="CountTimeTrigger">
+			<column name="id" type="varchar(64)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="deviceId" type="varchar(64)" remarks="设备Id">
+				<constraints nullable="false" />
+			</column>
+			<column name="dateNum" type="varchar(64)" remarks="上报时间">
+			</column>
+			<column name="countTiming" type="varchar(64)" remarks="Timing次数">
+			</column>
+			<column name="countTrigger" type="varchar(64)" remarks="trigger次数">
+			</column>
+			<column name="countAll" type="varchar(64)" remarks="一天总上报次数">
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="20191014_update_Facilites" author="郭飞龙">
+		<comment>设施列表新增orderNum字段</comment>
+		<addColumn tableName="Facilities">
+			<column name="orderNum" type="varchar(16)" remarks="控制排序字段，默认为999"
+				defaultValue="999">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+
+
+	<changeSet id="20191016_update_smsRecord" author="张贺">
+		<comment>为实现短信延迟发送功能，新增creatTime表示记录创建时间，state表示发送状态(0为待发送，1为已发送，2为取消发送，3为发送失败)，failReason表示失败原因，默认为null
+		</comment>
+		<addColumn tableName="SmsRecord">
+			<column name="createTime" type="varchar(20)" remarks="告警短信记录创建时间">
+			</column>
+
+			<column name="state" type="int(6)" remarks="短信发送状态,0为待发送，1为已发送，2为取消发送，3为发送失败">
+			</column>
+
+			<column name="failReason" type="varchar(255)" remarks="发送失败原因">
+			</column>
+		</addColumn>
+	</changeSet>
+
+
+
+	<changeSet id="20191021_update_CountTimeTrigger" author="郭飞龙">
+		<comment>上报次数统计表新增ractv,ractvTime字段</comment>
+		<addColumn tableName="CountTimeTrigger">
+			<column name="ractv" type="double(255)" remarks="r值"
+				defaultValue="0">
+				<constraints nullable="false" />
+			</column>
+			<column name="ractvTime" type="bigint(255)" remarks="r值对应统计次数"
+				defaultValue="0">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+
+
+	<changeSet id="20191021_update_SmsRecord" author="张贺">
+		<comment>SmsRecord表修改字段可以为空</comment>
+		<dropNotNullConstraint tableName="SmsRecord"
+			columnName="sendTime" columnDataType="varchar(255)" />
+	</changeSet>
+
+
+
+	<changeSet id="20191021_update_Device_RealRported" author="郭飞龙">
+		<comment>设备实时状态表新增sumXYZ,sumNum字段</comment>
+		<addColumn tableName="Device_RealRported">
+			<column name="sumXYZ" type="bigint(255)" remarks="xyz的和"
+				defaultValue="0">
+				<constraints nullable="false" />
+			</column>
+			<column name="sumNum" type="bigint(255)" remarks="统计的xyz的次数"
+				defaultValue="0">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+
+
+	<changeSet id="20191112_create_Device_Rported_Effective"
+		author="郭飞龙">
+		<comment>设备上报数据筛选可用记录表 </comment>
+		<createTable tableName="DeviceRportedEffective">
+			<column name="id" type="varchar(64)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="deviceId" type="varchar(64)" remarks="设备ID">
+				<constraints nullable="false" />
+			</column>
+			<column name="dateNum" type="varchar(64)" remarks="日期">
+				<constraints nullable="false" />
+			</column>
+			<column name="xavtv" type="varchar(64)" remarks="X轴震动时相对初始值的平均值">
+				<constraints nullable="false" />
+			</column>
+			<column name="yavtv" type="varchar(64)" remarks="Y轴震动时相对初始值的平均值">
+				<constraints nullable="false" />
+			</column>
+			<column name="zavtv" type="varchar(64)" remarks="Z轴震动时相对初始值的平均值">
+				<constraints nullable="false" />
+			</column>
+			<column name="xgcm" type="varchar(64)" remarks="震动计数">
+				<constraints nullable="false" />
+			</column>
+			<column name="ygcm" type="varchar(64)" remarks="沉降等级计数">
+				<constraints nullable="false" />
+			</column>
+			<column name="xgtv" type="varchar(64)" remarks="X轴当前角度阀值">
+				<constraints nullable="false" />
+			</column>
+			<column name="ygtv" type="varchar(64)" remarks="Y轴当前角度阀值">
+				<constraints nullable="false" />
+			</column>
+			<column name="reportTime" type="varchar(64)" remarks="上报时间">
+				<constraints nullable="false" />
+			</column>
+			<column name="manageState" type="varchar(64)" remarks="可用状态">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="20191112_create_Device_Rported_Avg" author="郭飞龙">
+		<comment>每日xyz平均值记录表 </comment>
+		<createTable tableName="RportedAvg">
+			<column name="id" type="varchar(64)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="deviceId" type="varchar(64)" remarks="设备ID">
+				<constraints nullable="false" />
+			</column>
+			<column name="dateNum" type="varchar(64)" remarks="日期">
+				<constraints nullable="false" />
+			</column>
+			<column name="xavtvAvg" type="varchar(64)" remarks="X轴震动时相对初始值的平均值总平均值">
+				<constraints nullable="false" />
+			</column>
+			<column name="yavtvAvg" type="varchar(64)" remarks="Y轴震动时相对初始值的平均值总平均值">
+				<constraints nullable="false" />
+			</column>
+			<column name="zavtvAvg" type="varchar(64)" remarks="Z轴震动时相对初始值的平均值总平均值">
+				<constraints nullable="false" />
+			</column>
+			<column name="xgcmAvg" type="varchar(64)" remarks="震动计数总平均值">
+				<constraints nullable="false" />
+			</column>
+			<column name="ygcmAvg" type="varchar(64)" remarks="沉降等级计数总平均值">
+				<constraints nullable="false" />
+			</column>
+			<column name="ractvAvg" type="varchar(64)" remarks="总平均r值,根据xyz平均值计算得到">
+				<constraints nullable="false" />
+			</column>
+			<column name="manageState" type="varchar(64)" remarks="可用状态">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="20191120_update_Facilities" author="郭飞龙">
+		<comment>设施表新增到场图片presentPic字段</comment>
+		<addColumn tableName="Facilities">
+			<column name="presentPic" type="text" remarks="到场图片,转待整治时需要">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="20191120_update_Facilities_hiddenTroubleDesc"
+		author="郭飞龙">
+		<comment>设施表新增隐患描述字段</comment>
+		<addColumn tableName="Facilities">
+			<column name="hiddenTroubleDesc" type="text" remarks="隐患描述json">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="20191121_create_HiddenTroubleType" author="张贺">
+		<comment>新增隐患种类表</comment>
+		<createTable tableName="HiddenTroubleType">
+			<column name="id" type="varchar(64)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="name" type="varchar(32)" remarks="种类名称">
+				<constraints primaryKey="false" nullable="false" />
+			</column>
+
+		</createTable>
+	</changeSet>
+
+	<changeSet id="20191121_update_HiddenTroubleType" author="张贺">
+		<comment>隐患种类表新增typeForApp字段，用于app区分下拉框或者input</comment>
+		<addColumn tableName="HiddenTroubleType">
+			<column name="typeForApp" type="varchar(16)" remarks="用于app区分下拉框或者输入框">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+
+
+
+
+
+</databaseChangeLog>

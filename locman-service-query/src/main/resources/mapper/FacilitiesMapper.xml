@@ -1,0 +1,1307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.run.locman.api.query.repository.FacilitiesQueryRepository">
+
+	<resultMap type="com.run.locman.api.entity.Facilities" id="FacilitiesResultMap">
+		<result column="id" property="id" javaType="String" />
+		<result column="facilitiesCode" property="facilitiesCode"
+			javaType="String" />
+		<result column="facilitiesTypeId" property="facilitiesTypeId"
+			javaType="String" />
+		<result column="areaId" property="areaId" javaType="String" />
+		<result column="longitude" property="longitude" javaType="String" />
+		<result column="latitude" property="latitude" javaType="String" />
+		<result column="address" property="address" javaType="String" />
+		<result column="manageState" property="manageState" javaType="String" />
+		<result column="accessSecret" property="accessSecret" javaType="String" />
+		<result column="extend" property="extend" javaType="String" />
+		<result column="showExtend" property="showExtend" javaType="String" />
+		<result column="completeAddress" property="completeAddress"
+			javaType="String" />
+		<result column="version" property="version" javaType="String" />
+		<result column="creationUserId" property="creationUserId"
+			javaType="String" />
+		<result column="creationTime" property="creationTime" javaType="String" />
+		<result column="editorUserId" property="editorUserId" javaType="String" />
+		<result column="editorTime" property="editorTime" javaType="String" />
+		<result column="organizationId" property="organizationId"
+			javaType="String" />
+		<result column="defenseState" property="defenseState" javaType="String" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id, facilitiesCode, facilitiesTypeId, areaId, longitude,
+		latitude, address, manageState, accessSecret, extend,
+		creationUserId,
+		creationTime, editorUserId, editorTime,
+		organizationId, showExtend,
+		completeAddress,defenseState
+	</sql>
+	<sql id="Base_Condition">
+		<if test="id != null">
+			and id=#{id}
+		</if>
+		<if test="facilitiesCode != null">
+			and facilitiesCode=#{facilitiesCode}
+		</if>
+		<if test="facilitiesTypeId != null">
+			and facilitiesTypeId=#{facilitiesTypeId}
+		</if>
+		<if test="areaId != null">
+			and areaId=#{areaId}
+		</if>
+		<if test="longitude != null">
+			and longitude=#{longitude}
+		</if>
+		<if test="latitude != null">
+			and latitude=#{latitude}
+		</if>
+		<if test="address != null">
+			and address=#{address}
+		</if>
+		<if test="manageState != null">
+			and manageState=#{manageState}
+		</if>
+		<if test="accessSecret != null">
+			and accessSecret=#{accessSecret}
+		</if>
+		<if test="extend != null">
+			and extend=#{extend}
+		</if>
+		<if test="creationUserId != null">
+			and creationUserId=#{creationUserId}
+		</if>
+		<if test="creationTime != null">
+			and creationTime=#{creationTime}
+		</if>
+		<if test="editorUserId != null">
+			and editorUserId=#{editorUserId}
+		</if>
+		<if test="editorTime != null">
+			and editorTime=#{editorTime}
+		</if>
+		<if test="organizationId != null">
+			and organizationId=#{organizationId}
+		</if>
+		<if test="showExtend != null">
+			and showExtend=#{showExtend}
+		</if>
+		<if test="completeAddress != null">
+			and completeAddress=#{completeAddress}
+		</if>
+		<if test="defenseState != null">
+			and defenseState=#{defenseState}
+		</if>
+	</sql>
+
+	<select id="findById" resultMap="FacilitiesResultMap"
+		parameterType="String">
+		select
+		<include refid="Base_Column" />
+		from Facilities where id=#{id}
+	</select>
+	<select id="findAll" resultMap="FacilitiesResultMap">
+		select
+		<include refid="Base_Column" />
+		from Facilities
+	</select>
+	<select id="findByModel" resultMap="FacilitiesResultMap"
+		parameterType="com.run.locman.api.entity.Facilities">
+		select
+		<include refid="Base_Column" />
+		from Facilities where 1=1
+		<include refid="Base_Condition" />
+	</select>
+
+	<select id="queryFacilitiesListPage" parameterType="java.util.Map"
+		resultMap="FacilitiesResultMap">
+		SELECT
+		fa.*,ft.facilitiesTypeName FROM Facilities fa
+		LEFT
+		JOIN
+		FacilitiesType ft
+		ON fa.facilitiesTypeId = ft.id
+		WHERE
+		fa.manageState =
+		#{manageState}
+	</select>
+
+	<select id="queryFacilitiesMapPage" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT fa.*,ft.facilitiesTypeName FROM Facilities fa
+		LEFT JOIN
+		FacilitiesType ft ON fa.facilitiesTypeId = ft.id
+		WHERE fa.manageState <![CDATA[ <> ]]>
+		#{manageState}
+		<if test="facilitiesCode != null and facilitiesCode != ''">
+			AND fa.facilitiesCode LIKE CONCAT
+			('%',#{facilitiesCode},'%')
+		</if>
+		<if test="areaId != null and areaId != ''">
+			AND fa.areaId = #{areaId}
+		</if>
+	</select>
+
+	<select id="queryFacilitiesMapPageCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT COUNT(1) FROM Facilities fa
+		LEFT JOIN FacilitiesType ft ON
+		fa.facilitiesTypeId = ft.id
+		WHERE fa.manageState <![CDATA[ <> ]]>
+		#{manageState}
+		<if test="facilitiesCode != null and facilitiesCode != ''">
+			AND fa.facilitiesCode LIKE CONCAT
+			('%',#{facilitiesCode},'%')
+		</if>
+		<if test="areaId != null and areaId != ''">
+			AND fa.areaId = #{areaId}
+		</if>
+	</select>
+
+	<select id="queryFacilitiesListPageCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT COUNT(1) FROM
+		Facilities
+	</select>
+
+	<!-- 查询设施GIS信息 -->
+	<!-- <select id="queryMapFacilities1" resultType="java.util.Map"> SELECT 
+		fa.*, ft.facilityTypeAlias,ftb.* FROM Facilities fa LEFT JOIN FacilitiesType 
+		ft ON fa.facilitiesTypeId = ft.id LEFT JOIN FacilitiesTypeBase ftb ON ft.facilityTypeBaseId 
+		= ftb.id WHERE fa.manageState != 'disable' <if test="accessSecret != null 
+		and accessSecret != ''"> AND fa.accessSecret = #{accessSecret} </if> <if 
+		test="completeAddress != null and completeAddress != ''"> AND fa.completeAddress 
+		LIKE CONCAT ('%',#{completeAddress},'%') </if> <if test="facilitiesCode != 
+		null and facilitiesCode != ''"> AND fa.facilitiesCode LIKE CONCAT ('%',#{facilitiesCode},'%') 
+		</if> <if test="facilitiesTypeId != null and facilitiesTypeId != ''"> AND 
+		fa.facilitiesTypeId = #{facilitiesTypeId} </if> <if test="id != null and 
+		id != ''"> AND fa.id = #{id} </if> <if test="organizationId != null and organizationId.size 
+		> 0"> AND fa.organizationId in <foreach item="item" collection="organizationId" 
+		index="index" open="(" close=")" separator=","> #{item} </foreach> </if> 
+		</select> -->
+
+	<select id="queryMapFacilities" resultType="java.util.Map">
+		SELECT
+		A.longitude,
+		A.latitude,
+		A.id,
+		A.alarmWorstLevel,
+		A.accessSecret,
+		CASE A.boundNum WHEN
+		0
+		THEN 'unBound'
+
+		ELSE
+		'bound'
+		END boundState,
+		CASE
+		WHEN
+		JSON_CONTAINS (
+		A.extend,
+		'{"checkWellFuncType":"进水篦"}'
+		) THEN
+		'雨水篦子'
+		ELSE
+		A.facilityTypeAlias
+		END facilityTypeAlias,
+		A.organizationId
+		FROM
+		(
+		SELECT
+		fa.longitude,
+		fa.latitude,
+		fa.id,
+		MIN(c.alarmLevel)
+		alarmWorstLevel,
+		fa.accessSecret
+		accessSecret,
+		COUNT(b.deviceId) boundNum,
+		fa.extend,
+		ft.facilityTypeAlias,
+		fa.organizationId,
+		fa.defenseState
+		FROM
+		Facilities
+		fa
+		LEFT JOIN
+		FacilitiesType ft ON
+		fa.facilitiesTypeId =
+		ft.id
+		LEFT JOIN
+		Facility_Device b on
+		b.facilityId=fa.id
+		LEFT JOIN (
+		SELECT
+		deviceId,min(a.alarmLevel)
+		alarmLevel
+		FROM
+		AlarmInfo a where a.isDel in
+		(0,1)
+		<if test="accessSecret != null and accessSecret != ''">
+			AND accessSecret = #{accessSecret}
+		</if>
+		GROUP BY
+		a.deviceId
+		) c on c.deviceId=b.deviceId
+
+		WHERE
+		fa.manageState !=
+		'disable'
+		<if test="accessSecret != null and accessSecret != ''">
+			AND fa.accessSecret = #{accessSecret}
+			and ft.accessSecret =
+			#{accessSecret}
+		</if>
+		<if test="completeAddress != null and completeAddress != ''">
+			AND fa.completeAddress LIKE CONCAT
+			('%',#{completeAddress},'%')
+		</if>
+		<if test="searchKey != null and searchKey != ''">
+			and fa.facilitiesCode like CONCAT('%',#{searchKey},'%')
+		</if>
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			AND fa.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		<if test="defenseState != null and defenseState != ''">
+			AND fa.defenseState = #{defenseState}
+		</if>
+		
+		<if test="organizationId != null and organizationId.size > 0">
+			AND fa.organizationId in
+			<foreach item="item" collection="organizationId" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		GROUP BY fa.id
+		) A
+		WHERE
+		1 = 1
+		<choose>
+			<when
+				test="alarmWorstLevel != null and alarmWorstLevel != '' and alarmWorstLevel !=3  and alarmWorstLevel != '999'.toString()"><!-- 查询一般或紧急告警 -->
+					AND A.alarmWorstLevel = #{alarmWorstLevel}
+			</when>
+			<when test="alarmWorstLevel != null and alarmWorstLevel != '' and alarmWorstLevel == '999'.toString()"><!-- 查询正常的设施 -->
+				<if test="defenseState == null or defenseState == ''">
+					AND A.alarmWorstLevel IS NULL
+				</if>
+			</when>
+		</choose>
+		ORDER BY A.latitude,A.longitude
+	</select>
+	
+	<select id="queryMapFacilitiesId" resultType="java.lang.String">
+	
+		SELECT
+		CONCAT('fac:',A.id)
+		FROM
+		(
+		SELECT
+		fa.id,
+		MIN(c.alarmLevel)
+		alarmWorstLevel
+		FROM
+		Facilities
+		fa
+		LEFT JOIN
+		FacilitiesType ft ON
+		fa.facilitiesTypeId =
+		ft.id
+		LEFT JOIN
+		Facility_Device b on
+		b.facilityId=fa.id
+		LEFT JOIN (
+		SELECT
+		deviceId,min(a.alarmLevel)
+		alarmLevel
+		FROM
+		AlarmInfo a where a.isDel in
+		(0,1)
+		<if test="accessSecret != null and accessSecret != ''">
+			AND accessSecret = #{accessSecret}
+		</if>
+		GROUP BY
+		a.deviceId
+		) c on c.deviceId=b.deviceId
+
+		WHERE
+		fa.manageState !=
+		'disable'
+		<if test="accessSecret != null and accessSecret != ''">
+			AND fa.accessSecret = #{accessSecret}
+			and ft.accessSecret =
+			#{accessSecret}
+		</if>
+		<if test="completeAddress != null and completeAddress != ''">
+			AND fa.completeAddress LIKE CONCAT
+			('%',#{completeAddress},'%')
+		</if>
+		<if test="searchKey != null and searchKey != ''">
+			and fa.facilitiesCode like CONCAT('%',#{searchKey},'%')
+		</if>
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			AND fa.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		<if test="defenseState != null and defenseState != ''">
+			AND fa.defenseState = #{defenseState}
+		</if>
+		
+		<if test="organizationId != null and organizationId.size > 0">
+			AND fa.organizationId in
+			<foreach item="item" collection="organizationId" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		GROUP BY fa.id
+		) A
+		WHERE
+		1 = 1
+		<choose>
+			<when
+				test="alarmWorstLevel != null and alarmWorstLevel != '' and alarmWorstLevel !=3  and alarmWorstLevel != '999'.toString()"><!-- 查询一般或紧急告警 -->
+					AND A.alarmWorstLevel = #{alarmWorstLevel}
+			</when>
+			<when test="alarmWorstLevel != null and alarmWorstLevel != '' and alarmWorstLevel == '999'.toString()"><!-- 查询正常的设施 -->
+				<if test="defenseState == null or defenseState == ''">
+					AND A.alarmWorstLevel IS NULL
+				</if>
+			</when>
+		</choose>
+	
+	</select>
+
+	<select id="queryFacilities2App" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT fa.id, fa.facilitiesCode, ft.facilitiesTypeName, fa.latitude,
+		fa.longitude, fa.address, IF (ISNULL(al.id), 0, 1) AS alarmInfo FROM
+		Facilities fa
+		LEFT JOIN Alarm al ON al.facilitiesId = fa.id AND
+		al.state = 0
+		LEFT JOIN FacilitiesType ft ON ft.id = fa.facilitiesTypeId
+		<where>
+			fa.manageState = 'enable' AND
+			( acos(
+			sin(( #{latitude} * 3.1415) /
+			180) * sin((latitude * 3.1415) / 180) +
+			cos(( #{latitude} * 3.1415) /
+			180) * cos((latitude * 3.1415) / 180) *
+			cos(( #{longitude} * 3.1415) /
+			180 - (longitude * 3.1415) / 180)
+			) * 6370.996
+			) <![CDATA[ <= ]]>
+			5
+		</where>
+	</select>
+
+	<select id="getById" parameterType="String" resultType="java.util.Map">
+		SELECT fa.*, fr.regionId, ft.facilitiesTypeName FROM Facilities fa
+		LEFT JOIN FacilitiesRegion fr ON fa.id = fr.facilitiesId
+		LEFT JOIN
+		FacilitiesType ft ON fa.facilitiesTypeId = ft.id
+		<where>
+			fa.manageState = 'enable' AND
+			fa.id = #{facilitiesId}
+		</where>
+	</select>
+
+	<select id="getByDeviceId" parameterType="String" resultMap="FacilitiesResultMap">
+		SELECT * FROM Facilities fa
+		<where>
+			fa.id = (SELECT de.facilitiesId FROM Device de WHERE
+			de.deviceId =
+			#{deviceId})
+		</where>
+	</select>
+
+	<select id="findByFacId" resultType="java.util.Map"
+		parameterType="String">
+		SELECT
+		facType.facilityTypeAlias,
+		ftb.facilityTypeName,
+		area.areaName,
+		fac.id,
+		fac.facilitiesCode,
+		fac.facilitiesTypeId,
+		fac.areaId,
+		fac.longitude,
+		fac.latitude,
+		fac.address,
+		fac.manageState,
+		fac.accessSecret,
+		fac.extend,
+		fac.showExtend,
+		fac.creationUserId,
+		fac.creationTime,
+		fac.editorUserId,
+		fac.editorTime,
+		fac.organizationId,
+		fac.completeAddress,
+		fac.defenseState
+		FROM
+		Facilities fac
+		LEFT
+		JOIN FacilitiesType
+		facType ON
+		fac.facilitiesTypeId =
+		facType.id
+		LEFT JOIN
+		Area area ON
+		fac.areaId =
+		area.id
+		LEFT JOIN
+		FacilitiesTypeBase ftb ON
+		facType.facilityTypeBaseId =
+		ftb.id
+		WHERE
+		fac.id = #{id}
+	</select>
+	<select id="findByFacCode" resultType="java.util.Map"
+		parameterType="String">
+		select
+		facType.facilityTypeAlias,
+		area.areaName,
+		fac.id,
+		fac.facilitiesCode, fac.facilitiesTypeId, fac.areaId, fac.longitude,
+		fac.latitude, fac.address, fac.manageState,
+		fac.accessSecret,
+		fac.extend,
+		fac.creationUserId, fac.creationTime,
+		fac.editorUserId,
+		fac.editorTime,
+		fac.organizationId,
+		fac.defenseState
+		from Facilities fac
+		left join
+		FacilitiesType facType
+		on
+		fac.facilitiesTypeId=facType.id
+		left
+		join
+		Area
+		area on
+		fac.areaId=area.id
+		where fac.facilitiesCode=#{code}
+	</select>
+	<select id="findFacByPage" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select * from (
+		SELECT
+		<if test= "defenseState == '4'.toString() or defenseState == '5'.toString()">
+		DISTINCT
+		</if>
+		fac.id,
+		facType.facilityTypeAlias,
+		ftb.facilityTypeName,
+		fac.facilitiesCode,
+		fac.facilitiesTypeId,
+		fac.longitude,
+		fac.latitude,
+		fac.address,
+		fac.manageState,
+		REPLACE(json_extract(fac.extend, "$.Material"),'"','') AS material,
+		fac.extend,
+		fac.organizationId,
+		fac.defenseState,
+		fac.completeAddress,
+		MIN(ai.alarmLevel) as
+		alarmLevel,
+		GROUP_CONCAT(
+        DISTINCT ai.alarmDesc SEPARATOR '/'
+      	) alarmDesc,
+		if(ISNULL(GROUP_CONCAT(fd.deviceId)),'unbound','bound')
+		as
+		bingStatus
+		FROM
+		Facilities fac
+		LEFT JOIN Facility_Device fd ON
+		fd.facilityId =
+		fac.id
+		LEFT JOIN
+		FacilitiesType facType
+		ON
+		fac.facilitiesTypeId =
+		facType.id
+		LEFT JOIN
+		FacilitiesTypeBase ftb ON
+		ftb.id =
+		facType.facilityTypeBaseId
+
+		LEFT JOIN (
+		
+				
+		<if test= "defenseState == '4'.toString() or defenseState == '5'.toString()">
+		SELECT
+			alram.deviceId,
+			min(alram.alarmLevel) alarmLevel,
+			GROUP_CONCAT(
+				DISTINCT alram.alarmDesc SEPARATOR '/'
+			) alarmDesc,
+			MAX(aoo.createTime) createTime
+		FROM
+			AlarmInfo alram
+		LEFT JOIN Alarm_Order aio ON aio.alarmId = alram.id
+		LEFT JOIN AlarmOrder aoo ON aoo.id = aio.alarmOrderId
+		WHERE
+			aoo.id IS NOT NULL
+			
+			<if test="accessSecret != null and accessSecret != ''">
+				AND alram.accessSecret = #{accessSecret}
+			</if>
+			
+			<if test="alarmDesc !=null and alarmDesc !=''">
+				and alram.alarmDesc=#{alarmDesc}
+			</if>
+			
+		GROUP BY
+			alram.deviceId
+		ORDER BY
+			createTime DESC
+		</if>
+		
+		<if test="defenseState != '4'.toString() and  defenseState != '5'.toString()">
+		SELECT
+		deviceId,
+		min(alram.alarmLevel) alarmLevel,
+		
+		GROUP_CONCAT(
+		DISTINCT alram.alarmDesc
+		SEPARATOR '/'
+		) alarmDesc
+		
+		FROM
+		AlarmInfo
+		alram
+		WHERE
+		alram.isDel IN
+		(0, 1)
+		<if test="accessSecret != null and accessSecret != ''">
+			AND alram.accessSecret = #{accessSecret}
+		</if>
+		
+		<if test="alarmDesc !=null and alarmDesc !=''">
+			and alram.alarmDesc=#{alarmDesc}
+		</if>
+		
+		GROUP BY
+		alram.deviceId
+		</if>
+
+		
+		) ai ON ai.deviceId = fd.deviceId
+		LEFT JOIN
+		Device d ON fd.deviceId = d.id
+		
+		<if test= "defenseState == '4'.toString()">
+		LEFT JOIN FacilitiesRenovation fr
+		ON fr.facilityId = fac.id
+		</if>
+		
+		WHERE
+		fac.accessSecret =
+		#{accessSecret}
+		
+		<!-- 设施列表查询待整治设施时需要关联待整治记录表,待整治记录表中已通过未处理可用状态的设施才展示 -->
+		<if test= "defenseState == '4'.toString()">
+		AND fr.manageState = '3'
+		</if>
+		
+		
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			AND facType.id = #{facilitiesTypeId}
+		</if>
+		
+		<if test="alarmDesc !=null and alarmDesc !=''">
+			and ai.alarmDesc is not NULL
+		</if>
+		
+		<if test="material !=null and material !=''">
+			AND REPLACE(json_extract(fac.extend, "$.Material"),'"','') = #{material}
+		</if>
+
+		<if test="alarmLevel !=null and alarmLevel !='' and alarmLevel !='999'">
+			and ai.alarmLevel=#{alarmLevel}
+		</if>
+		<if test="alarmLevel == '999'">
+			and ai.alarmLevel is null
+			and fd.deviceId is not null
+		</if>
+
+		<if test="serchKey !=null and serchKey !='' and whole == 'false'">
+			and (facilitiesCode like
+			CONCAT('%',#{serchKey},'%')
+			or
+			address like CONCAT('%',#{serchKey},'%')
+			or
+			 d.deviceName like CONCAT('%',#{serchKey},'%')
+			)
+		</if>
+		<if test="serchKey !=null and serchKey !='' and whole == 'true'">
+			and facilitiesCode = #{serchKey}
+		</if>
+
+		<if test="manageState !=null and manageState !='' ">
+			and fac.manageState =#{manageState}
+		</if>
+		<if test="defenseState != null and defenseState != ''">
+			AND fac.defenseState = #{defenseState}
+		</if>
+		<if test="organizationId != null and organizationId.size > 0">
+			AND fac.organizationId in
+			<foreach item="item" collection="organizationId" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		GROUP BY fac.id 
+		ORDER BY fac.orderNum
+		<if test="sortField !=null and sortField !='' ">
+			<!-- sortField:排序字段,0:按组织,1:地址,2:修改时间倒叙 -->
+			<if test="sortField == '0'.toString()">
+			, fac.organizationId
+			</if>
+			<if test="sortField == '1'.toString()">
+			, fac.address
+			</if>
+			<if test="sortField == '2'.toString()">
+			, fac.editorTime DESC
+			</if>
+		</if>
+		<if test="sortField ==null or sortField =='' ">
+			, fac.creationTime DESC , fac.editorTime DESC
+		</if>
+		 )
+		facMuchTable 
+		<if test="bingStatus != null and bingStatus != ''">
+			where facMuchTable.bingStatus = #{bingStatus}
+		</if>
+	</select>
+
+	<select id="checkFacilitiesCode" resultType="int" parameterType="java.util.Map">
+		SELECT count(1) FROM Facilities where accessSecret = #{accessSecret}
+		AND facilitiesCode=#{facilitiesCode}
+		<if test="id !=null and id !='' ">
+			and id != #{id}
+		</if>
+	</select>
+
+
+	<!-- APP查询设施GIS信息 -->
+	<select id="queryMapFacilitiesToApp" resultType="java.util.Map">
+		SELECT
+		fa.id id,
+		fa.address address,
+		fa.facilitiesCode facilitiesCode,
+		fa.latitude latitude,
+		fa.longitude longitude,
+		fa.manageState
+		manageState,
+		ftb.facilityTypeIco facilityTypeIco,
+		ft.facilityTypeAlias
+		facilityTypeAlias,
+		MIN(ai.alarmLevel) alarmWorstLevel
+		FROM
+		Facilities fa
+		LEFT JOIN
+		FacilitiesType ft ON fa.facilitiesTypeId = ft.id
+		LEFT JOIN
+		FacilitiesTypeBase ftb ON ft.facilityTypeBaseId = ftb.id
+		LEFT JOIN
+		Facility_Device fd ON fd.facilityId = fa.id
+		LEFT JOIN (
+		SELECT
+		deviceId,
+		min(alram.alarmLevel) alarmLevel
+		FROM
+		AlarmInfo alram
+		WHERE
+		alram.isDel IN
+		(0, 1)
+		<if test="accessSecret != null and accessSecret != ''">
+			AND alram.accessSecret = #{accessSecret}
+		</if>
+		GROUP BY
+		alram.deviceId
+		) ai ON ai.deviceId = fd.deviceId
+		LEFT JOIN
+		Device dev ON fd.deviceId = dev.id
+		
+		WHERE
+		fa.manageState != 'disable'
+		<if
+			test="reduceLatitude != null and reduceLatitude != '' and plusLatitude != null and plusLatitude != '' and reduceLongitude != null and reduceLongitude != '' and plusLongitude != ''and plusLongitude != ''">
+			AND fa.latitude between #{reduceLatitude}
+			and #{plusLatitude}
+			AND
+			fa.longitude between #{reduceLongitude} and
+			#{plusLongitude}
+		</if>
+		<if test="accessSecret != null and accessSecret != ''">
+			AND fa.accessSecret = #{accessSecret}
+		</if>
+		<if test="address != null and address != ''">
+			AND (
+				fa.address LIKE CONCAT ('%',#{address},'%')
+				or dev.deviceName like CONCAT('%',#{address},'%')
+			)
+		</if>
+		<if test="facilitiesCode != null and facilitiesCode != ''">
+			AND fa.facilitiesCode LIKE CONCAT
+			('%',#{facilitiesCode},'%')
+		</if>
+		<if test="facilitiesTypeId != null and facilitiesTypeId != ''">
+			AND fa.facilitiesTypeId = #{facilitiesTypeId}
+		</if>
+		<if test="organizationId != null and organizationId.size > 0">
+			AND fa.organizationId in
+			<foreach item="item" collection="organizationId" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		GROUP BY
+		fa.id
+	</select>
+
+	<!--查询设施最严重的告警等级 -->
+	<select id="queryFacilityWorstAlarm" resultType="java.lang.String"
+		parameterType="java.util.Map">
+		SELECT
+		min(aa.alarmLevel)
+		FROM
+		AlarmInfo aa
+		WHERE aa.isDel =
+		'1'
+		AND aa.facilitiesId =
+		#{facilitiesId}
+	</select>
+
+	<!-- 模糊查询设施信息 -->
+	<select id="getFacilityListBySelectKeyAndTypeName"
+		parameterType="java.util.Map" resultType="java.util.Map">
+		select
+		DISTINCT fi.id facilitiesId,
+		fi.facilitiesCode facilitiesCode,
+		fi.facilitiesTypeId facilitiesTypeId,
+		fi.address address,
+		ft.facilityTypeAlias facilityTypeAlias,
+		ftb.facilityTypeName
+		facilityTypeName,
+		ftb.facilityTypeIco facilityTypeIco
+		from Facilities fi
+		LEFT JOIN FacilitiesType ft
+		on fi.facilitiesTypeId=ft.id
+		LEFT JOIN
+		FacilitiesTypeBase ftb on
+		ft.facilityTypeBaseId=ftb.id
+		left join
+		Facility_Device fd
+		on fd.facilityId = fi.id
+		right JOIN Device dev
+		on
+		fd.deviceId = dev.id
+		<where>
+			fi.manageState != 'disable'
+			AND fi.accessSecret = #{accessSecret}
+			<if test="selectKey!=null and selectKey!=''">
+				AND (fi.facilitiesCode like CONCAT('%',#{selectKey},'%')
+				OR fi.address like CONCAT('%',#{selectKey},'%')
+				OR fi.completeAddress
+				like CONCAT('%',#{selectKey},'%'))
+			</if>
+			<if test="facilitiesTypeId!=null and facilitiesTypeId!=''">
+				AND ft.id=#{facilitiesTypeId}
+			</if>
+		</where>
+	</select>
+
+	<select id="getAreaByIds" parameterType="java.lang.String"
+		resultType="java.lang.String">
+		select areaName from Area where areaCode in (#{id}) ORDER
+		BY areaCode ASC
+	</select>
+
+	<!-- 根绝id查询设施状态 -->
+	<select id="getFacilityMangerStateById" parameterType="java.util.List"
+		resultType="java.lang.String">
+		select * from Facilities
+		where id in
+		<foreach item="item" index="index" collection="list" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+		and manageState = "disable"
+	</select>
+
+	<select id="getFacilityByParam" resultMap="FacilitiesResultMap"
+		parameterType="java.util.Map">
+		select
+		<include refid="Base_Column" />
+		from Facilities where facilitiesCode = #{facilitiesCode} and
+		accessSecret = #{accessSecret}
+		<if test="organizationId != null and organizationId.size > 0">
+			and organizationId in
+			<foreach item="item" collection="organizationId" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+
+	<select id="getFacilityIdList" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		SELECT
+		f.ID AS facilityId
+		FROM
+		DEVICE_INFO D
+		RIGHT JOIN
+		Facilities f ON D.FACILITIESID = f.ID
+		LEFT JOIN FacilitiesType ft ON
+		f.facilitiesTypeId = ft.id
+		WHERE
+		D.COMPANYID = #{accessSecret}
+		AND
+		D.DEVICETYPENAME = #{deviceTypeName}
+		AND D.ID IS NOT NULL
+	</select>
+
+	<select id="getDeviceIdList" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		SELECT
+		d.id AS deviceId,
+		d.deviceType
+		FROM
+		Device d
+		WHERE
+		d.appTag
+		=#{appTag}
+	</select>
+
+	<select id="findFacilitiesTypeId" parameterType="java.util.Map"
+		resultType="String">
+		SELECT
+		ft.id
+		FROM
+		FacilitiesType ft
+		LEFT JOIN
+		FacilitiesTypeBase ftb ON
+		ft.facilityTypeBaseId = ftb.id
+		WHERE
+		ft.accessSecret = #{accessSecret}
+		AND
+		ft.facilityTypeAlias =
+		#{facilitiesType}
+		AND
+		ftb.facilityTypeName = #{basicsFacType}
+
+	</select>
+
+
+
+	<select id="checkDeviceId" parameterType="java.util.Map"
+		resultType="int">
+		select count(1) from Device where id = #{deviceId} and
+		accessSecret = #{accessSecret}
+	</select>
+
+	<select id="checkDeviceOrFac" parameterType="String" resultType="int">
+		select count(1) from Facility_Device where deviceId =
+		#{deviceId}
+	</select>
+
+	<select id="countAlarmFacilities" parameterType="java.util.Map"
+		resultType="int">
+		SELECT
+		COUNT(DISTINCT a.facilitiesId) totalNum
+		FROM
+		AlarmInfo a
+		LEFT JOIN
+		Facility_Device fd ON a.facilitiesId = fd.facilityId
+		LEFT JOIN
+		Facilities f ON fd.facilityId = f.id
+		LEFT JOIN FacilitiesType ft ON
+		f.facilitiesTypeId = ft.id
+		LEFT JOIN FacilitiesTypeBase ftb ON
+		ft.facilityTypeBaseId = ftb.id
+		WHERE
+		a.accessSecret =
+		#{accessSecret}
+		AND
+		a.isDel not in (2,3,4)
+		AND f.manageState =
+		'enable'
+		<if test="organizationId != null and organizationId.size > 0">
+			And f.organizationId in
+			<foreach item="item" collection="organizationId" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+
+
+	<select id="getBoundDeviceInfo" resultType="java.util.Map">
+		SELECT
+		d.id AS
+		deviceId,
+		dt.id AS deviceTypeId,
+		d.deviceName,
+		dt.deviceTypeName
+		FROM
+		Facilities f
+		LEFT JOIN Facility_Device fd ON fd.facilityId = f.id
+		LEFT
+		JOIN Device
+		d ON d.id = fd.deviceId
+		LEFT JOIN DeviceType dt ON
+		d.deviceType = dt.id
+		WHERE
+		d.id IS NOT NULL
+		AND f.id = #{facilityId}
+		AND
+		f.accessSecret =
+		#{accessSecret}
+	</select>
+
+
+
+	<select id="findFacitiesByIds" parameterType="java.util.List"
+		resultType="java.util.Map">
+		SELECT
+		fac.id,
+		facType.facilityTypeAlias,
+		fac.facilitiesCode,
+		fac.facilitiesTypeId,
+		fac.areaId,
+		fac.longitude,
+		fac.latitude,
+		fac.address,
+		fac.manageState,
+		fac.extend,
+		fac.showExtend,
+		fac.creationTime,
+		fac.editorTime,
+		fac.completeAddress
+		FROM
+		Facilities fac
+		LEFT JOIN FacilitiesType facType ON fac.facilitiesTypeId =
+		facType.id
+		LEFT JOIN Area area ON fac.areaId = area.id
+		LEFT JOIN
+		FacilitiesTypeBase ftb ON facType.facilityTypeBaseId = ftb.id
+		WHERE
+		fac.id in
+		<foreach item="item" open="(" separator="," close=")"
+			collection="list">
+			#{item}
+		</foreach>
+
+	</select>
+
+	<select id="getBoundDevicesInfoByfacIds" resultType="java.util.Map">
+		SELECT
+		f.id AS facilityId,
+		d.id AS deviceId,
+		dt.id AS deviceTypeId,
+		d.deviceName,
+		dt.deviceTypeName
+		FROM
+		Facilities f
+		LEFT JOIN
+		Facility_Device fd ON fd.facilityId = f.id
+		LEFT JOIN Device
+		d ON d.id =
+		fd.deviceId
+		LEFT JOIN DeviceType dt ON d.deviceType = dt.id
+		WHERE
+		d.id IS
+		NOT NULL
+		AND f.accessSecret =
+		#{accessSecret}
+		AND f.id in
+		<foreach collection="ids" item="item" open="(" separator=","
+			close=")">
+			#{item}
+		</foreach>
+
+
+	</select>
+
+
+	<select id="countFacByTypeAndOrg" resultType="java.util.Map">
+		SELECT
+		FacilitiesType.facilityTypeAlias,
+		COUNT(1) as count
+		FROM
+		Facilities
+		LEFT
+		JOIN FacilitiesType ON Facilities.facilitiesTypeId =
+		FacilitiesType.id
+		WHERE
+		Facilities.accessSecret = #{accessSecret}
+		AND
+		Facilities.organizationId = #{organizationId}
+		AND
+		JSON_CONTAINS(Facilities.extend, '{"checkWellFuncType":"进水篦"}') = 0
+		GROUP BY
+		FacilitiesType.id
+		UNION
+		SELECT
+		"雨水箅子" as facilityTypeAlias,
+		COUNT(1) as count
+		FROM
+		Facilities
+		WHERE
+		JSON_CONTAINS(Facilities.extend,
+		'{"checkWellFuncType":"进水篦"}') = 1
+		AND Facilities.accessSecret =
+		#{accessSecret}
+		AND Facilities.organizationId = #{organizationId}
+	</select>
+
+	<select id="countFacNumByStreet" resultType="java.util.Map">
+		SELECT
+		A.facilityTypeAlias,
+		COUNT(1) count
+		FROM
+		(
+		SELECT
+		CASE
+		WHEN
+		JSON_CONTAINS (
+		f.extend,
+		'{"checkWellFuncType":"进水篦"}'
+		) THEN
+		'雨水篦子'
+		ELSE
+		ft.facilityTypeAlias
+		END facilityTypeAlias
+		FROM
+		Facilities f
+		LEFT JOIN
+		FacilitiesType ft ON f.facilitiesTypeId = ft.id
+		WHERE
+		f.accessSecret =
+		#{accessSecret}
+		AND f.organizationId IN
+		<foreach collection="orgIds" item="item" open="(" separator=","
+			close=")">
+			#{item}
+		</foreach>
+		) A
+		GROUP BY
+		A.facilityTypeAlias
+	</select>
+
+
+	<select id="findFacilityInfoByCodeAndAcc" resultType="java.util.Map">
+		SELECT
+		f.id
+		facilityId,
+		ft.facilityTypeAlias facilityTypeAlias,
+		f.facilitiesTypeId
+		facilitiesTypeId,
+		f.facilitiesCode facilitiesCode,
+		f.longitude
+		longitude,
+		f.latitude latitude,
+		f.address address,
+		f.manageState
+		manageState,
+		f.creationTime creationTime,
+		f.editorTime editorTime,
+		f.completeAddress completeAddress,
+		f.extend extend,
+		f.showExtend
+		showExtend,
+		f.areaId
+		FROM
+		Facilities f
+		LEFT JOIN FacilitiesType ft ON
+		f.facilitiesTypeId = ft.id
+		WHERE
+		f.facilitiesCode = #{facilitiesCode}
+		AND f.accessSecret =
+		#{accessSecret}
+	</select>
+
+	<select id="findFacilityLngLat" resultType="java.util.Map">
+		SELECT
+		f.longitude
+		lng,
+		f.latitude lat,
+		1 count
+		FROM
+		Facilities f
+		LEFT JOIN Facility_Device fd
+		ON fd.facilityId = f.id
+		WHERE
+		f.accessSecret = #{accessSecret}
+		and f.manageState='enable'
+	</select>
+	
+	<select id="facilityLngLatList" resultType="list">
+		SELECT
+		f.longitude
+		lng,
+		f.latitude lat,
+		1 count
+		FROM
+		Facilities f
+		LEFT JOIN Facility_Device fd
+		ON fd.facilityId = f.id
+		WHERE
+		f.accessSecret = #{accessSecret}
+	</select>
+
+	<select id="findFacilityRenovatedByPage" resultType="java.util.Map"
+	parameterType="java.util.Map">
+		SELECT
+			DISTINCT
+			f.id,
+			f.facilitiesCode,
+			f.accessSecret,
+			f.organizationId,
+			f.address,
+			ft.facilityTypeAlias facilityTypeAlias,
+			f.defenseState,
+			f.hiddenTroubleDesc,
+			f.presentPic,
+			ai.alarmDesc,
+			fr.createTime
+		FROM
+			Facilities f
+		LEFT JOIN FacilitiesType ft 
+		ON ft.id = f.facilitiesTypeId
+		LEFT JOIN Facility_Device fd 
+		ON fd.facilityId = f.id
+		LEFT JOIN (
+		<!-- <if test= "defenseState == '4'.toString()"> -->
+		SELECT
+			alram.deviceId,
+			min(alram.alarmLevel) alarmLevel,
+			GROUP_CONCAT(
+				DISTINCT alram.alarmDesc SEPARATOR '/'
+			) alarmDesc,
+			MAX(aoo.createTime) createTime
+		FROM
+			AlarmInfo alram
+		LEFT JOIN Alarm_Order aio ON aio.alarmId = alram.id
+		LEFT JOIN AlarmOrder aoo ON aoo.id = aio.alarmOrderId
+		WHERE
+			aoo.id IS NOT NULL
+			AND alram.accessSecret = #{accessSecret}
+			
+			<if test="alarmDesc !=null and alarmDesc !=''">
+				and alram.alarmDesc=#{alarmDesc}
+			</if>
+			
+		GROUP BY
+			alram.deviceId
+		ORDER BY
+			createTime DESC
+		<!-- </if> -->
+		
+		<!-- <if test="defenseState != '4'.toString()">
+		SELECT
+		deviceId,
+		min(alram.alarmLevel) alarmLevel,
+		
+		GROUP_CONCAT(
+		DISTINCT alram.alarmDesc
+		SEPARATOR '/'
+		) alarmDesc
+		
+		FROM
+		AlarmInfo
+		alram
+		WHERE
+		alram.isDel IN
+		(0, 1)
+
+		AND alram.accessSecret = #{accessSecret}
+		
+		<if test="alarmDesc !=null and alarmDesc !=''">
+			and alram.alarmDesc=#{alarmDesc}
+		</if>
+		GROUP BY
+		alram.deviceId
+		</if> -->
+		
+		) ai ON ai.deviceId = fd.deviceId
+		LEFT JOIN
+		Device d ON fd.deviceId = d.id
+		LEFT JOIN FacilitiesRenovation fr
+		ON fr.facilityId = f.id
+		WHERE
+		f.defenseState IN ('3', '4')
+		AND f.accessSecret = #{accessSecret}
+		AND fr.manageState in ('1','3')
+		<if test="alarmDesc !=null and alarmDesc !=''">
+			and ai.alarmDesc is not NULL
+		</if>
+		<if test="defenseState != null and defenseState != ''">
+			AND f.defenseState = #{defenseState}
+		</if>
+		<if test="organizationId != null and organizationId.size > 0">
+			AND f.organizationId in
+			<foreach item="item" collection="organizationId" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="serchKey !=null and serchKey !=''">
+			and (facilitiesCode like
+			CONCAT('%',#{serchKey},'%')
+			or
+			address like CONCAT('%',#{serchKey},'%')
+			or
+			 d.deviceName like CONCAT('%',#{serchKey},'%')
+			)
+		</if>
+		<if test="startTime != null and startTime != ''">
+			AND fr.createTime >= #{startTime}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			AND #{endTime} >= fr.createTime
+		</if>
+		ORDER BY
+		f.address,
+		f.organizationId,
+		fr.createTime DESC
+	</select>
+
+	<select id="findFacInfoByDeviceId" resultType="com.alibaba.fastjson.JSONObject">
+		SELECT
+			d.accessSecret accessSecret,
+			f.id id
+		FROM
+			Device d
+		LEFT JOIN Facility_Device fd ON fd.deviceId = d.id
+		LEFT JOIN Facilities f ON f.id = fd.facilityId
+		WHERE
+			d.id = #{deviceId}
+	
+	</select>
+	
+	<select id="findFacIdByOrgId" resultType="java.lang.String" parameterType="java.util.Map">
+	select
+	f.id
+	from 
+	Facilities f
+	where accessSecret =#{accessSecret}
+	
+	<if test="organizationId != null and organizationId.size > 0">
+			And f.organizationId in
+			<foreach item="item" collection="organizationIdList" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+
+
+</mapper>
+

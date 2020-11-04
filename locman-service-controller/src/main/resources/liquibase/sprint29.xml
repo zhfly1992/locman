@@ -1,0 +1,102 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog 
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+	<property name="autoIncrement" value="true" dbms="mysql" />
+
+	<changeSet id="20191205_create_Facilities_Renovation" author="郭飞龙">
+		<comment>设施转待整治状态记录表 </comment>
+		<createTable tableName="FacilitiesRenovation">
+			<column name="id" type="varchar(64)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="facilityId" type="varchar(64)" remarks="设施ID">
+				<constraints nullable="false" />
+			</column>
+			<column name="applicationInfo" type="text" remarks="申请信息">
+				<constraints nullable="true" />
+			</column>
+			<column name="createTime" type="varchar(64)" remarks="创建时间">
+				<constraints nullable="false" />
+			</column>
+			<column name="auditTime" type="varchar(64)" remarks="审核时间">
+				<constraints nullable="true" />
+			</column>
+			<column name="endTime" type="varchar(64)" remarks="完成时间">
+				<constraints nullable="true" />
+			</column>
+			<column name="manageState" type="varchar(64)"
+				remarks="可用状态:0已处理不可用,1待审批可用,2被拒绝不可用,3已通过未处理可用">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+
+
+	<changeSet id="20191209_update_FacilitiesRenovation" author="郭飞龙">
+		<comment>FacilitiesRenovation表添加操作人员记录</comment>
+		<addColumn tableName="FacilitiesRenovation">
+			<column name="auditor" type="varchar(32)" remarks="审核人Id"
+				defaultValue="">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+		<addColumn tableName="FacilitiesRenovation">
+			<column name="dealBy" type="varchar(32)" remarks="转故障人Id"
+				defaultValue="">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+		<addColumn tableName="FacilitiesRenovation">
+			<column name="completeBy" type="varchar(32)" remarks="完成人Id"
+				defaultValue="">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+		<addColumn tableName="FacilitiesRenovation">
+			<column name="dealTime" type="varchar(32)" remarks="转故障工单时间"
+				defaultValue="">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+	
+	<changeSet id="20191213_create_ManholeCoverSwitch" author="钟滨远">
+		<comment>井盖开关记录信息表 </comment>
+		<createTable tableName="ManholeCoverSwitch">
+			<column name="id" type="varchar(64)" remarks="主键id（UUID）">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="deviceId" type="varchar(64)" remarks="设备ID">
+				<constraints nullable="false" />
+			</column>
+			<column name="openTime" type="varchar(64)" remarks="开井时间">
+				<constraints nullable="false" />
+			</column>
+			<column name="closeTime" type="varchar(64)" remarks="关井时间">
+				<constraints nullable="true" />
+			</column>
+			<column name="differenceTime" type="varchar(64)" remarks="时间差">
+				<constraints nullable="true" />
+			</column>
+			
+			
+			
+		</createTable>
+	</changeSet>
+	
+	
+		<changeSet id="20191216_update_AlarmRule" author="郭飞龙">
+		<comment>AlarmRule表添加排序字段</comment>
+		<addColumn tableName="AlarmRule">
+			<column name="sortField" type="int" remarks="控制排序字段"
+				defaultValue="999">
+				<constraints nullable="true" />
+			</column>
+		</addColumn>
+	</changeSet>
+	
+
+</databaseChangeLog>

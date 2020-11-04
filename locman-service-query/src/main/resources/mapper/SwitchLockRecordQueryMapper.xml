@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.query.repository.SwitchLockRecordQueryRepository">
+
+
+	<select id="listSwitchLockPage" parameterType="com.run.locman.api.entity.SwitchLockRecord"
+		resultType="java.util.Map">
+		SELECT
+		f.facilitiesCode,
+		ft.facilityTypeAlias,
+		a.areaName,
+		f.organizationId,
+		sr.lockState,
+		sr.reportTime,
+		sr.arrangeUserId
+		FROM
+		SwitchLockRecord sr
+		LEFT JOIN Device d ON sr.deviceId = d.id
+		LEFT JOIN
+		Facility_Device fd ON fd.deviceId = d.id
+		LEFT JOIN Facilities f ON
+		fd.facilityId = f.id
+		LEFT JOIN FacilitiesType ft ON f.facilitiesTypeId
+		= ft.id
+		LEFT JOIN Area a ON substring_index(f.areaId, ',' ,- 1) =
+		a.areaCode
+		WHERE
+		sr.accessSecret = #{accessSecret}
+		<if test="orgIds != null and orgIds.size > 0">
+			and f.organizationId in
+			<foreach item="item" collection="orgIds" index="index" open="("
+				close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="keyWord != null and keyWord != ''">
+			and (
+			f.facilitiesCode LIKE
+			CONCAT('%',#{keyWord},'%')
+			or
+			a.areaName LIKE
+			CONCAT('%',#{keyWord},'%')
+			<if test="ids != null and ids.size > 0 ">
+				or
+				sr.arrangeUserId in
+				<foreach item="item" collection="ids" index="index" open="("
+					close=")" separator=",">
+					#{item}
+				</foreach>
+			</if>
+			)
+		</if>
+		ORDER BY reportTime DESC
+	</select>
+
+	<select id="checkLock" resultType="java.lang.String">
+		SELECT
+		sr.lockState
+		FROM
+		SwitchLockRecord sr
+		LEFT JOIN Device d
+		ON
+		sr.deviceId = d.id
+		LEFT JOIN DeviceType dt
+		ON d.deviceType = dt.id
+		WHERE
+		sr.deviceId = #{deviceId}
+		AND
+		sr.accessSecret
+		=
+		#{accessSecret}
+		AND
+		<!--一体化智能人井 -->
+		dt.typeSign = '1'
+		
+	<!--  	d.deviceType in
+		<foreach item="item" index="index" collection="deviceTypeList" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>-->
+		ORDER BY
+		sr.reportTime DESC
+		LIMIT 1
+	</select>
+	
+	<select id="listManholeCoverSwitch" resultType="java.util.Map" parameterType="java.util.Map">
+		SELECT
+			d.id deviceId,
+			A.openTime,
+			f.facilitiesCode,
+			mc.closeTime,
+			mc.differenceTime,
+			f.address,
+			d.deviceName,
+			f.id facilityId
+		FROM
+			Device d
+		LEFT JOIN Facility_Device fd ON fd.deviceId = d.id
+		LEFT JOIN Facilities f ON f.id = fd.facilityId
+		LEFT JOIN (
+			SELECT
+				mcs.deviceId,
+				MAX(mcs.openTime) openTime
+			FROM
+				ManholeCoverSwitch mcs
+			GROUP BY
+				deviceId
+		) A ON A.deviceId = d.id
+		LEFT JOIN ManholeCoverSwitch mc ON (
+			A.openTime = mc.openTime
+			AND A.deviceId = mc.deviceId
+		)
+		WHERE
+			fd.facilityId IS NOT NULL
+		AND f.accessSecret = #{accessSecret}
+		AND f.defenseState in (1,3,4)
+		and A.openTime is not NULL
+		<if test="keyWord !=null and keyWord !='' ">
+		and (
+			f.facilitiesCode LIKE
+			CONCAT('%',#{keyWord},'%')
+			or
+			d.deviceName LIKE
+			CONCAT('%',#{keyWord},'%') 
+			)
+		</if>
+		ORDER BY
+			A.openTime DESC
+				
+	</select>
+	
+	<select id="getManholeCoverSwitchInfo" resultType="java.util.Map" parameterType="java.util.Map">
+	SELECT
+		m.deviceId,
+		m.openTime,
+		m.closeTime,
+		m.differenceTime,
+		f.facilitiesCode,
+		f.address,
+		d.deviceName,
+		f.id facilityId
+		from 
+		ManholeCoverSwitch m
+		LEFT JOIN Device d on d.id=m.deviceId
+		LEFT JOIN Facility_Device fd on fd.deviceId =d.id
+		LEFT JOIN Facilities f on f.id=fd.facilityId
+		where m.deviceId=#{deviceId}
+		AND f.accessSecret = #{accessSecret}
+		
+		ORDER BY m.openTime DESC
+	</select>
+
+</mapper>
+

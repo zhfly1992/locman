@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.run.locman.api.query.repository.FocusSecurityQueryRepository">
+	<select id="getFocusSecurityInfoPage" parameterType="java.util.Map" resultType="java.util.Map" >
+	 select
+		*
+		from 
+		FocusSecurity f 
+		where f.`status` ='enable'
+		and accessSecret=#{accessSecret}
+	</select>
+	
+	
+	
+	<select id="commandReceiveStates" resultType="java.util.Map">
+	 SELECT
+		f.facilitiesCode,
+		d.deviceName,
+		drr.device_ls,
+		ff.IotReceivingStatus,
+		drr.commandReceive,
+		drr.lastReportTime,
+		fs.securityName,
+		f.organizationId
+	FROM
+		FocusSecurity fs
+	LEFT JOIN Facilities_FocusSecurity ff ON fs.id = ff.securityId
+	LEFT JOIN Facilities f ON f.id = ff.facilityId
+	LEFT JOIN Facility_Device fd ON fd.facilityId = f.id
+	LEFT JOIN Device d ON d.id = fd.deviceId
+	LEFT JOIN Device_RealRported drr ON drr.deviceId = fd.deviceId
+	WHERE
+		fs.`status` = "enable"
+		AND f.accessSecret = #{queryMap.accessSecret}
+	<if test="queryMap.searchKey != null and queryMap.searchKey != ''">
+			AND (d.deviceName = #{queryMap.searchKey}
+			or f.facilitiesCode = #{queryMap.searchKey})
+		</if>
+			
+	<if test="organizationId != null and organizationId.size > 0">
+		AND f.organizationId in
+		<foreach item="item" collection="organizationId" index="index"
+			open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+		</if>
+	
+	</select>
+	
+</mapper>

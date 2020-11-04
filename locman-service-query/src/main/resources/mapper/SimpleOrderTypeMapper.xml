@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.run.locman.api.query.repository.SimpleOrderTypeQueryRepository">
+
+	<resultMap
+		type="com.run.locman.api.entity.SimpleOrderProcessType"
+		id="simpleOrderTypeResultMap">
+		<result column="id" property="id" javaType="String" />
+		<result column="name" property="name" javaType="String" />
+		<result column="accessSecret" property="accessSecret"
+			javaType="String" />
+	</resultMap>
+
+	<sql id="Base_Column">
+		id, name,accessSecret
+	</sql>
+	<select id="findOrderTypeBySecret"
+		resultMap="simpleOrderTypeResultMap">
+		select
+		<include refid="Base_Column" />
+		from SimpleOrderProcessType
+	</select>
+	<select id="findOrderState" resultType="java.util.Map">
+		select * from
+		SimpleOrderProcessState
+	</select>
+</mapper>
+
